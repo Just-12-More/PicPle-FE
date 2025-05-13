@@ -1,44 +1,86 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.buildlog/
-.history
-.svn/
-migrate_working_dir/
+# ----------------------------
+# Dart & Flutter
+# ----------------------------
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+build/
+**/build/
+**/doc/api/
+**/ios/Flutter/.last_build_id
+generated_plugin_registrant.dart
 
-# IntelliJ related
+# Symbolication & Obfuscation
+app.*.symbols
+app.*.map.json
+
+# ----------------------------
+# Android
+# ----------------------------
+android/.gradle/
+android/.idea/
+android/local.properties
+android/key.properties
+android/app/.cxx/
+android/app/build/
+android/app/debug/
+android/app/profile/
+android/app/release/
+
+# ----------------------------
+# iOS
+# ----------------------------
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+ios/.symlinks/
+ios/Pods/
+ios/Podfile.lock
+ios/Runner.xcworkspace/
+
+# Xcode
+*.xcodeproj/*.pbxuser
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+
+# ----------------------------
+# IDEs
+# ----------------------------
+
+# IntelliJ / Android Studio
 *.iml
 *.ipr
 *.iws
 .idea/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+# VS Code (comment out if you want to track it)
+.vscode/
 
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.pub-cache/
-.pub/
-/build/
+# ----------------------------
+# macOS & Windows system files
+# ----------------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
 
-# Symbolication related
-app.*.symbols
-
-# Obfuscation related
-app.*.map.json
-
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
-/android/app/.cxx
+# ----------------------------
+# Logs, caches, misc
+# ----------------------------
+*.log
+*.pyc
+*.swp
+*.class
+.history
+.atom/
+.svn/
+.swiftpm/
+.build/
+.buildlog/
+migrate_working_dir/
