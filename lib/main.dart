@@ -11,11 +11,12 @@ Future<void> main() async {
   await Config.init();
 
   WidgetsFlutterBinding.ensureInitialized();
-  await NaverMapSdk.instance.initialize(
+
+  await FlutterNaverMap().init(
     clientId: Config.naverClientId,
     onAuthFailed: (e) {
       log("NaverMapSdk auth failed: $e");
-    },
+    }
   );
 
   runApp(const ProviderScope(child: MyApp()));

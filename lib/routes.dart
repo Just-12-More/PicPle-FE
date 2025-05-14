@@ -15,6 +15,7 @@ enum Routes {
 }
 
 final router = GoRouter(
+  initialLocation: Routes.home.path,
   routes: [
     GoRoute(path: Routes.splash.path, builder: (context, state) => const SplashPage()),
     GoRoute(path: Routes.home.path, builder: (context, state) => const HomePage()),
