@@ -1,8 +1,23 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:picple/routes.dart';
 
-void main() {
+import 'config.dart';
+
+Future<void> main() async {
+  await Config.init();
+
+  WidgetsFlutterBinding.ensureInitialized();
+  await NaverMapSdk.instance.initialize(
+    clientId: Config.naverClientId,
+    onAuthFailed: (e) {
+      log("NaverMapSdk auth failed: $e");
+    },
+  );
+
   runApp(const ProviderScope(child: MyApp()));
 }
 

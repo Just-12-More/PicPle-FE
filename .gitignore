@@ -12,6 +12,7 @@ build/
 **/doc/api/
 **/ios/Flutter/.last_build_id
 generated_plugin_registrant.dart
+.env
 
 # Symbolication & Obfuscation
 app.*.symbols
