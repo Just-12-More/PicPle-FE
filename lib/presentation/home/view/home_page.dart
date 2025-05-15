@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_svg/svg.dart';
@@ -62,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
       onMapReady: (controller) async {
         _mapController = controller;
         await _addMyLocationMarker();
+        await _addRandomMarkersAroundSeoul();
       },
     );
   }
@@ -115,6 +118,47 @@ class _HomeScreenState extends State<HomeScreen> {
         target: const NLatLng(37.5665, 126.978),
         zoom: 14,
       ));
+  }
+
+  Future<void> _addRandomMarkersAroundSeoul() async {
+    if (_mapController == null) return;
+
+    const centerLat = 37.5665;
+    const centerLng = 126.9780;
+    const markerCount = 10;
+
+    final rand = Random();
+
+    for (int i = 0; i < markerCount; i++) {
+      final randomLatOffset = (rand.nextDouble() - 0.5) * 0.01; // ±0.005
+      final randomLngOffset = (rand.nextDouble() - 0.5) * 0.01;
+
+      final overlayImage = await NOverlayImage.fromWidget(
+        context: context,
+        widget: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Container(
+            color: PicpleColors.white,
+            width: 48,
+            height: 48,
+          ),
+        ),
+        size: const Size(48, 48),
+      );
+
+      final marker = NMarker(
+        id: 'random_marker_$i',
+        position: NLatLng(
+          centerLat + randomLatOffset,
+          centerLng + randomLngOffset,
+        ),
+        icon: overlayImage,
+        size: const Size(48, 48),
+      );
+      marker.setGlobalZIndex(0);
+
+      _mapController!.addOverlay(marker);
+    }
   }
 }
 
