@@ -1,4 +1,4 @@
-package com.just.twelve.more.picple.picple
+package com.just.twelve.more.picple
 
 import io.flutter.embedding.android.FlutterActivity
 
