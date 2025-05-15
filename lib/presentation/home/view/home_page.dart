@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 
+import '../../theme/picple_colors.dart';
+
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
@@ -22,14 +24,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(child: _buildMap()),
-          ],
-        ),
+    return SafeArea(
+      child: Column(
+        children: [
+          Expanded(child: _buildMap()),
+        ],
       ),
     );
   }
@@ -46,20 +45,59 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       onMapReady: (controller) async {
         _mapController = controller;
-        await _addMarkersAndPath();
+        await _addMyLocationMarker();
       },
     );
   }
 
-  Future<void> _addMarkersAndPath() async {
+  Future<void> _addMyLocationMarker() async {
     if (_mapController == null) return;
 
-    // 마커, 경로 등을 추가하는 로직 작성 예시
-    final marker = NMarker(
-      id: 'marker_1',
-      position: const NLatLng(37.5665, 126.9780), // 서울시청 좌표 예시
+    final myPositionIcon = await NOverlayImage.fromWidget(
+      context: context,
+      widget: Container(
+        width: 20,
+        height: 20,
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          color: PicpleColors.white,
+        ),
+        child: Center(
+          child: Container(
+            width: 12,
+            height: 12,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: PicpleColors.primary1,
+            ),
+          ),
+        ),
+      ),
+      size: const Size(20, 20),
     );
 
-    _mapController!.addOverlay(marker);
+    // 마커 추가
+    final marker = NMarker(
+      id: 'my_location',
+      position: const NLatLng(37.5665, 126.978),
+      icon: myPositionIcon,
+    );
+
+    // 반경 원 추가
+    final circle = NCircleOverlay(
+      id: 'my_radius',
+      center: const NLatLng(37.5665, 126.978),
+      radius: 500, // meters
+      color: PicpleColors.primary1.withAlpha((0.2 * 255).toInt()),
+    );
+
+    // 지도에 표시
+    _mapController!
+      ..addOverlay(circle)
+      ..addOverlay(marker)
+      ..updateCamera(NCameraUpdate.scrollAndZoomTo(
+        target: const NLatLng(37.5665, 126.978),
+        zoom: 14,
+      ));
   }
 }
