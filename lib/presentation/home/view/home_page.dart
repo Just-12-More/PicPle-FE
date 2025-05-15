@@ -23,6 +23,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   NaverMapController? _mapController;
+  bool _isTracking = false;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +35,15 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: () {
               // 검색 기능 구현
             },
-          )
+          ),
+          LocationToggleButton(
+            isTracking: _isTracking,
+            onTap: () {
+              setState(() {
+                _isTracking = !_isTracking;
+              });
+            },
+          ),
         ],
       ),
     );
@@ -153,6 +162,57 @@ class SearchFromHereButton extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class LocationToggleButton extends StatelessWidget {
+  final bool isTracking;
+  final VoidCallback onTap;
+
+  const LocationToggleButton({
+    super.key,
+    required this.isTracking,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final backgroundColor = isTracking ? PicpleColors.primary1: PicpleColors.white;
+    final iconColor = isTracking ? PicpleColors.white : PicpleColors.primary1;
+
+    return Positioned(
+      bottom: 24,
+      right: 24,
+      child: Center(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(10),
+          onTap: onTap,
+          child: Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: PicpleColors.white,
+                width: 2
+              )
+            ),
+            child: Center(
+              child: SvgPicture.asset(
+                "assets/icons/ic_location.svg",
+                width: 36,
+                height: 36,
+                colorFilter: ColorFilter.mode(
+                  iconColor,
+                  BlendMode.srcIn
+                )
+              ),
+            ),
+          ),
+        ),
+      )
     );
   }
 }
