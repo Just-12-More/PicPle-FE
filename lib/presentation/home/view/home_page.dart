@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:picple/presentation/theme/picple_typography.dart';
 
 import '../../theme/picple_colors.dart';
 
@@ -25,9 +27,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Column(
+      child: Stack(
         children: [
-          Expanded(child: _buildMap()),
+          _buildMap(),
+          SearchFromHereButton(
+            onTap: () {
+              // 검색 기능 구현
+            },
+          )
         ],
       ),
     );
@@ -99,5 +106,53 @@ class _HomeScreenState extends State<HomeScreen> {
         target: const NLatLng(37.5665, 126.978),
         zoom: 14,
       ));
+  }
+}
+
+class SearchFromHereButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const SearchFromHereButton({
+    super.key,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: 40,
+      left: 0,
+      right: 0,
+      child: Center(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(42),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(42),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '현위치에서 검색',
+                  style: PicpleTypography.body1SemiBold.copyWith(
+                    color: PicpleColors.primary1,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                SvgPicture.asset(
+                  'assets/icons/ic_refresh.svg',
+                  width: 12,
+                  height: 12,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
