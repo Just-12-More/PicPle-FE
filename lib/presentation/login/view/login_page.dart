@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:picple/presentation/login/controller/login_controller.dart';
 
 import '../../../core/base/base_controller.dart';
@@ -116,7 +117,7 @@ class EffectStreamHandler extends ConsumerWidget {
 
   void _navigateTo(BuildContext context, String route) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Navigator.pushNamed(context, route);
+      context.go(route);
     });
   }
 }
