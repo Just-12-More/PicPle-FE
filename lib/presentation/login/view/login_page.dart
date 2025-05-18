@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:picple/presentation/login/controller/login_controller.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:picple/presentation/theme/picple_colors.dart';
 import 'package:picple/presentation/theme/picple_typography.dart';
 
 import '../../../core/base/base_controller.dart';
@@ -16,35 +17,46 @@ class LoginPage extends ConsumerWidget {
     final state = ref.watch(loginController);
 
     return Material(
-      child: Column(
-        children: [
-          const SizedBox(height: 144),
-          Image.asset('assets/icons/ic_picple.png', width: 300, height: 200),
-          const Expanded(child: SizedBox()),
-          state.isLoading
-              ? const CircularProgressIndicator()
-              : LoginButtons(
-                onProcessEvent: (event) {
-                  ref.read(loginController.notifier).onEventReceived(event);
-                },
+      child: SafeArea(
+        child: Center(
+          child: Column(
+            children: [
+              const SizedBox(height: 100),
+              Image.asset(
+                'assets/icons/ic_picple.png',
+                width: 300,
+                height: 200,
               ),
-          const SizedBox(height: 20),
-          RichText(
-            text: const TextSpan(
-              style: TextStyle(fontSize: 13, color: Color(0xFF808080)),
-              children: [
-                TextSpan(text: '첫 로그인 시, '),
-                TextSpan(
-                  text: '서비스 이용약관',
-                  style: TextStyle(decoration: TextDecoration.underline),
+              const Expanded(child: SizedBox()),
+              state.isLoading
+                  ? const CircularProgressIndicator()
+                  : LoginButtons(
+                    onProcessEvent: (event) {
+                      ref.read(loginController.notifier).onEventReceived(event);
+                    },
+                  ),
+              const SizedBox(height: 20),
+              RichText(
+                text: const TextSpan(
+                  style: TextStyle(fontSize: 13, color: Color(0xFF808080)),
+                  children: [
+                    TextSpan(text: '첫 로그인 시, '),
+                    TextSpan(
+                      text: '서비스 이용약관',
+                      style: TextStyle(
+                        decoration: TextDecoration.underline,
+                        color: PicpleColors.gray5,
+                      ),
+                    ),
+                    TextSpan(text: '에 동의한 것으로 간주합니다.'),
+                  ],
                 ),
-                TextSpan(text: '에 동의한 것으로 간주합니다.'),
-              ],
-            ),
+              ),
+              const SizedBox(height: 24),
+              const EffectStreamHandler(),
+            ],
           ),
-          const SizedBox(height: 40),
-          const EffectStreamHandler(),
-        ],
+        ),
       ),
     );
   }
@@ -150,9 +162,9 @@ class EffectStreamHandler extends ConsumerWidget {
 
   void _showToast(BuildContext context, String message) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
     });
   }
 
