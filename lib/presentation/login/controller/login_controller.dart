@@ -25,6 +25,7 @@ class LoginController extends BaseController<LoginState, LoginEvent, LoginEffect
   }
 
   void _kakaoLogin() async {
+    updateState(state.copyWith(isLoading: true));
     if (await isKakaoTalkInstalled()) {
       try {
         OAuthToken token = await UserApi.instance.loginWithKakaoTalk();
@@ -46,6 +47,7 @@ class LoginController extends BaseController<LoginState, LoginEvent, LoginEffect
     } else {
       showToast("카카오톡이 설치되어 있지 않습니다.");
     }
+    updateState(state.copyWith(isLoading: false));
   }
 
   void _googleLogin() async {
