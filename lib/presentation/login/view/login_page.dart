@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:picple/presentation/login/controller/login_controller.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/base/base_controller.dart';
 import '../controller/login_contract.dart';
@@ -14,14 +15,16 @@ class LoginPage extends ConsumerWidget {
     final state = ref.watch(loginController);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Login'),
-      ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Display loading indicator or login buttons
+            const SizedBox(height: 144),
+            Image.asset(
+              'assets/icons/ic_picple.png',
+              width: 300,
+              height: 200,
+            ),
+            const Expanded(child: SizedBox()),
             state.isLoading
                 ? const CircularProgressIndicator()
                 : LoginButtons(
@@ -30,6 +33,25 @@ class LoginPage extends ConsumerWidget {
                     },
                   ),
             const SizedBox(height: 20),
+            RichText(
+              text: const TextSpan(
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF808080),
+                ),
+                children: [
+                  TextSpan(text: '첫 로그인 시, '),
+                  TextSpan(
+                    text: '서비스 이용약관',
+                    style: TextStyle(
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                  TextSpan(text: '에 동의한 것으로 간주합니다.'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 40),
             const EffectStreamHandler(),
           ],
         ),
@@ -55,13 +77,8 @@ class LoginButtons extends StatelessWidget {
           onPressed: () {
             onProcessEvent(KakaoLoginButtonClicked());
           },
-          label: 'Login with Kakao',
-        ),
-        LoginButton(
-          onPressed: () {
-            onProcessEvent(GoogleLoginButtonClicked());
-          },
-          label: 'Login with Google',
+          label: '카카오로 3초만에 시작하기',
+          iconPath: 'assets/icons/ic_kakao.svg',
         ),
       ],
     );
@@ -72,14 +89,54 @@ class LoginButtons extends StatelessWidget {
 class LoginButton extends StatelessWidget {
   final VoidCallback onPressed;
   final String label;
+  final String? iconPath;
 
-  const LoginButton({required this.onPressed, required this.label, super.key});
+  const LoginButton({
+    required this.onPressed, 
+    required this.label, 
+    this.iconPath,
+    super.key
+  });
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      child: Text(label),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: SizedBox(
+        width: double.infinity,
+        height: 56,
+        child: TextButton(
+          style: TextButton.styleFrom(
+            backgroundColor: const Color(0xFFFBE400),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          onPressed: onPressed,
+          child: Row(
+            children: [
+              if (iconPath != null) ...[
+                const SizedBox(width: 8),
+                SvgPicture.asset(
+                  iconPath!,
+                  height: 24,
+                  width: 24,
+                ),
+                const SizedBox(width: 8),
+              ],
+              Expanded(
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
