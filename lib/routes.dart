@@ -4,6 +4,7 @@ import 'package:picple/presentation/component/picple_bottom_navigation_bar.dart'
 import 'package:picple/presentation/home/view/home_page.dart';
 import 'package:picple/presentation/login/view/login_page.dart';
 import 'package:picple/presentation/splash/view/splash_page.dart';
+import 'package:picple/presentation/profile/view/profile_page.dart';
 
 enum Routes {
   splash(name: 'Splash', path: '/'),
@@ -57,7 +58,7 @@ final router = GoRouter(
             routes: [
               GoRoute(
                   path: Routes.profile.path,
-                  builder: (context, state) => const HomePage(),
+                  builder: (context, state) => const ProfilePage(),
                   routes: []
               ),
             ]
