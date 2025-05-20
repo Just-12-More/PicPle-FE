@@ -1,20 +1,20 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
+import 'package:picple/data/repository/auth_repository.dart';
 
+import '../../../data/model/request/login_request.dart';
 import '../../../data/service_providers.dart';
-import '../../../data/services/auth_service.dart';
-import '../../../models/auth/login_request.dart';
 import 'login_contract.dart';
 
 final loginStateProvider = NotifierProvider<LoginNotifier, LoginState>(() => LoginNotifier());
 final loginEffectProvider = StateProvider<LoginEffect?>((ref) => null);
 
 class LoginNotifier extends Notifier<LoginState> {
-  late final AuthService _authService;
+  late final AuthRepository _authRepository;
 
   @override
   LoginState build() {
-    _authService = ref.watch(authServiceProvider);
+    _authRepository = ref.watch(authRepositoryProvider);
     return LoginState();
   }
 
@@ -29,7 +29,7 @@ class LoginNotifier extends Notifier<LoginState> {
           provider: LoginProvider.kakao,
         );
 
-        final result = await _authService.login(request);
+        final result = await _authRepository.login(request.accessToken, request.provider);
 
         if (result.isSuccess) {
           _showToast("로그인 성공");
