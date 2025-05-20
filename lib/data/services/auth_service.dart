@@ -1,7 +1,7 @@
 import 'package:picple/data/dio_client.dart';
+import 'package:picple/data/services/storage_service.dart';
 import 'package:picple/models/auth/login_request.dart';
 import 'package:picple/models/auth/login_response.dart';
-import 'package:picple/services/storage_service.dart';
 
 class AuthService {
   final DioClient _dioClient;
