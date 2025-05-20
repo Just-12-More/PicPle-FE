@@ -5,6 +5,7 @@ import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:picple/presentation/theme/picple_typography.dart';
 
+import '../../../core/util/naver_map_utils.dart';
 import '../../theme/picple_colors.dart';
 
 class HomePage extends StatelessWidget {
@@ -125,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     const centerLat = 37.5665;
     const centerLng = 126.9780;
-    const markerCount = 10;
+    const markerCount = 50;
 
     final rand = Random();
 
@@ -133,31 +134,18 @@ class _HomeScreenState extends State<HomeScreen> {
       final randomLatOffset = (rand.nextDouble() - 0.5) * 0.01; // ±0.005
       final randomLngOffset = (rand.nextDouble() - 0.5) * 0.01;
 
-      final overlayImage = await NOverlayImage.fromWidget(
-        context: context,
-        widget: ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: Container(
-            color: PicpleColors.white,
-            width: 48,
-            height: 48,
+      final imageId = 200 + i;
+      final imageUrl = 'https://picsum.photos/id/$imageId/300/300';
+
+      addMarkerWithPlaceholderImage(
+          controller: _mapController!,
+          id: 'random_marker_$i',
+          position: NLatLng(
+            centerLat + randomLatOffset,
+            centerLng + randomLngOffset,
           ),
-        ),
-        size: const Size(48, 48),
+          imageUrl: imageUrl
       );
-
-      final marker = NMarker(
-        id: 'random_marker_$i',
-        position: NLatLng(
-          centerLat + randomLatOffset,
-          centerLng + randomLngOffset,
-        ),
-        icon: overlayImage,
-        size: const Size(48, 48),
-      );
-      marker.setGlobalZIndex(0);
-
-      _mapController!.addOverlay(marker);
     }
   }
 }
