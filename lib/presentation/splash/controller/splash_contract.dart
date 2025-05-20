@@ -1,17 +1,16 @@
-import 'package:picple/core/base/base_controller.dart';
-
-class SplashState implements UiState {
+class SplashState {
   final bool isLoading;
 
   SplashState({this.isLoading = false});
+
+  SplashState copyWith({bool? isLoading}) {
+    return SplashState(
+      isLoading: isLoading ?? this.isLoading,
+    );
+  }
 }
 
-abstract class SplashEvent implements UiEvent {}
-
-class CheckLoginEvent extends SplashEvent {}
-
-abstract class SplashEffect implements UiEffect {}
-
+abstract class SplashEffect { }
 class NavigateTo extends SplashEffect {
   final String route;
   NavigateTo(this.route);
