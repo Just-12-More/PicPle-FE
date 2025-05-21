@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:picple/presentation/splash/controller/splash_contract.dart';
+import 'package:picple/presentation/splash/provider/splash_contract.dart';
 
 final splashStateProvider = NotifierProvider<SplashNotifier, SplashState>(() => SplashNotifier());
 final splashEffectProvider = StateProvider<SplashEffect?>((ref) => null);
