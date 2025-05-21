@@ -1,6 +1,4 @@
-import '../../../core/base/base_controller.dart';
-
-class LoginState implements UiState {
+class LoginState {
   final bool isLoading;
 
   LoginState({this.isLoading = false});
@@ -12,11 +10,7 @@ class LoginState implements UiState {
   }
 }
 
-abstract class LoginEvent implements UiEvent {}
-class KakaoLoginButtonClicked extends LoginEvent {}
-class GoogleLoginButtonClicked extends LoginEvent {}
-
-abstract class LoginEffect implements UiEffect {}
+abstract class LoginEffect { }
 class NavigateTo extends LoginEffect {
   final String route;
   NavigateTo(this.route);
