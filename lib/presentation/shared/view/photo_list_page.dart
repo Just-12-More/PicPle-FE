@@ -63,7 +63,7 @@ class PhotoListScreen extends ConsumerWidget {
               likeCount: photo.likeCount,
               title: photo.title,
               description: photo.description,
-              time: photo.createdAt,
+              time: photo.formattedTime,
             );
           },
         ),
@@ -136,7 +136,7 @@ class FeedItem extends StatelessWidget {
                 children: [
                   Icon(
                     isLiked ? Icons.favorite : Icons.favorite_border,
-                    color: isLiked ? Colors.red : Colors.grey,
+                    color: isLiked ? PicpleColors.red : PicpleColors.gray5,
                     size: 24,
                   ),
                   const SizedBox(width: 4),

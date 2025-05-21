@@ -1,3 +1,5 @@
+import 'package:picple/core/util/date_time_utils.dart';
+
 class NearbyPhotosData {
   final String address;
   final PhotoData centerPhoto;
@@ -31,6 +33,8 @@ class PhotoData {
   final bool isLiked;
   final String address;
   final String createdAt;
+
+  String get formattedTime => formatPostedTimeFromString(createdAt);
 
   PhotoData({
     required this.id,
