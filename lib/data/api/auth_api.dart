@@ -1,15 +1,15 @@
+import 'package:picple/data/api/storage_api.dart';
 import 'package:picple/data/dio_client.dart';
 import 'package:picple/data/model/request/login_request.dart';
 import 'package:picple/data/model/response/login_response.dart';
-import 'package:picple/data/services/storage_service.dart';
 
 import '../model/response/base_response.dart';
 
-class AuthService {
+class AuthApi {
   final DioClient _dioClient;
-  final StorageService _storageService;
+  final StorageApi _storageService;
 
-  AuthService(this._dioClient, this._storageService);
+  AuthApi(this._dioClient, this._storageService);
 
   Future<BaseResponse<LoginData>> login(LoginRequest request) async {
     try {

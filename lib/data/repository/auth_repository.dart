@@ -1,13 +1,13 @@
 import 'package:picple/data/datasource/auth_data_source.dart';
 import 'package:picple/data/model/request/login_request.dart';
-import 'package:picple/data/services/storage_service.dart';
 
+import '../api/storage_api.dart';
 import '../model/response/base_response.dart';
 import '../model/response/login_response.dart';
 
 class AuthRepository {
   final AuthDataSource _dataSource;
-  final StorageService _storageService;
+  final StorageApi _storageService;
 
   AuthRepository(this._dataSource, this._storageService);
 

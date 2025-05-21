@@ -1,12 +1,12 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class StorageService {
+class StorageApi {
   final FlutterSecureStorage _storage;
   
   static const String _accessTokenKey = 'access_token';
   static const String _refreshTokenKey = 'refresh_token';
 
-  StorageService() : _storage = const FlutterSecureStorage();
+  StorageApi() : _storage = const FlutterSecureStorage();
 
   Future<void> saveTokens({
     required String accessToken,
