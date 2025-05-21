@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:picple/presentation/shared/provider/photo_list_contract.dart';
+import 'package:picple/presentation/shared/provider/photo_list_provider.dart';
 
 import '../../theme/picple_colors.dart';
 import '../../theme/picple_typography.dart';
@@ -12,27 +15,29 @@ class PhotoListPage extends StatelessWidget {
   }
 }
 
-class PhotoListScreen extends StatefulWidget {
+class PhotoListScreen extends ConsumerWidget {
   const PhotoListScreen({super.key});
 
   @override
-  State<PhotoListScreen> createState() => _PhotoListScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(photoListStateProvider);
 
-class _PhotoListScreenState extends State<PhotoListScreen> {
-  final dummyFeeds = List.generate(10, (index) => FeedItem(
-    username: '준서 핵졸귀',
-    profileImageUrl: 'https://i.pravatar.cc/150?img=${index + 1}',
-    imageUrl: 'https://picsum.photos/id/${index + 10}/400/300',
-    isLiked: index % 2 == 0,
-    likeCount: 5 + index,
-    title: '낭만 넘치는 이곳',
-    description: '와 여기 경치가 되게 좋네요~~~~',
-    time: '2시간 전',
-  ));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(photoListStateProvider.notifier).fetchPhotoList();
+    });
 
-  @override
-  Widget build(BuildContext context) {
+    ref.listen<PhotoListEffect?>(photoListEffectProvider, (previous, next) {
+      if (next == null) return;
+
+      if (next is ShowToast) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(next.message)),
+        );
+      }
+
+      ref.read(photoListEffectProvider.notifier).state = null;
+    });
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: PicpleColors.white,
@@ -40,14 +45,27 @@ class _PhotoListScreenState extends State<PhotoListScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text('서울시 행궁동', style: PicpleTypography.title1),
+        title: Text(state.address, style: PicpleTypography.title1),
         centerTitle: true,
       ),
       backgroundColor: PicpleColors.background,
       body: SafeArea(
         child: ListView.builder(
-          itemCount: dummyFeeds.length,
-          itemBuilder: (context, index) => dummyFeeds[index],
+          itemCount: state.photos.length,
+          itemBuilder: (context, index) {
+            final photo = state.photos[index];
+
+            return FeedItem(
+              username: photo.nickname,
+              profileImageUrl: photo.profileImgUrl,
+              imageUrl: photo.imgUrl,
+              isLiked: photo.isLiked,
+              likeCount: photo.likeCount,
+              title: photo.title,
+              description: photo.description,
+              time: photo.createdAt,
+            );
+          },
         ),
       ),
     );
