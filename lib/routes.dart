@@ -3,15 +3,17 @@ import 'package:go_router/go_router.dart';
 import 'package:picple/presentation/component/picple_bottom_navigation_bar.dart';
 import 'package:picple/presentation/home/view/home_page.dart';
 import 'package:picple/presentation/login/view/login_page.dart';
-import 'package:picple/presentation/splash/view/splash_page.dart';
 import 'package:picple/presentation/profile/view/profile_page.dart';
+import 'package:picple/presentation/shared/view/photo_list_page.dart';
+import 'package:picple/presentation/splash/view/splash_page.dart';
 
 enum Routes {
   splash(name: 'Splash', path: '/'),
   login(name: 'Login', path: '/login'),
   home(name: 'Home', path: '/home'),
   upload(name: 'Upload', path: '/upload'),
-  profile(name: 'Profile', path: '/profile');
+  profile(name: 'Profile', path: '/profile'),
+  photoList(name: 'PhotoList', path: '/photo_list');
 
   final String name;
   final String path;
@@ -29,6 +31,10 @@ final router = GoRouter(
     GoRoute(
       path: Routes.login.path,
       builder: (context, state) => const LoginPage(),
+    ),
+    GoRoute(
+      path: Routes.photoList.path,
+      builder: (context, state) => const PhotoListPage()
     ),
 
     StatefulShellRoute.indexedStack(

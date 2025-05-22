@@ -1,22 +1,24 @@
+import 'package:picple/data/api/storage_api.dart';
 import 'package:picple/data/dio_client.dart';
 import 'package:picple/data/model/request/login_request.dart';
 import 'package:picple/data/model/response/login_response.dart';
-import 'package:picple/data/services/storage_service.dart';
 
-class AuthService {
+import '../model/response/base_response.dart';
+
+class AuthApi {
   final DioClient _dioClient;
-  final StorageService _storageService;
+  final StorageApi _storageService;
 
-  AuthService(this._dioClient, this._storageService);
+  AuthApi(this._dioClient, this._storageService);
 
-  Future<LoginResponse> login(LoginRequest request) async {
+  Future<BaseResponse<LoginData>> login(LoginRequest request) async {
     try {
       final response = await _dioClient.dio.post(
         '/auth/login',
         data: request.toJson(),
       );
       
-      final loginResponse = LoginResponse.fromJson(response.data);
+      final loginResponse = BaseResponse<LoginData>.fromJson(response.data, LoginData.fromJson);
       
       if (loginResponse.isSuccess && loginResponse.data != null) {
         await _storageService.saveTokens(
@@ -27,9 +29,12 @@ class AuthService {
       
       return loginResponse;
     } catch (e) {
-      return LoginResponse(
+      return BaseResponse(
         isSuccess: false,
-        error: e.toString(),
+        error: ResponseError(
+          code: "500",
+          message: 'An error occurred while logging in: $e',
+        ),
       );
     }
   }
