@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:picple/presentation/theme/picple_colors.dart';
 import 'package:picple/presentation/theme/picple_typography.dart';
+import 'package:go_router/go_router.dart';
+import 'package:picple/routes.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -32,14 +34,14 @@ class _ProfilePageState extends State<ProfilePage>
         backgroundColor: PicpleColors.white,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.pop(),
         ),
         title: const Text('마이페이지', style: PicpleTypography.title1),
         centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_rounded),
-            onPressed: () {},
+            onPressed: () => context.push(Routes.setting.path),
           ),
         ],
       ),
