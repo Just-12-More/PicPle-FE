@@ -36,7 +36,6 @@ dependencies:
   flutter_dotenv: ^5.2.1
   dio: ^5.8.0+1
   pretty_dio_logger: ^1.4.0
-  get_it: ^8.0.3
   json_annotation: ^4.9.0
   json_serializable: ^6.9.0
   flutter_secure_storage: ^9.2.4
@@ -46,6 +45,7 @@ dependencies:
   flutter_naver_map: ^1.2.3+1
   http: ^1.2.1
   image: ^4.1.7
+  intl: ^0.18.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

@@ -3,15 +3,13 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:picple/data/locator.dart';
-import 'package:picple/routes.dart';
 import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
+import 'package:picple/routes.dart';
 
 import 'config.dart';
 
 Future<void> main() async {
   await Config.init();
-  setupLocator();
   WidgetsFlutterBinding.ensureInitialized();
 
   KakaoSdk.init(nativeAppKey: Config.kakaoNativeAppKey);
