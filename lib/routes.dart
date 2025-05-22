@@ -4,6 +4,7 @@ import 'package:picple/presentation/component/picple_bottom_navigation_bar.dart'
 import 'package:picple/presentation/home/view/home_page.dart';
 import 'package:picple/presentation/login/view/login_page.dart';
 import 'package:picple/presentation/profile/view/profile_page.dart';
+import 'package:picple/presentation/setting/setting_page.dart';
 import 'package:picple/presentation/shared/view/photo_list_page.dart';
 import 'package:picple/presentation/splash/view/splash_page.dart';
 
@@ -13,6 +14,7 @@ enum Routes {
   home(name: 'Home', path: '/home'),
   upload(name: 'Upload', path: '/upload'),
   profile(name: 'Profile', path: '/profile'),
+  setting(name: 'Setting', path: '/setting');
   photoList(name: 'PhotoList', path: '/photo_list');
 
   final String name;
@@ -33,8 +35,12 @@ final router = GoRouter(
       builder: (context, state) => const LoginPage(),
     ),
     GoRoute(
+      path: Routes.setting.path,
+      builder: (context, state) => const SettingPage(),
+    ),
+    GoRoute(
       path: Routes.photoList.path,
-      builder: (context, state) => const PhotoListPage()
+      builder: (context, state) => const PhotoListPage(),
     ),
 
     StatefulShellRoute.indexedStack(
