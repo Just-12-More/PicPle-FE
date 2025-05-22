@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:picple/presentation/theme/picple_colors.dart';
 import 'package:go_router/go_router.dart';
+import 'package:picple/presentation/theme/picple_colors.dart';
 import 'package:picple/presentation/theme/picple_typography.dart';
 
 class SettingPage extends StatelessWidget {
@@ -107,21 +107,26 @@ class _SettingItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        child: Row(
-          children: [
-            Icon(icon, color: PicpleColors.gray5, size: 24),
-            const SizedBox(width: 16),
-            Text(
-              label,
-              style: PicpleTypography.body1,
-            ),
-            const Spacer(),
-            const Icon(Icons.chevron_right, color: PicpleColors.gray5),
-          ],
+    return Material(
+      color: PicpleColors.white,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          child: Row(
+            children: [
+              Icon(icon, color: PicpleColors.gray5, size: 24),
+              const SizedBox(width: 16),
+              Text(
+                label,
+                style: PicpleTypography.body1.copyWith(
+                  color: PicpleColors.black,
+                ),
+              ),
+              const Spacer(),
+              const Icon(Icons.chevron_right, color: PicpleColors.gray5),
+            ],
+          ),
         ),
       ),
     );
