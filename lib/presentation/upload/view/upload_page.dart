@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../theme/picple_colors.dart';
 import '../../theme/picple_typography.dart';
@@ -46,6 +47,46 @@ class _UploadScreenState extends State<UploadScreen> {
     }
   }
 
+  Future<void> _checkCameraPermissionAndTakePhoto() async {
+    final status = await Permission.camera.status;
+
+    if (status.isGranted) {
+      _takePhoto();
+    } else if (status.isDenied) {
+      final result = await Permission.camera.request();
+      if (result.isGranted) {
+        _takePhoto();
+      } else {
+        _showPermissionDeniedDialog();
+      }
+    } else if (status.isPermanentlyDenied || status.isRestricted) {
+      _showPermissionDeniedDialog();
+    }
+  }
+
+  void _showPermissionDeniedDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('권한 필요'),
+        content: const Text('카메라 권한이 필요합니다. 설정에서 권한을 허용해주세요.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () {
+              openAppSettings();
+              Navigator.of(context).pop();
+            },
+            child: const Text('설정 열기'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -54,7 +95,7 @@ class _UploadScreenState extends State<UploadScreen> {
     _descriptionController.addListener(_updateState);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _takePhoto();
+      _checkCameraPermissionAndTakePhoto();
     });
   }
 
@@ -96,7 +137,7 @@ class _UploadScreenState extends State<UploadScreen> {
                   fit: BoxFit.cover,
                 )
                     : GestureDetector(
-                  onTap: _takePhoto,
+                  onTap: _checkCameraPermissionAndTakePhoto,
                   child: Container(
                     color: PicpleColors.gray2,
                     child: const Center(
