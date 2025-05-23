@@ -19,41 +19,38 @@ class PicpleBottomNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Stack(
-        alignment: Alignment.bottomCenter,
+        alignment: Alignment.center,
         children: [
           BottomAppBar(
+            padding: EdgeInsets.zero,
             color: PicpleColors.white,
-            shape: const CircularNotchedRectangle(),
-            notchMargin: 8,
-            child: SizedBox(
-              height: 76,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildNavItem(
-                    index: 0,
-                    iconPath: 'assets/icons/ic_home.svg',
-                    label: '홈',
-                    isSelected: currentIndex == 0,
-                    onTap: () => onTap(0),
-                  ),
-                  const SizedBox(width: 72), // 카메라 버튼 공간 확보
-                  _buildNavItem(
-                    index: 1,
-                    iconPath: 'assets/icons/ic_profile.svg',
-                    label: '프로필',
-                    isSelected: currentIndex == 1,
-                    onTap: () => onTap(1),
-                  ),
-                ],
-              ),
+            height: 76,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(
+                  index: 0,
+                  iconPath: 'assets/icons/ic_home.svg',
+                  label: '홈',
+                  isSelected: currentIndex == 0,
+                  rightPadding: 16,
+                  onTap: () => onTap(0),
+                ),
+
+                _buildNavItem(
+                  index: 1,
+                  iconPath: 'assets/icons/ic_profile.svg',
+                  label: '프로필',
+                  isSelected: currentIndex == 1,
+                  leftPadding: 16,
+                  onTap: () => onTap(1),
+                ),
+              ],
             ),
           ),
       
           // 가운데 카메라 버튼
           Positioned(
-            top: 0,
-            bottom: 0, // 높이 조정
             child: SizedBox(
               width: 64,
               height: 64,
@@ -82,31 +79,38 @@ class PicpleBottomNavigationBar extends StatelessWidget {
     required String label,
     required bool isSelected,
     required VoidCallback onTap,
+    double leftPadding = 0.0,
+    double rightPadding = 0.0,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: SizedBox(
-        width: 80,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SvgPicture.asset(
-              iconPath,
-              width: 24,
-              height: 24,
-              colorFilter: ColorFilter.mode(
-                isSelected ? PicpleColors.primary1 : PicpleColors.gray5,
-                BlendMode.srcIn,
-              ),
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkResponse(
+          onTap: onTap,
+          child: Padding(
+            padding: EdgeInsets.only(left: leftPadding, right: rightPadding),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SvgPicture.asset(
+                  iconPath,
+                  width: 24,
+                  height: 24,
+                  colorFilter: ColorFilter.mode(
+                    isSelected ? PicpleColors.primary1 : PicpleColors.gray5,
+                    BlendMode.srcIn,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  style: PicpleTypography.nav.copyWith(
+                    color: isSelected ? PicpleColors.primary1 : PicpleColors.gray5,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: PicpleTypography.nav.copyWith(
-                color: isSelected ? PicpleColors.primary1 : PicpleColors.gray5,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
