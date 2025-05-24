@@ -19,4 +19,37 @@ class FakeAuthDataSource implements AuthDataSource {
       LoginData.fromJson
     );
   }
+
+  @override
+  Future<BaseResponse<LoginData>> reissue() async {
+    await Future.delayed(const Duration(microseconds: 300));
+    return BaseResponse<LoginData>.fromJson(
+      {
+        "isSuccess": true,
+        "data": {
+          "accessToken": "mock_access_token",
+          "refreshToken": "mock_refresh_token"
+        }
+      },
+      LoginData.fromJson
+    );
+  }
+
+  @override
+  Future<BaseResponse<void>> logout() async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    return BaseResponse<void>.fromJson(
+      {"isSuccess": true},
+      (_) => null
+    );
+  }
+
+  @override
+  Future<BaseResponse<void>> withdrawal() async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    return BaseResponse<void>.fromJson(
+      {"isSuccess": true},
+      (_) => null
+    );
+  }
 }
