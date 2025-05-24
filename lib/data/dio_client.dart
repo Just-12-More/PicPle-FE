@@ -45,7 +45,17 @@ class TokenInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     try {
-      final token = await storage.read(key: Constants.ACCESS_TOKEN_KEY);
+      // 로그인 시에는 토큰을 전달하지 않음
+      if (options.path.contains('/auth/login')) {
+        handler.next(options);
+        return;
+      }
+      String tokenKey = Constants.ACCESS_TOKEN_KEY;
+      // 토큰 재발급 시에는 refresh token을 전달함
+      if (options.path.contains('/auth/reissue/token')) {
+        tokenKey = Constants.REFRESH_TOKEN_KEY;
+      }
+      final token = await storage.read(key: tokenKey);
       if (token != null) {
         options.headers["Authorization"] = "Bearer $token";
       }
