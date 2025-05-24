@@ -2,6 +2,7 @@ import 'package:picple/data/datasource/photo_data_source.dart';
 import 'package:picple/data/model/response/nearby_photos_response.dart';
 
 import '../model/request/nearby_photos_request.dart';
+import '../model/request/upload_photo_request.dart';
 import '../model/response/base_response.dart';
 
 class FakePhotoDataSource implements PhotoDataSource {
@@ -43,6 +44,30 @@ class FakePhotoDataSource implements PhotoDataSource {
         "error": null
       },
       NearbyPhotosData.fromJson
+    );
+  }
+
+  @override
+  Future<BaseResponse<PhotoData>> uploadPhoto(UploadPhotoRequest request) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    return BaseResponse<PhotoData>.fromJson(
+      {
+        "isSuccess": true,
+        "data": {
+          "id": 100,
+          "title": request.title,
+          "imgUrl": request.imageUrl,
+          "description": request.description,
+          "nickname": "테스트유저",
+          "profileImgUrl": "https://picsum.photos/seed/testuser/48/48",
+          "likeCount": 0,
+          "isLiked": false,
+          "address": "서울시 강남구",
+          "createdAt": DateTime.now().toIso8601String()
+        },
+        "error": null
+      },
+      PhotoData.fromJson
     );
   }
 }

@@ -34,4 +34,36 @@ class PhotoApi {
       );
     }
   }
+
+  Future<BaseResponse<PhotoData>> uploadFeed(
+    String imageUrl,
+    String title,
+    String description,
+  ) async {
+    try {
+      final response = await _dioClient.dio.post(
+        '/photos',
+        data: {
+          'imageUrl': imageUrl,
+          'title': title,
+          'description': description,
+        },
+      );
+
+      final uploadResponse = BaseResponse<PhotoData>.fromJson(
+        response.data,
+        PhotoData.fromJson,
+      );
+
+      return uploadResponse;
+    } catch (e) {
+      return BaseResponse<PhotoData>(
+        isSuccess: false,
+        error: ResponseError(
+          code: "500",
+          message: 'An error occurred while uploading the photo: $e',
+        ),
+      );
+    }
+  }
 }
