@@ -141,6 +141,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                       child: TextButton(
                         style: TextButton.styleFrom(
                           backgroundColor: PicpleColors.primary1,
+                          disabledBackgroundColor: PicpleColors.gray4,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -148,9 +149,9 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                         onPressed: state.isLoading
                             ? null
                             : () => ref.read(profileEditStateProvider.notifier).saveChanges(),
-                        child: const Text(
+                        child: Text(
                           '변경사항 저장',
-                          style: TextStyle(fontSize: 16, color: Colors.white),
+                          style: PicpleTypography.body1SemiBold.copyWith(color: Colors.white),
                         ),
                       ),
                     ),
