@@ -1,12 +1,16 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../../core/util/permission_utils.dart';
 import '../../theme/picple_colors.dart';
 import '../../theme/picple_typography.dart';
+import '../provider/upload_contract.dart';
+import '../provider/upload_provider.dart';
 
 class UploadPage extends StatelessWidget {
   const UploadPage({super.key});
@@ -17,82 +21,54 @@ class UploadPage extends StatelessWidget {
   }
 }
 
-class UploadScreen extends StatefulWidget {
+class UploadScreen extends ConsumerStatefulWidget {
   const UploadScreen({super.key});
 
   @override
   _UploadScreenState createState() => _UploadScreenState();
 }
 
-class _UploadScreenState extends State<UploadScreen> {
+class _UploadScreenState extends ConsumerState<UploadScreen> {
   final ImagePicker _picker = ImagePicker();
-  File? _photo;
+
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
 
-  bool get _isFormValid =>
-      _photo != null &&
-          _titleController.text.trim().isNotEmpty &&
-          _descriptionController.text.trim().isNotEmpty;
+  bool get _isFormValid {
+    final state = ref.watch(uploadStateProvider);
 
-  void _updateState() => setState(() {});
+    return state.photo != null &&
+        _titleController.text.trim().isNotEmpty &&
+        _descriptionController.text.trim().isNotEmpty;
+  }
 
   Future<void> _takePhoto() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.camera);
 
     if (pickedFile != null) {
-      setState(() {
-        _photo = File(pickedFile.path);
-      });
+      ref.read(uploadStateProvider.notifier).setPhoto(File(pickedFile.path));
+      setState(() { });
     }
   }
 
   Future<void> _checkCameraPermissionAndTakePhoto() async {
-    final status = await Permission.camera.status;
-
-    if (status.isGranted) {
-      _takePhoto();
-    } else if (status.isDenied) {
-      final result = await Permission.camera.request();
-      if (result.isGranted) {
-        _takePhoto();
-      } else {
-        _showPermissionDeniedDialog();
-      }
-    } else if (status.isPermanentlyDenied || status.isRestricted) {
-      _showPermissionDeniedDialog();
-    }
-  }
-
-  void _showPermissionDeniedDialog() {
-    showDialog(
+    final granted = await requestPermission(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('권한 필요'),
-        content: const Text('카메라 권한이 필요합니다. 설정에서 권한을 허용해주세요.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('취소'),
-          ),
-          TextButton(
-            onPressed: () {
-              openAppSettings();
-              Navigator.of(context).pop();
-            },
-            child: const Text('설정 열기'),
-          ),
-        ],
-      ),
+      permission: Permission.camera,
+      errorMessage: '카메라 권한이 필요합니다.',
     );
+
+    if (granted) {
+      _takePhoto();
+    }
   }
 
   @override
   void initState() {
     super.initState();
 
-    _titleController.addListener(_updateState);
-    _descriptionController.addListener(_updateState);
+    _titleController.addListener(() => setState(() { }));
+    _descriptionController.addListener(() => setState(() { }));
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkCameraPermissionAndTakePhoto();
@@ -101,6 +77,19 @@ class _UploadScreenState extends State<UploadScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(uploadStateProvider);
+    ref.listen<UploadEffect?>(uploadEffectProvider, (previous, next) {
+      if (next == null) return;
+
+      if (next is ShowToast) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(next.message)),
+        );
+      }
+
+      ref.read(uploadEffectProvider.notifier).state = null;
+    });
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: PicpleColors.white,
@@ -129,9 +118,9 @@ class _UploadScreenState extends State<UploadScreen> {
               // 사진 미리보기
               AspectRatio(
                 aspectRatio: 1.0,
-                child: _photo != null
+                child: state.photo != null
                     ? Image.file(
-                  _photo!,
+                  state.photo!,
                   width: double.infinity,
                   height: double.infinity,
                   fit: BoxFit.cover,
@@ -190,8 +179,11 @@ class _UploadScreenState extends State<UploadScreen> {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
           child: ElevatedButton(
-            onPressed: _isFormValid ? () {
-              log('사진 업로드');
+            onPressed: _isFormValid ? () async {
+              final title = _titleController.text.trim();
+              final description = _descriptionController.text.trim();
+
+              _handleUpload(context, ref, title, description);
             } : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: PicpleColors.primary1,
@@ -210,6 +202,34 @@ class _UploadScreenState extends State<UploadScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> _handleUpload(BuildContext context, WidgetRef ref, String title, String description) async {
+    final messenger = ScaffoldMessenger.of(context);
+
+    final granted = await requestPermission(
+      context: context,
+      permission: Permission.locationWhenInUse,
+      errorMessage: '위치 권한이 필요합니다.',
+    );
+    if (!granted) return;
+
+    Position position;
+    try {
+      position = await Geolocator.getCurrentPosition();
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('위치 정보를 가져올 수 없습니다: $e')),
+      );
+      return;
+    }
+
+    await ref.read(uploadStateProvider.notifier).uploadPhoto(
+      title,
+      description,
+      position.latitude,
+      position.longitude,
     );
   }
 }
