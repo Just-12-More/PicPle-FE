@@ -7,6 +7,7 @@ import 'package:picple/presentation/profile/view/profile_page.dart';
 import 'package:picple/presentation/setting/setting_page.dart';
 import 'package:picple/presentation/shared/view/photo_list_page.dart';
 import 'package:picple/presentation/splash/view/splash_page.dart';
+import 'package:picple/presentation/upload/view/upload_page.dart';
 
 enum Routes {
   splash(name: 'Splash', path: '/'),
@@ -14,7 +15,7 @@ enum Routes {
   home(name: 'Home', path: '/home'),
   upload(name: 'Upload', path: '/upload'),
   profile(name: 'Profile', path: '/profile'),
-  setting(name: 'Setting', path: '/setting');
+  setting(name: 'Setting', path: '/setting'),
   photoList(name: 'PhotoList', path: '/photo_list');
 
   final String name;
@@ -24,7 +25,7 @@ enum Routes {
 }
 
 final router = GoRouter(
-  initialLocation: Routes.splash.path,
+  initialLocation: Routes.home.path,
   routes: [
     GoRoute(
       path: Routes.splash.path,
@@ -43,6 +44,12 @@ final router = GoRouter(
       builder: (context, state) => const PhotoListPage(),
     ),
 
+    GoRoute(
+        path: Routes.upload.path,
+        builder: (context, state) => UploadPage(),
+        routes: []
+    ),
+
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
         return ScaffoldWithNavBar(navigationShell: navigationShell);
@@ -56,15 +63,6 @@ final router = GoRouter(
               routes: []
             ),
           ]
-        ),
-        StatefulShellBranch(
-            routes: [
-              GoRoute(
-                  path: Routes.upload.path,
-                  builder: (context, state) => const HomePage(),
-                  routes: []
-              ),
-            ]
         ),
         StatefulShellBranch(
             routes: [
@@ -90,10 +88,13 @@ class ScaffoldWithNavBar extends StatelessWidget {
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: PicpleBottomNavigationBar(
-          currentIndex: navigationShell.currentIndex,
-          onTap: (index) {
-            navigationShell.goBranch(index);
-          }
+        currentIndex: navigationShell.currentIndex,
+        onTap: (index) {
+          navigationShell.goBranch(index);
+        },
+        onUploadTap: () {
+          context.push(Routes.upload.path);
+        },
       )
     );
   }
