@@ -59,6 +59,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
     });
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
