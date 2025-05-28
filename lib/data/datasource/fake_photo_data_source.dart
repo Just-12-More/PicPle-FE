@@ -9,34 +9,40 @@ import '../model/response/geo_photos_response.dart';
 
 class FakePhotoDataSource implements PhotoDataSource {
 
+  int _photoIdCounter = 1;
+
   @override
   Future<BaseResponse<GeoPhotosData>> getGeoPhotos(GeoPhotosRequest request) async {
     await Future.delayed(const Duration(milliseconds: 500));
+
+    final photos = List.generate(10, (index) {
+      final id = _photoIdCounter++;
+      return {
+        "id": id,
+        "title": "사진 $id",
+        "imgUrl": "https://picsum.photos/id/${100 + id}/300/300",
+        "description": "설명 $id",
+        "nickname": "유저$id",
+        "profileImgUrl": "https://picsum.photos/seed/user$id/48/48",
+        "likeCount": id * 5,
+        "isLiked": id % 2 == 0,
+        "address": "서울시 강남구",
+        "latitude": request.latitude + (index * 0.001),
+        "longitude": request.longitude + (index * 0.001),
+        "createdAt": DateTime.now().subtract(Duration(days: index)).toIso8601String(),
+      };
+    });
+
     return BaseResponse<GeoPhotosData>.fromJson(
-      {
-        "isSuccess": true,
-        "data": {
-          "address": "서울시 강남구 테헤란로",
-          "photos": List.generate(10, (index) {
-            return {
-              "id": index + 1,
-              "title": "사진 ${index + 1}",
-              "imgUrl": "https://picsum.photos/id/${100 + index}/300/300",
-              "description": "설명 ${index + 1}",
-              "nickname": "유저${index + 1}",
-              "profileImgUrl": "https://picsum.photos/seed/user${index + 1}/48/48",
-              "likeCount": (index + 1) * 5,
-              "isLiked": index % 2 == 0,
-              "address": "서울시 강남구",
-              "latitude": 37.5665 + (index * 0.001),
-              "longitude": 126.978 + (index * 0.001),
-              "createdAt": DateTime.now().subtract(Duration(days: index)).toIso8601String()
-            };
-          }),
+        {
+          "isSuccess": true,
+          "data": {
+            "address": "서울시 강남구 테헤란로",
+            "photos": photos,
+          },
+          "error": null
         },
-        "error": null
-      },
-      GeoPhotosData.fromJson
+        GeoPhotosData.fromJson
     );
   }
 
