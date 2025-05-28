@@ -1,13 +1,12 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:picple/core/util/naver_map_utils.dart';
 import 'package:picple/presentation/theme/picple_colors.dart';
 import 'package:picple/presentation/theme/picple_typography.dart';
+
+import '../provider/home_contract.dart';
+import '../provider/home_provider.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -28,34 +27,11 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   NaverMapController? _mapController;
   NMarker? _myLocationMarker;
-  NCircleOverlay? _myLocationCircle;
 
-  @override
-  void initState() {
-    super.initState();
-  }
+  Future<void> _updateMyLocationMarker(double latitude, double longitude) async {
+    if (_mapController == null) return;
 
-  void _startTracking() async {
-    final hasPermission = await Geolocator.requestPermission();
-    if (hasPermission == LocationPermission.denied ||
-        hasPermission == LocationPermission.deniedForever) {
-      return;
-    }
-
-    Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 10,
-      ),
-    ).listen((position) async {
-      if (_isTracking && _mapController != null) {
-        await _updateMyLocationMarker(position);
-      }
-    });
-  }
-
-  Future<void> _updateMyLocationMarker(Position position) async {
-    final newPosition = NLatLng(position.latitude, position.longitude);
+    final newPosition = NLatLng(latitude, longitude);
 
     final markerIcon = await NOverlayImage.fromWidget(
       context: context,
@@ -80,8 +56,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       size: const Size(20, 20),
     );
 
-    _mapController!.deleteOverlay(_myLocationMarker!.info);
-    _mapController!.deleteOverlay(_myLocationCircle!.info);
+    if (_myLocationMarker != null) {
+      _mapController!.deleteOverlay(_myLocationMarker!.info);
+    }
 
     _myLocationMarker = NMarker(
       id: 'my_location',
@@ -89,16 +66,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       icon: markerIcon,
     );
 
-    _myLocationCircle = NCircleOverlay(
-      id: 'my_radius',
-      center: newPosition,
-      radius: 500,
-      color: PicpleColors.primary1.withAlpha((0.2 * 255).toInt()),
-    );
-
     _mapController!
       ..addOverlay(_myLocationMarker!)
-      ..addOverlay(_myLocationCircle!)
       ..updateCamera(NCameraUpdate.scrollAndZoomTo(
         target: newPosition,
         zoom: 14,
@@ -107,14 +76,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(homeStateProvider);
+
+    ref.listen(
+      homeStateProvider.select((state) => (state.latitude, state.longitude)),
+          (previous, next) {
+        final (lat, lng) = next;
+        if (lat != null && lng != null && _mapController != null) {
+          _updateMyLocationMarker(lat, lng);
+        }
+      },
+    );
+
+    ref.listen<HomeEffect?>(homeEffectProvider, (previous, next) {
+      if (next == null) return;
+
+      switch (next) {
+        case ShowToast():
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(next.message)),
+          );
+          break;
+      }
+
+      ref.read(homeEffectProvider.notifier).state = null;
+    });
+
     return SafeArea(
       child: Stack(
         children: [
           _buildMap(),
           SearchFromHereButton(onTap: () {}),
           LocationToggleButton(
-            isTracking: _isTracking,
-            onTap: () => setState(() => _isTracking = !_isTracking),
+            isCameraLockedOnUser: state.isCameraLockedOnUser,
+            onTap: () =>
+                ref.read(homeStateProvider.notifier).toggleCameraLock(),
           ),
         ],
       ),
@@ -133,34 +129,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       onMapReady: (controller) async {
         _mapController = controller;
-        await _addRandomMarkersAroundSeoul();
       },
     );
-  }
-
-  Future<void> _addRandomMarkersAroundSeoul() async {
-    if (_mapController == null) return;
-
-    const centerLat = 37.5665;
-    const centerLng = 126.9780;
-    const markerCount = 50;
-
-    final rand = Random();
-
-    for (int i = 0; i < markerCount; i++) {
-      final randomLatOffset = (rand.nextDouble() - 0.5) * 0.01;
-      final randomLngOffset = (rand.nextDouble() - 0.5) * 0.01;
-
-      final imageId = 200 + i;
-      final imageUrl = 'https://picsum.photos/id/$imageId/300/300';
-
-      addMarkerWithPlaceholderImage(
-        controller: _mapController!,
-        id: 'random_marker_$i',
-        position: NLatLng(centerLat + randomLatOffset, centerLng + randomLngOffset),
-        imageUrl: imageUrl,
-      );
-    }
   }
 }
 
@@ -207,15 +177,15 @@ class SearchFromHereButton extends StatelessWidget {
 }
 
 class LocationToggleButton extends StatelessWidget {
-  final bool isTracking;
+  final bool isCameraLockedOnUser;
   final VoidCallback onTap;
 
-  const LocationToggleButton({super.key, required this.isTracking, required this.onTap});
+  const LocationToggleButton({super.key, required this.isCameraLockedOnUser, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = isTracking ? PicpleColors.primary1 : PicpleColors.white;
-    final iconColor = isTracking ? PicpleColors.white : PicpleColors.primary1;
+    final backgroundColor = isCameraLockedOnUser ? PicpleColors.primary1 : PicpleColors.white;
+    final iconColor = isCameraLockedOnUser ? PicpleColors.white : PicpleColors.primary1;
 
     return Positioned(
       bottom: 24,
