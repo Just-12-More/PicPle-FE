@@ -64,7 +64,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: Stack(
         children: [
           _buildMap(),
-          SearchFromHereButton(onTap: () {}),
+          SearchFromHereButton(onTap: () {
+            if (state.latitude != null && state.longitude != null) {
+              ref.read(homeStateProvider.notifier).fetchGeoPhotos(
+                state.latitude!, state.longitude!,
+              );
+            } else {
+              ref.read(homeEffectProvider.notifier).state =
+                  ShowToast("위치 정보가 없습니다.");
+            }
+          }),
           LocationToggleButton(
             isCameraLockedOnUser: state.isCameraLockedOnUser,
             onTap: () =>
