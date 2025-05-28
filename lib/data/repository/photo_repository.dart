@@ -14,20 +14,16 @@ class PhotoRepository {
 
   Future<BaseResponse<GeoPhotosData>> getGeoPhotos(
     double latitude,
-    double longitude,
-    double leftTopLatitude,
-    double leftTopLongitude,
-    double rightBottomLatitude,
-    double rightBottomLongitude,
+    double longitude
   ) async {
     final response = await _dataSource.getGeoPhotos(
       GeoPhotosRequest(
         latitude: latitude,
         longitude: longitude,
-        leftTopLatitude: leftTopLatitude,
-        leftTopLongitude: leftTopLongitude,
-        rightBottomLatitude: rightBottomLatitude,
-        rightBottomLongitude: rightBottomLongitude,
+        leftTopLatitude: latitude - 0.01, // Example offset for left top corner
+        leftTopLongitude: longitude - 0.01, // Example offset for left top corner
+        rightBottomLatitude: latitude + 0.01, // Example offset for right bottom corner
+        rightBottomLongitude: longitude + 0.01, // Example offset for right bottom corner
       ),
     );
 

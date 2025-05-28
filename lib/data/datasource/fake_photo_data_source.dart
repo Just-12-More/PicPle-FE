@@ -28,6 +28,8 @@ class FakePhotoDataSource implements PhotoDataSource {
               "likeCount": (index + 1) * 5,
               "isLiked": index % 2 == 0,
               "address": "서울시 강남구",
+              "latitude": 37.5665 + (index * 0.001),
+              "longitude": 126.978 + (index * 0.001),
               "createdAt": DateTime.now().subtract(Duration(days: index)).toIso8601String()
             };
           }),
@@ -56,6 +58,8 @@ class FakePhotoDataSource implements PhotoDataSource {
             "likeCount": 120,
             "isLiked": true,
             "address": "서울시 강남구",
+            "latitude": 37.5665,
+            "longitude": 126.978,
             "createdAt": "2024-04-01T12:00:00Z"
           },
           "nearbyPhotos": List.generate(5, (index) {
@@ -69,6 +73,8 @@ class FakePhotoDataSource implements PhotoDataSource {
               "likeCount": (index + 1) * 10,
               "isLiked": index % 2 == 0,
               "address": "서울시",
+              "latitude": 37.5665 + (index * 0.001),
+              "longitude": 126.978 + (index * 0.001),
               "createdAt": "2024-04-01T0${index + 1}:00:00Z"
             };
           }),
@@ -95,6 +101,8 @@ class FakePhotoDataSource implements PhotoDataSource {
           "likeCount": 0,
           "isLiked": false,
           "address": "서울시 강남구",
+          "latitude": request.latitude,
+          "longitude": request.longitude,
           "createdAt": DateTime.now().toIso8601String()
         },
         "error": null
