@@ -2,78 +2,62 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:picple/core/util/naver_map_utils.dart';
+import 'package:picple/presentation/theme/picple_colors.dart';
 import 'package:picple/presentation/theme/picple_typography.dart';
-
-import '../../../core/util/naver_map_utils.dart';
-import '../../theme/picple_colors.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const HomeScreen(); // 화면 전환 또는 포함 여부에 따라 조정
+    return const HomeScreen();
   }
 }
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   NaverMapController? _mapController;
-  bool _isTracking = false;
+  NMarker? _myLocationMarker;
+  NCircleOverlay? _myLocationCircle;
 
   @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Stack(
-        children: [
-          _buildMap(),
-          SearchFromHereButton(
-            onTap: () {
-              // 검색 기능 구현
-            },
-          ),
-          LocationToggleButton(
-            isTracking: _isTracking,
-            onTap: () {
-              setState(() {
-                _isTracking = !_isTracking;
-              });
-            },
-          ),
-        ],
-      ),
-    );
+  void initState() {
+    super.initState();
   }
 
-  Widget _buildMap() {
-    return NaverMap(
-      options: const NaverMapViewOptions(
-        indoorEnable: true,
-        locationButtonEnable: false,
-        consumeSymbolTapEvents: false,
-        rotationGesturesEnable: true,
-        scrollGesturesEnable: true,
-        zoomGesturesEnable: true,
+  void _startTracking() async {
+    final hasPermission = await Geolocator.requestPermission();
+    if (hasPermission == LocationPermission.denied ||
+        hasPermission == LocationPermission.deniedForever) {
+      return;
+    }
+
+    Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 10,
       ),
-      onMapReady: (controller) async {
-        _mapController = controller;
-        await _addMyLocationMarker();
-        await _addRandomMarkersAroundSeoul();
-      },
-    );
+    ).listen((position) async {
+      if (_isTracking && _mapController != null) {
+        await _updateMyLocationMarker(position);
+      }
+    });
   }
 
-  Future<void> _addMyLocationMarker() async {
-    if (_mapController == null) return;
+  Future<void> _updateMyLocationMarker(Position position) async {
+    final newPosition = NLatLng(position.latitude, position.longitude);
 
-    final myPositionIcon = await NOverlayImage.fromWidget(
+    final markerIcon = await NOverlayImage.fromWidget(
       context: context,
       widget: Container(
         width: 20,
@@ -96,29 +80,62 @@ class _HomeScreenState extends State<HomeScreen> {
       size: const Size(20, 20),
     );
 
-    // 마커 추가
-    final marker = NMarker(
+    _mapController!.deleteOverlay(_myLocationMarker!.info);
+    _mapController!.deleteOverlay(_myLocationCircle!.info);
+
+    _myLocationMarker = NMarker(
       id: 'my_location',
-      position: const NLatLng(37.5665, 126.978),
-      icon: myPositionIcon,
+      position: newPosition,
+      icon: markerIcon,
     );
 
-    // 반경 원 추가
-    final circle = NCircleOverlay(
+    _myLocationCircle = NCircleOverlay(
       id: 'my_radius',
-      center: const NLatLng(37.5665, 126.978),
-      radius: 500, // meters
+      center: newPosition,
+      radius: 500,
       color: PicpleColors.primary1.withAlpha((0.2 * 255).toInt()),
     );
 
-    // 지도에 표시
     _mapController!
-      ..addOverlay(circle)
-      ..addOverlay(marker)
+      ..addOverlay(_myLocationMarker!)
+      ..addOverlay(_myLocationCircle!)
       ..updateCamera(NCameraUpdate.scrollAndZoomTo(
-        target: const NLatLng(37.5665, 126.978),
+        target: newPosition,
         zoom: 14,
       ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Stack(
+        children: [
+          _buildMap(),
+          SearchFromHereButton(onTap: () {}),
+          LocationToggleButton(
+            isTracking: _isTracking,
+            onTap: () => setState(() => _isTracking = !_isTracking),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMap() {
+    return NaverMap(
+      options: const NaverMapViewOptions(
+        indoorEnable: true,
+        locationButtonEnable: false,
+        consumeSymbolTapEvents: false,
+        rotationGesturesEnable: true,
+        scrollGesturesEnable: true,
+        zoomGesturesEnable: true,
+      ),
+      onMapReady: (controller) async {
+        _mapController = controller;
+        await _addRandomMarkersAroundSeoul();
+      },
+    );
   }
 
   Future<void> _addRandomMarkersAroundSeoul() async {
@@ -131,20 +148,17 @@ class _HomeScreenState extends State<HomeScreen> {
     final rand = Random();
 
     for (int i = 0; i < markerCount; i++) {
-      final randomLatOffset = (rand.nextDouble() - 0.5) * 0.01; // ±0.005
+      final randomLatOffset = (rand.nextDouble() - 0.5) * 0.01;
       final randomLngOffset = (rand.nextDouble() - 0.5) * 0.01;
 
       final imageId = 200 + i;
       final imageUrl = 'https://picsum.photos/id/$imageId/300/300';
 
       addMarkerWithPlaceholderImage(
-          controller: _mapController!,
-          id: 'random_marker_$i',
-          position: NLatLng(
-            centerLat + randomLatOffset,
-            centerLng + randomLngOffset,
-          ),
-          imageUrl: imageUrl
+        controller: _mapController!,
+        id: 'random_marker_$i',
+        position: NLatLng(centerLat + randomLatOffset, centerLng + randomLngOffset),
+        imageUrl: imageUrl,
       );
     }
   }
@@ -152,11 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
 class SearchFromHereButton extends StatelessWidget {
   final VoidCallback onTap;
-
-  const SearchFromHereButton({
-    super.key,
-    required this.onTap,
-  });
+  const SearchFromHereButton({super.key, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -179,9 +189,7 @@ class SearchFromHereButton extends StatelessWidget {
               children: [
                 Text(
                   '현위치에서 검색',
-                  style: PicpleTypography.body1SemiBold.copyWith(
-                    color: PicpleColors.primary1,
-                  ),
+                  style: PicpleTypography.body1SemiBold.copyWith(color: PicpleColors.primary1),
                 ),
                 const SizedBox(width: 10),
                 SvgPicture.asset(
@@ -202,49 +210,37 @@ class LocationToggleButton extends StatelessWidget {
   final bool isTracking;
   final VoidCallback onTap;
 
-  const LocationToggleButton({
-    super.key,
-    required this.isTracking,
-    required this.onTap,
-  });
+  const LocationToggleButton({super.key, required this.isTracking, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = isTracking ? PicpleColors.primary1: PicpleColors.white;
+    final backgroundColor = isTracking ? PicpleColors.primary1 : PicpleColors.white;
     final iconColor = isTracking ? PicpleColors.white : PicpleColors.primary1;
 
     return Positioned(
       bottom: 24,
       right: 24,
-      child: Center(
-        child: InkWell(
-          borderRadius: BorderRadius.circular(10),
-          onTap: onTap,
-          child: Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: PicpleColors.white,
-                width: 2
-              )
-            ),
-            child: Center(
-              child: SvgPicture.asset(
-                "assets/icons/ic_location.svg",
-                width: 36,
-                height: 36,
-                colorFilter: ColorFilter.mode(
-                  iconColor,
-                  BlendMode.srcIn
-                )
-              ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: onTap,
+        child: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: PicpleColors.white, width: 2),
+          ),
+          child: Center(
+            child: SvgPicture.asset(
+              "assets/icons/ic_location.svg",
+              width: 36,
+              height: 36,
+              colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
             ),
           ),
         ),
-      )
+      ),
     );
   }
 }

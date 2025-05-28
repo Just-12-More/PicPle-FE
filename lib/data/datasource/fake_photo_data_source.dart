@@ -1,11 +1,43 @@
 import 'package:picple/data/datasource/photo_data_source.dart';
 import 'package:picple/data/model/response/nearby_photos_response.dart';
 
+import '../model/request/geo_photos_request.dart';
 import '../model/request/nearby_photos_request.dart';
 import '../model/request/upload_photo_request.dart';
 import '../model/response/base_response.dart';
+import '../model/response/geo_photos_response.dart';
 
 class FakePhotoDataSource implements PhotoDataSource {
+
+  @override
+  Future<BaseResponse<GeoPhotosData>> getGeoPhotos(GeoPhotosRequest request) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    return BaseResponse<GeoPhotosData>.fromJson(
+      {
+        "isSuccess": true,
+        "data": {
+          "address": "서울시 강남구 테헤란로",
+          "photos": List.generate(10, (index) {
+            return {
+              "id": index + 1,
+              "title": "사진 ${index + 1}",
+              "imgUrl": "https://picsum.photos/id/${100 + index}/300/300",
+              "description": "설명 ${index + 1}",
+              "nickname": "유저${index + 1}",
+              "profileImgUrl": "https://picsum.photos/seed/user${index + 1}/48/48",
+              "likeCount": (index + 1) * 5,
+              "isLiked": index % 2 == 0,
+              "address": "서울시 강남구",
+              "createdAt": DateTime.now().subtract(Duration(days: index)).toIso8601String()
+            };
+          }),
+        },
+        "error": null
+      },
+      GeoPhotosData.fromJson
+    );
+  }
+
   @override
   Future<BaseResponse<NearbyPhotosData>> getNearbyPhotos(NearbyPhotosRequest request) async {
     await Future.delayed(const Duration(milliseconds: 500));
