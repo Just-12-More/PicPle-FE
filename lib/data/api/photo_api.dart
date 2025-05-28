@@ -1,13 +1,48 @@
+import 'package:picple/data/model/request/geo_photos_request.dart';
 import 'package:picple/data/model/request/nearby_photos_request.dart';
 import 'package:picple/data/model/response/nearby_photos_response.dart';
 
 import '../dio_client.dart';
 import '../model/response/base_response.dart';
+import '../model/response/geo_photos_response.dart';
 
 class PhotoApi {
   final DioClient _dioClient;
 
   PhotoApi(this._dioClient);
+
+  Future<BaseResponse<GeoPhotosData>> getGeoPhotos(
+    GeoPhotosRequest request
+  ) async {
+    try {
+      final response = await _dioClient.dio.post(
+          '/photos',
+          data: {
+            'latitude': request.latitude,
+            'longitude': request.longitude,
+            'leftTopLatitude': request.leftTopLatitude,
+            'leftTopLongitude': request.leftTopLongitude,
+            'rightBottomLatitude': request.rightBottomLatitude,
+            'rightBottomLongitude': request.rightBottomLongitude,
+          }
+      );
+
+      final geoPhotosResponse = BaseResponse<GeoPhotosData>.fromJson(
+        response.data,
+        GeoPhotosData.fromJson,
+      );
+
+      return geoPhotosResponse;
+    } catch (e) {
+      return BaseResponse<GeoPhotosData>(
+        isSuccess: false,
+        error: ResponseError(
+          code: "500",
+          message: 'An error occurred while fetching photo details: $e',
+        ),
+      );
+    }
+  }
 
   Future<BaseResponse<NearbyPhotosData>> getNearbyPhotos(
     NearbyPhotosRequest request
