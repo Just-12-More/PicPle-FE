@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,6 +7,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:picple/presentation/theme/picple_colors.dart';
 import 'package:picple/presentation/theme/picple_typography.dart';
 
+import '../../../core/util/naver_map_utils.dart';
+import '../../../data/model/response/nearby_photos_response.dart';
 import '../provider/home_contract.dart';
 import '../provider/home_provider.dart';
 
@@ -27,6 +31,65 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   NaverMapController? _mapController;
   NMarker? _myLocationMarker;
+  final List<String> _renderedPhotoIds = [];
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(homeStateProvider);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _renderPhotoMarkers(state.photos);
+      if (state.latitude != null && state.longitude != null) {
+        _updateMyLocationMarker(state.latitude!, state.longitude!);
+      } else {
+        log('No initial location data available');
+      }
+    });
+
+    ref.listen<HomeEffect?>(homeEffectProvider, (previous, next) {
+      if (next == null) return;
+
+      switch (next) {
+        case ShowToast():
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(next.message)),
+          );
+          break;
+      }
+
+      ref.read(homeEffectProvider.notifier).state = null;
+    });
+
+    return SafeArea(
+      child: Stack(
+        children: [
+          _buildMap(),
+          SearchFromHereButton(onTap: () {}),
+          LocationToggleButton(
+            isCameraLockedOnUser: state.isCameraLockedOnUser,
+            onTap: () =>
+                ref.read(homeStateProvider.notifier).toggleCameraLock(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMap() {
+    return NaverMap(
+      options: const NaverMapViewOptions(
+        indoorEnable: true,
+        locationButtonEnable: false,
+        consumeSymbolTapEvents: false,
+        rotationGesturesEnable: true,
+        scrollGesturesEnable: true,
+        zoomGesturesEnable: true,
+      ),
+      onMapReady: (controller) async {
+        _mapController = controller;
+      },
+    );
+  }
 
   Future<void> _updateMyLocationMarker(double latitude, double longitude) async {
     if (_mapController == null) return;
@@ -74,63 +137,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ));
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final state = ref.watch(homeStateProvider);
+  void _renderPhotoMarkers(List<PhotoData> photos){
+    for (final photo in photos) {
+      final markerId = 'photo_${photo.id}';
+      if (_renderedPhotoIds.contains(markerId)) continue;
 
-    ref.listen(
-      homeStateProvider.select((state) => (state.latitude, state.longitude)),
-          (previous, next) {
-        final (lat, lng) = next;
-        if (lat != null && lng != null && _mapController != null) {
-          _updateMyLocationMarker(lat, lng);
-        }
-      },
-    );
+      addMarkerWithPlaceholderImage(
+        controller: _mapController!,
+        id: markerId,
+        position: NLatLng(photo.latitude, photo.longitude),
+        imageUrl: photo.imgUrl,
+      );
 
-    ref.listen<HomeEffect?>(homeEffectProvider, (previous, next) {
-      if (next == null) return;
-
-      switch (next) {
-        case ShowToast():
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(next.message)),
-          );
-          break;
-      }
-
-      ref.read(homeEffectProvider.notifier).state = null;
-    });
-
-    return SafeArea(
-      child: Stack(
-        children: [
-          _buildMap(),
-          SearchFromHereButton(onTap: () {}),
-          LocationToggleButton(
-            isCameraLockedOnUser: state.isCameraLockedOnUser,
-            onTap: () =>
-                ref.read(homeStateProvider.notifier).toggleCameraLock(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMap() {
-    return NaverMap(
-      options: const NaverMapViewOptions(
-        indoorEnable: true,
-        locationButtonEnable: false,
-        consumeSymbolTapEvents: false,
-        rotationGesturesEnable: true,
-        scrollGesturesEnable: true,
-        zoomGesturesEnable: true,
-      ),
-      onMapReady: (controller) async {
-        _mapController = controller;
-      },
-    );
+      _renderedPhotoIds.add(markerId);
+    }
   }
 }
 

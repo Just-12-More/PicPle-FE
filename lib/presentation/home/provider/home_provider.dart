@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
@@ -12,8 +13,11 @@ final homeEffectProvider = StateProvider<HomeEffect?>((ref) => null);
 
 class HomeNotifier extends Notifier<HomeState> {
   late final PhotoRepository _photoRepository;
-
   StreamSubscription<Position>? _positionSubscription;
+
+  bool _hasFetchedInitialPhotos = false;
+  double? _lastFetchedLatitude;
+  double? _lastFetchedLongitude;
 
   @override
   HomeState build() {
@@ -54,6 +58,33 @@ class HomeNotifier extends Notifier<HomeState> {
       latitude: latitude,
       longitude: longitude,
     );
+
+    log("Current position: $latitude, $longitude");
+
+    if (!_hasFetchedInitialPhotos) {
+      _hasFetchedInitialPhotos = true;
+      _lastFetchedLatitude = latitude;
+      _lastFetchedLongitude = longitude;
+      fetchGeoPhotos(latitude, longitude);
+      return;
+    }
+
+    if (_shouldRefresh(latitude, longitude)) {
+      _lastFetchedLatitude = latitude;
+      _lastFetchedLongitude = longitude;
+      fetchGeoPhotos(latitude, longitude);
+    }
+  }
+
+  bool _shouldRefresh(double lat, double lng) {
+    if (_lastFetchedLatitude == null || _lastFetchedLongitude == null) {
+      return true;
+    }
+
+    final latDiff = (lat - _lastFetchedLatitude!).abs();
+    final lngDiff = (lng - _lastFetchedLongitude!).abs();
+
+    return latDiff >= 0.03 || lngDiff >= 0.03;
   }
 
   void toggleCameraLock() async {
@@ -64,27 +95,21 @@ class HomeNotifier extends Notifier<HomeState> {
   Future<void> fetchGeoPhotos(
     double latitude,
     double longitude,
-    double leftTopLatitude,
-    double leftTopLongitude,
-    double rightBottomLatitude,
-    double rightBottomLongitude,
   ) async {
     state = state.copyWith(isLoading: true);
 
     try {
       final result = await _photoRepository.getGeoPhotos(
-          latitude,
-          longitude,
-          leftTopLatitude,
-          leftTopLongitude,
-          rightBottomLatitude,
-          rightBottomLongitude
+        latitude,
+        longitude
       );
 
       if (result.isSuccess) {
         state = state.copyWith(
           photos: result.data!.photos
         );
+
+        log("Fetched ${result.data!.photos.length} photos at $latitude, $longitude");
       } else {
         ref.read(homeEffectProvider.notifier).state = ShowToast("사진을 불러오는 데 실패했습니다.");
       }
