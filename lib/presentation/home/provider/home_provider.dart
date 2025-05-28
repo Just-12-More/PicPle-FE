@@ -87,7 +87,7 @@ class HomeNotifier extends Notifier<HomeState> {
     return latDiff >= 0.03 || lngDiff >= 0.03;
   }
 
-  void toggleCameraLock() async {
+  void toggleCameraLock() {
     final newLockState = !state.isCameraLockedOnUser;
     state = state.copyWith(isCameraLockedOnUser: newLockState);
   }

@@ -37,10 +37,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(homeStateProvider);
 
+    ref.listen(homeStateProvider, (previous, next) {
+      log("camera lock state changed: ${next.isCameraLockedOnUser}");
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _renderPhotoMarkers(state.photos);
       if (state.latitude != null && state.longitude != null) {
-        _updateMyLocationMarker(state.latitude!, state.longitude!);
+        _updateMyLocationMarker(state.isCameraLockedOnUser, state.latitude!, state.longitude!);
       } else {
         log('No initial location data available');
       }
@@ -100,7 +104,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Future<void> _updateMyLocationMarker(double latitude, double longitude) async {
+  Future<void> _updateMyLocationMarker(
+    bool isCameraLockedOnUser,
+    double latitude,
+    double longitude
+  ) async {
     if (_mapController == null) return;
 
     final newPosition = NLatLng(latitude, longitude);
@@ -138,12 +146,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       icon: markerIcon,
     );
 
-    _mapController!
-      ..addOverlay(_myLocationMarker!)
-      ..updateCamera(NCameraUpdate.scrollAndZoomTo(
-        target: newPosition,
-        zoom: 14,
-      ));
+    _mapController!.addOverlay(_myLocationMarker!);
+
+    if (isCameraLockedOnUser) {
+      _mapController!.updateCamera(NCameraUpdate.scrollAndZoomTo(target: newPosition, zoom: 14));
+    }
   }
 
   void _renderPhotoMarkers(List<PhotoData> photos){

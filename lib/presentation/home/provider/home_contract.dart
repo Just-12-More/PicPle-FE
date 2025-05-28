@@ -29,7 +29,7 @@ class HomeState {
       isLoading: isLoading ?? this.isLoading,
       photos: photos ?? this.photos,
       isTracking: isTracking ?? this.isTracking,
-      isCameraLockedOnUser: isTracking ?? this.isCameraLockedOnUser,
+      isCameraLockedOnUser: isCameraLockedOnUser ?? this.isCameraLockedOnUser,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
     );
