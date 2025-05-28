@@ -41,3 +41,8 @@ class ShowToast extends HomeEffect {
   final String message;
   ShowToast(this.message);
 }
+class MoveCamera extends HomeEffect {
+  final double latitude;
+  final double longitude;
+  MoveCamera(this.latitude, this.longitude);
+}

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
@@ -59,13 +58,13 @@ class HomeNotifier extends Notifier<HomeState> {
       longitude: longitude,
     );
 
-    log("Current position: $latitude, $longitude");
-
     if (!_hasFetchedInitialPhotos) {
       _hasFetchedInitialPhotos = true;
       _lastFetchedLatitude = latitude;
       _lastFetchedLongitude = longitude;
       fetchGeoPhotos(latitude, longitude);
+
+      ref.read(homeEffectProvider.notifier).state = MoveCamera(latitude, longitude);
       return;
     }
 
@@ -73,6 +72,10 @@ class HomeNotifier extends Notifier<HomeState> {
       _lastFetchedLatitude = latitude;
       _lastFetchedLongitude = longitude;
       fetchGeoPhotos(latitude, longitude);
+
+      if (state.isCameraLockedOnUser) {
+        ref.read(homeEffectProvider.notifier).state = MoveCamera(latitude, longitude);
+      }
     }
   }
 
@@ -84,7 +87,7 @@ class HomeNotifier extends Notifier<HomeState> {
     final latDiff = (lat - _lastFetchedLatitude!).abs();
     final lngDiff = (lng - _lastFetchedLongitude!).abs();
 
-    return latDiff >= 0.03 || lngDiff >= 0.03;
+    return latDiff >= 0.02 || lngDiff >= 0.02;
   }
 
   void toggleCameraLock() {
@@ -108,8 +111,6 @@ class HomeNotifier extends Notifier<HomeState> {
         state = state.copyWith(
           photos: result.data!.photos
         );
-
-        log("Fetched ${result.data!.photos.length} photos at $latitude, $longitude");
       } else {
         ref.read(homeEffectProvider.notifier).state = ShowToast("사진을 불러오는 데 실패했습니다.");
       }
