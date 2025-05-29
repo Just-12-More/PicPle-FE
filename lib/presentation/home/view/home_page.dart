@@ -39,8 +39,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _renderPhotoMarkers(state.photos);
-      if (state.latitude != null && state.longitude != null) {
-        _updateMyLocationMarker(state.latitude!, state.longitude!);
+      if (state.userLatitude != null && state.userLongitude != null) {
+        _updateMyLocationMarker(state.userLatitude!, state.userLongitude!);
       } else {
         log('No initial location data available');
       }
@@ -75,14 +75,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         children: [
           _buildMap(),
           SearchFromHereButton(onTap: () {
-            if (state.latitude != null && state.longitude != null) {
-              ref.read(homeStateProvider.notifier).fetchGeoPhotos(
-                state.latitude!, state.longitude!,
-              );
-            } else {
-              ref.read(homeEffectProvider.notifier).state =
-                  ShowToast("위치 정보가 없습니다.");
-            }
+            if (_mapController == null) return;
+
+            final latitude = _mapController!.nowCameraPosition.target.latitude;
+            final longitude = _mapController!.nowCameraPosition.target.longitude;
+
+            ref.read(homeStateProvider.notifier).fetchGeoPhotos(latitude, longitude);
           }),
           LocationToggleButton(
             isCameraLockedOnUser: state.isCameraLockedOnUser,
@@ -106,6 +104,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       onMapReady: (controller) async {
         _mapController = controller;
+      },
+      onCameraIdle: () {
+        final position = _mapController!.nowCameraPosition;
+
+        ref.read(homeStateProvider.notifier).setCameraPosition(
+          position.target.latitude,
+          position.target.longitude,
+        );
       },
     );
   }

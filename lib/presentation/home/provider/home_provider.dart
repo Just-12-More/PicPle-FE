@@ -14,6 +14,8 @@ class HomeNotifier extends Notifier<HomeState> {
   late final PhotoRepository _photoRepository;
   StreamSubscription<Position>? _positionSubscription;
 
+  Timer? _throttleTimer;
+
   bool _hasFetchedInitialPhotos = false;
   double? _lastFetchedLatitude;
   double? _lastFetchedLongitude;
@@ -26,6 +28,7 @@ class HomeNotifier extends Notifier<HomeState> {
 
     ref.onDispose(() {
       _positionSubscription?.cancel();
+      _throttleTimer?.cancel();
     });
 
     return HomeState();
@@ -54,28 +57,31 @@ class HomeNotifier extends Notifier<HomeState> {
 
   void setCurrentPosition(double latitude, double longitude) {
     state = state.copyWith(
-      latitude: latitude,
-      longitude: longitude,
+      userLatitude: latitude,
+      userLongitude: longitude,
     );
 
     if (!_hasFetchedInitialPhotos) {
       _hasFetchedInitialPhotos = true;
       _lastFetchedLatitude = latitude;
       _lastFetchedLongitude = longitude;
-      fetchGeoPhotos(latitude, longitude);
+      _throttledFetchGeoPhotos(latitude, longitude);
 
       ref.read(homeEffectProvider.notifier).state = MoveCamera(latitude, longitude);
       return;
     }
+  }
+
+  void setCameraPosition(double latitude, double longitude) {
+    state = state.copyWith(
+      cameraLatitude: latitude,
+      cameraLongitude: longitude,
+    );
 
     if (_shouldRefresh(latitude, longitude)) {
       _lastFetchedLatitude = latitude;
       _lastFetchedLongitude = longitude;
-      fetchGeoPhotos(latitude, longitude);
-
-      if (state.isCameraLockedOnUser) {
-        ref.read(homeEffectProvider.notifier).state = MoveCamera(latitude, longitude);
-      }
+      _throttledFetchGeoPhotos(latitude, longitude);
     }
   }
 
@@ -87,12 +93,20 @@ class HomeNotifier extends Notifier<HomeState> {
     final latDiff = (lat - _lastFetchedLatitude!).abs();
     final lngDiff = (lng - _lastFetchedLongitude!).abs();
 
-    return latDiff >= 0.02 || lngDiff >= 0.02;
+    return latDiff >= 0.001 || lngDiff >= 0.001;
   }
 
   void toggleCameraLock() {
     final newLockState = !state.isCameraLockedOnUser;
     state = state.copyWith(isCameraLockedOnUser: newLockState);
+  }
+
+  void _throttledFetchGeoPhotos(double latitude, double longitude) {
+    if (_throttleTimer?.isActive ?? false) return; // 이미 대기 중이면 무시
+
+    _throttleTimer = Timer(const Duration(seconds: 1), () {
+      fetchGeoPhotos(latitude, longitude);
+    });
   }
 
   Future<void> fetchGeoPhotos(
