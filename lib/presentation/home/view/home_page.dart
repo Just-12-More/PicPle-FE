@@ -199,7 +199,7 @@ class SearchFromHereButton extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  '현위치에서 검색',
+                  '현 지도에서 검색',
                   style: PicpleTypography.body1SemiBold.copyWith(color: PicpleColors.primary1),
                 ),
                 const SizedBox(width: 10),
