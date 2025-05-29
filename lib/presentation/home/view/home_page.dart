@@ -82,10 +82,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
             ref.read(homeStateProvider.notifier).fetchGeoPhotos(latitude, longitude);
           }),
-          LocationToggleButton(
-            isCameraLockedOnUser: state.isCameraLockedOnUser,
-            onTap: () =>
-                ref.read(homeStateProvider.notifier).toggleCameraLock(),
+          MoveToMyLocationButton(
+            onTap: () => ref.read(homeStateProvider.notifier).moveToMyLocation()
           ),
         ],
       ),
@@ -219,17 +217,13 @@ class SearchFromHereButton extends StatelessWidget {
   }
 }
 
-class LocationToggleButton extends StatelessWidget {
-  final bool isCameraLockedOnUser;
+class MoveToMyLocationButton extends StatelessWidget {
   final VoidCallback onTap;
 
-  const LocationToggleButton({super.key, required this.isCameraLockedOnUser, required this.onTap});
+  const MoveToMyLocationButton({super.key, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = isCameraLockedOnUser ? PicpleColors.primary1 : PicpleColors.white;
-    final iconColor = isCameraLockedOnUser ? PicpleColors.white : PicpleColors.primary1;
-
     return Positioned(
       bottom: 24,
       right: 24,
@@ -240,7 +234,7 @@ class LocationToggleButton extends StatelessWidget {
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: backgroundColor,
+            color: PicpleColors.white,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: PicpleColors.white, width: 2),
           ),
@@ -249,7 +243,7 @@ class LocationToggleButton extends StatelessWidget {
               "assets/icons/ic_location.svg",
               width: 36,
               height: 36,
-              colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+              colorFilter: const ColorFilter.mode(PicpleColors.primary1, BlendMode.srcIn),
             ),
           ),
         ),

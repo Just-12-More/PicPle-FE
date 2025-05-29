@@ -67,9 +67,21 @@ class HomeNotifier extends Notifier<HomeState> {
       _lastFetchedLongitude = longitude;
       _throttledFetchGeoPhotos(latitude, longitude);
 
-      ref.read(homeEffectProvider.notifier).state = MoveCamera(latitude, longitude);
+      moveToMyLocation();
       return;
     }
+  }
+
+  void moveToMyLocation() {
+    if (state.userLatitude == null || state.userLongitude == null) {
+      ref.read(homeEffectProvider.notifier).state = ShowToast("위치 정보를 가져올 수 없습니다.");
+      return;
+    }
+
+    final latitude = state.userLatitude!;
+    final longitude = state.userLongitude!;
+
+    ref.read(homeEffectProvider.notifier).state = MoveCamera(latitude, longitude);
   }
 
   void setCameraPosition(double latitude, double longitude) {
@@ -94,11 +106,6 @@ class HomeNotifier extends Notifier<HomeState> {
     final lngDiff = (lng - _lastFetchedLongitude!).abs();
 
     return latDiff >= 0.001 || lngDiff >= 0.001;
-  }
-
-  void toggleCameraLock() {
-    final newLockState = !state.isCameraLockedOnUser;
-    state = state.copyWith(isCameraLockedOnUser: newLockState);
   }
 
   void _throttledFetchGeoPhotos(double latitude, double longitude) {

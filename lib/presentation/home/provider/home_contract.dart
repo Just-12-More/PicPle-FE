@@ -4,7 +4,6 @@ class HomeState {
   final bool isLoading;
   final List<PhotoData> photos;
   final bool isTracking;
-  final bool isCameraLockedOnUser;
   final double? userLatitude;
   final double? userLongitude;
   final double? cameraLatitude;
@@ -14,7 +13,6 @@ class HomeState {
     this.isLoading = false,
     this.photos = const [],
     this.isTracking = false,
-    this.isCameraLockedOnUser = false,
     this.userLatitude,
     this.userLongitude,
     this.cameraLatitude,
@@ -25,7 +23,6 @@ class HomeState {
     bool? isLoading,
     List<PhotoData>? photos,
     bool? isTracking,
-    bool? isCameraLockedOnUser,
     double? userLatitude,
     double? userLongitude,
     double? cameraLatitude,
@@ -35,7 +32,6 @@ class HomeState {
       isLoading: isLoading ?? this.isLoading,
       photos: photos ?? this.photos,
       isTracking: isTracking ?? this.isTracking,
-      isCameraLockedOnUser: isCameraLockedOnUser ?? this.isCameraLockedOnUser,
       userLatitude: userLatitude ?? this.userLatitude,
       userLongitude: userLongitude ?? this.userLongitude,
       cameraLatitude: cameraLatitude ?? this.cameraLatitude,
