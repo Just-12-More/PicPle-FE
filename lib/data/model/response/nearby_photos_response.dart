@@ -32,6 +32,8 @@ class PhotoData {
   final int likeCount;
   final bool isLiked;
   final String address;
+  final double latitude;
+  final double longitude;
   final String createdAt;
 
   String get formattedTime => formatPostedTimeFromString(createdAt);
@@ -46,6 +48,8 @@ class PhotoData {
     required this.likeCount,
     required this.isLiked,
     required this.address,
+    required this.latitude,
+    required this.longitude,
     required this.createdAt,
   });
 
@@ -60,6 +64,8 @@ class PhotoData {
       likeCount: json['likeCount'],
       isLiked: json['isLiked'],
       address: json['address'],
+      latitude: json['latitude']?.toDouble() ?? 0.0,
+      longitude: json['longitude']?.toDouble() ?? 0.0,
       createdAt: json['createdAt'],
     );
   }
