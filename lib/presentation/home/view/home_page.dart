@@ -188,30 +188,41 @@ class SearchFromHereButton extends StatelessWidget {
       left: 0,
       right: 0,
       child: Center(
-        child: InkWell(
-          borderRadius: BorderRadius.circular(42),
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(42),
+        child: TextButton(
+          onPressed: onTap,
+          style: ButtonStyle(
+            backgroundColor: WidgetStateProperty.all(Colors.white),
+            padding: WidgetStateProperty.all(
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '현 지도에서 검색',
-                  style: PicpleTypography.body1SemiBold.copyWith(color: PicpleColors.primary1),
-                ),
-                const SizedBox(width: 10),
-                SvgPicture.asset(
-                  'assets/icons/ic_refresh.svg',
-                  width: 12,
-                  height: 12,
-                ),
-              ],
+            shape: WidgetStateProperty.all(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(42),
+              ),
             ),
+            overlayColor: WidgetStateProperty.resolveWith<Color?>(
+                  (Set<WidgetState> states) {
+                if (states.contains(WidgetState.pressed)) {
+                  return PicpleColors.gray2;
+                }
+                return null;
+              },
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '현 지도에서 검색',
+                style: PicpleTypography.body1SemiBold.copyWith(color: PicpleColors.primary1),
+              ),
+              const SizedBox(width: 10),
+              SvgPicture.asset(
+                'assets/icons/ic_refresh.svg',
+                width: 12,
+                height: 12,
+              ),
+            ],
           ),
         ),
       ),
