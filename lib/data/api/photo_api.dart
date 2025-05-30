@@ -20,10 +20,7 @@ class PhotoApi {
           data: {
             'latitude': request.latitude,
             'longitude': request.longitude,
-            'leftTopLatitude': request.leftTopLatitude,
-            'leftTopLongitude': request.leftTopLongitude,
-            'rightBottomLatitude': request.rightBottomLatitude,
-            'rightBottomLongitude': request.rightBottomLongitude,
+            'radius': request.radius,
           }
       );
 

@@ -99,16 +99,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         rotationGesturesEnable: true,
         scrollGesturesEnable: true,
         zoomGesturesEnable: true,
+        minZoom: 10,
       ),
       onMapReady: (controller) async {
         _mapController = controller;
       },
       onCameraIdle: () {
-        final position = _mapController!.nowCameraPosition;
+        final camera = _mapController!.nowCameraPosition;
 
         ref.read(homeStateProvider.notifier).setCameraPosition(
-          position.target.latitude,
-          position.target.longitude,
+          camera.target.latitude,
+          camera.target.longitude,
+          camera.zoom.toInt(),
         );
       },
     );

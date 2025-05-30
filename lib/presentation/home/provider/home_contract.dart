@@ -3,7 +3,7 @@ import '../../../data/model/response/nearby_photos_response.dart';
 class HomeState {
   final bool isLoading;
   final List<PhotoData> photos;
-  final bool isTracking;
+  final int zoomLevel;
   final double? userLatitude;
   final double? userLongitude;
   final double? cameraLatitude;
@@ -12,7 +12,7 @@ class HomeState {
   HomeState({
     this.isLoading = false,
     this.photos = const [],
-    this.isTracking = false,
+    this.zoomLevel = 14,
     this.userLatitude,
     this.userLongitude,
     this.cameraLatitude,
@@ -22,7 +22,7 @@ class HomeState {
   HomeState copyWith({
     bool? isLoading,
     List<PhotoData>? photos,
-    bool? isTracking,
+    int ? zoomLevel,
     double? userLatitude,
     double? userLongitude,
     double? cameraLatitude,
@@ -31,7 +31,7 @@ class HomeState {
     return HomeState(
       isLoading: isLoading ?? this.isLoading,
       photos: photos ?? this.photos,
-      isTracking: isTracking ?? this.isTracking,
+      zoomLevel: zoomLevel ?? this.zoomLevel,
       userLatitude: userLatitude ?? this.userLatitude,
       userLongitude: userLongitude ?? this.userLongitude,
       cameraLatitude: cameraLatitude ?? this.cameraLatitude,

@@ -84,8 +84,9 @@ class HomeNotifier extends Notifier<HomeState> {
     ref.read(homeEffectProvider.notifier).state = MoveCamera(latitude, longitude);
   }
 
-  void setCameraPosition(double latitude, double longitude) {
+  void setCameraPosition(double latitude, double longitude, int zoomLevel) {
     state = state.copyWith(
+      zoomLevel: zoomLevel,
       cameraLatitude: latitude,
       cameraLongitude: longitude,
     );
@@ -125,7 +126,8 @@ class HomeNotifier extends Notifier<HomeState> {
     try {
       final result = await _photoRepository.getGeoPhotos(
         latitude,
-        longitude
+        longitude,
+        radiusByZoom(state.zoomLevel)
       );
 
       if (result.isSuccess) {
@@ -140,5 +142,16 @@ class HomeNotifier extends Notifier<HomeState> {
     } finally {
       state = state.copyWith(isLoading: false);
     }
+  }
+
+  double radiusByZoom(int zoom) {
+    return switch (zoom) {
+      10 => 2.0,
+      11 => 1.0,
+      12 => 0.5,
+      13 => 0.25,
+      14 => 0.125,
+      _  => 5.0  // fallback
+    };
   }
 }
