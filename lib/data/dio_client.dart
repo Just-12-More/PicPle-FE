@@ -39,6 +39,7 @@ class DioClient {
 
 class TokenInterceptor extends Interceptor {
   final FlutterSecureStorage storage;
+  bool _isRefreshing = false;
 
   TokenInterceptor({required this.storage});
 
@@ -67,6 +68,41 @@ class TokenInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    handler.next(err);
+  if (err.response?.statusCode == 401 && !_isRefreshing) {
+    _isRefreshing = true;
+    try {
+      final refreshToken = await storage.read(key: Constants.REFRESH_TOKEN_KEY);
+      if (refreshToken == null) {
+        // Refresh token이 없으면 로그아웃 처리
+        print('Refresh token is missing. Logging out.');
+        handler.next(err);
+        return;
+      }
+
+      final response = await Dio().post(
+        '${Config.baseUrl}/auth/reissue/token',
+        options: Options(headers: {
+          'Authorization': 'Bearer $refreshToken',
+        }),
+      );
+
+      final newAccessToken = response.data['accessToken'];
+      final newRefreshToken = response.data['refreshToken'];
+      await storage.write(key: Constants.ACCESS_TOKEN_KEY, value: newAccessToken);
+      await storage.write(key: Constants.REFRESH_TOKEN_KEY, value: newRefreshToken);
+
+      // 원래 요청 재시도
+      final originalRequest = err.requestOptions;
+      originalRequest.headers['Authorization'] = 'Bearer $newAccessToken';
+      final retryResponse = await Dio().fetch(originalRequest);
+      handler.resolve(retryResponse);
+      return;
+    } catch (e) {
+      print('Failed to refresh token: $e');
+    } finally {
+      _isRefreshing = false;
+    }
+  }
+  handler.next(err);
   }
 }
