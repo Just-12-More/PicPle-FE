@@ -38,4 +38,51 @@ class AuthApi {
       );
     }
   }
+
+  Future<BaseResponse<LoginData>> reissue() async {
+    try {
+      final response = await _dioClient.dio.post('/auth/reissue/token');
+      return BaseResponse<LoginData>.fromJson(response.data, LoginData.fromJson);
+    } catch (e) {
+      return BaseResponse(
+        isSuccess: false,
+        error: ResponseError(
+          code: "500",
+          message: 'An error occurred while reissuing tokens: $e',
+        ),
+      );
+    }
+  }
+
+  Future<BaseResponse<void>> withdrawal() async {
+    try {
+      final response = await _dioClient.dio.post('/auth/withdrawal');
+      return BaseResponse<void>.fromJson(response.data, (_) => null);
+    } catch (e) {
+      return BaseResponse(
+        isSuccess: false,
+        error: ResponseError(
+          code: "500",
+          message: 'An error occurred while withdrawing: $e',
+        ),
+      );
+    }
+  }
+
+  Future<BaseResponse<void>> logout() async {
+    try {
+      final response = await _dioClient.dio.post('/auth/logout');
+      final logoutResponse = BaseResponse<void>.fromJson(response.data, (_) => null);
+      
+      return logoutResponse;
+    } catch (e) {
+      return BaseResponse(
+        isSuccess: false,
+        error: ResponseError(
+          code: "500",
+          message: 'An error occurred while logging out: $e',
+        ),
+      );
+    }
+  }
 } 

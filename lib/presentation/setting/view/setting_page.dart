@@ -1,13 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:picple/presentation/theme/picple_colors.dart';
 import 'package:picple/presentation/theme/picple_typography.dart';
+import 'package:go_router/go_router.dart';
+import '../provider/setting_notifier.dart';
+import '../provider/setting_contract.dart';
 
-class SettingPage extends StatelessWidget {
+
+class SettingPage extends ConsumerWidget {
   const SettingPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final notifier = ref.watch(settingStateProvider.notifier);
+
+    ref.listen<SettingEffect?>(settingEffectProvider, (previous, next) {
+      if (next == null) return;
+      switch (next) {
+        case ShowToast():
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(next.message)),
+          );
+          break;
+        case NavigateTo():
+          context.go(next.route);
+          break;
+      }
+      ref.read(settingEffectProvider.notifier).state = null;
+    });
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: PicpleColors.white,
@@ -54,7 +75,7 @@ class SettingPage extends StatelessWidget {
             _SettingItem(
               icon: Icons.logout,
               label: '로그아웃',
-              onTap: () {}
+              onTap: () => notifier.logout(),
             ),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -76,7 +97,7 @@ class SettingPage extends StatelessWidget {
             ),
             Center(
               child: TextButton(
-                onPressed: () {},
+                onPressed: () => notifier.withdraw(),
                 child: const Text(
                   '탈퇴하기',
                   style: TextStyle(

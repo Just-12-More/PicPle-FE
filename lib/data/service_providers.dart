@@ -7,7 +7,6 @@ import 'package:picple/data/repository/photo_repository.dart';
 
 import 'api/photo_api.dart';
 import 'datasource/auth_data_source.dart';
-import 'datasource/fake_auth_data_source.dart';
 import 'datasource/fake_photo_data_source.dart';
 import 'datasource/photo_data_source.dart';
 
@@ -20,7 +19,11 @@ final authApiProvider = Provider<AuthApi>((ref) =>
         ref.watch(storageApiProvider)
     )
 );
-final authDataSourceProvider = Provider<AuthDataSource>((_) => FakeAuthDataSource());
+final authDataSourceProvider = Provider<AuthDataSource>((ref) {
+  return AuthDataSourceImpl(
+    ref.watch(authApiProvider)
+  );
+});
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
     return AuthRepository(
         ref.watch(authDataSourceProvider),

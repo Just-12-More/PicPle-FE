@@ -28,4 +28,37 @@ class AuthRepository {
 
     return response;
   }
+
+  Future<BaseResponse<LoginData>> reissue() async {
+    final response = await _dataSource.reissue();
+
+    if (response.isSuccess && response.data != null) {
+      await _storageService.saveTokens(
+        accessToken: response.data!.accessToken,
+        refreshToken: response.data!.refreshToken,
+      );
+    }
+
+    return response;
+  }
+  
+  Future<BaseResponse<void>> logout() async {
+    final response = await _dataSource.logout();
+
+    if (response.isSuccess) {
+      await _storageService.clearTokens();
+    }
+
+    return response;
+  }
+
+  Future<BaseResponse<void>> withdrawal() async {
+    final response = await _dataSource.withdrawal();
+
+    if (response.isSuccess) {
+      await _storageService.clearTokens();
+    }
+
+    return response;
+  }
 }

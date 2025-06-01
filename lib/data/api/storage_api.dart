@@ -1,10 +1,8 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:picple/constants.dart';
 
 class StorageApi {
   final FlutterSecureStorage _storage;
-  
-  static const String _accessTokenKey = 'access_token';
-  static const String _refreshTokenKey = 'refresh_token';
 
   StorageApi() : _storage = const FlutterSecureStorage();
 
@@ -13,23 +11,28 @@ class StorageApi {
     required String refreshToken,
   }) async {
     await Future.wait([
-      _storage.write(key: _accessTokenKey, value: accessToken),
-      _storage.write(key: _refreshTokenKey, value: refreshToken),
+      _storage.write(key: Constants.ACCESS_TOKEN_KEY, value: accessToken),
+      _storage.write(key: Constants.REFRESH_TOKEN_KEY, value: refreshToken),
     ]);
   }
 
   Future<String?> getAccessToken() async {
-    return await _storage.read(key: _accessTokenKey);
+    return await _storage.read(key: Constants.ACCESS_TOKEN_KEY);
   }
 
   Future<String?> getRefreshToken() async {
-    return await _storage.read(key: _refreshTokenKey);
+    return await _storage.read(key: Constants.REFRESH_TOKEN_KEY);
   }
 
   Future<void> deleteTokens() async {
     await Future.wait([
-      _storage.delete(key: _accessTokenKey),
-      _storage.delete(key: _refreshTokenKey),
+      _storage.delete(key: Constants.ACCESS_TOKEN_KEY),
+      _storage.delete(key: Constants.REFRESH_TOKEN_KEY),
     ]);
   }
-} 
+
+  Future<void> clearTokens() async {
+    await _storage.delete(key: Constants.ACCESS_TOKEN_KEY);
+    await _storage.delete(key: Constants.REFRESH_TOKEN_KEY);
+  }
+}

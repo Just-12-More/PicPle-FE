@@ -15,7 +15,7 @@ class LoginRequest {
   Map<String, dynamic> toJson() {
     return {
       'accessToken': accessToken,
-      'provider': provider.index,
+      'provider': provider.name.toUpperCase(),
     };
   }
 } 
