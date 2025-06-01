@@ -16,22 +16,22 @@ class AuthDataSourceImpl extends AuthDataSource {
   AuthDataSourceImpl(this._authApi);
 
   @override
-  Future<BaseResponse<LoginData>> login(LoginRequest request) async {
-    return await _authApi.login(request);
+  Future<BaseResponse<LoginData>> login(LoginRequest request) {
+    return _authApi.login(request);
   }
 
   @override
-  Future<BaseResponse<void>> logout() async {
-    return await _authApi.logout();
+  Future<BaseResponse<void>> logout() {
+    return _authApi.logout();
   }
 
   @override
-  Future<BaseResponse<LoginData>> reissue() async {
-    return await _authApi.reissue();
+  Future<BaseResponse<LoginData>> reissue() {
+    return _authApi.reissue();
   }
 
   @override
-  Future<BaseResponse<void>> withdrawal() async {
-    return await _authApi.withdrawal();
+  Future<BaseResponse<void>> withdrawal() {
+    return _authApi.withdrawal();
   }
 }
