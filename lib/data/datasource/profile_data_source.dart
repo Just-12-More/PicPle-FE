@@ -4,6 +4,7 @@ import '../model/response/base_response.dart';
 
 abstract class ProfileDataSource {
   Future<BaseResponse<ProfileData>> getProfile();
+  Future<BaseResponse<ProfileData>> updateProfile(String nickname, String? imagePath);
 }
 
 class ProfileDataSourceImpl extends ProfileDataSource {
@@ -12,7 +13,12 @@ class ProfileDataSourceImpl extends ProfileDataSource {
   ProfileDataSourceImpl(this._profileApi);
 
   @override
-  Future<BaseResponse<ProfileData>> getProfile() async {
-    return await _profileApi.getProfile();
+  Future<BaseResponse<ProfileData>> getProfile() {
+    return _profileApi.getProfile();
+  }
+
+  @override
+  Future<BaseResponse<ProfileData>> updateProfile(String nickname, String? imagePath) {
+    return _profileApi.updateProfile(nickname, imagePath);
   }
 }

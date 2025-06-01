@@ -11,4 +11,9 @@ class ProfileRepository {
     final response = await _dataSource.getProfile();
     return response;
   }
+
+  Future<BaseResponse<ProfileData>> updateProfile(String nickname, String? imagePath) async {
+    final response = await _dataSource.updateProfile(nickname, imagePath);
+    return response;
+  }
 }

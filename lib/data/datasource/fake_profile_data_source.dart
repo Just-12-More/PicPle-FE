@@ -13,4 +13,15 @@ class FakeProfileDataSource extends ProfileDataSource {
       }
     }, ProfileData.fromJson);
   }
+
+  @override
+  Future<BaseResponse<ProfileData>> updateProfile(String nickname, String? imagePath) async {
+    return BaseResponse<ProfileData>.fromJson({
+      "isSuccess": true,
+      "data": {
+        "profileImgUrl": "https://randomuser.me/api/portraits/men/10.jpg",
+        "nickname": nickname,
+      }
+    }, ProfileData.fromJson);
+  }
 }

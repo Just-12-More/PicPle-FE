@@ -1,5 +1,10 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:picple/presentation/profile/provider/profile_notifier.dart';
 import 'package:picple/presentation/theme/picple_colors.dart';
 import 'package:picple/presentation/theme/picple_typography.dart';
 import '../provider/profile_edit_notifier.dart';
@@ -52,7 +57,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
           );
           break;
         case NavigateTo():
-          Navigator.of(context).pushReplacementNamed(next.route);
+          context.go(next.route);
           break;
       }
       ref.read(profileEditEffectProvider.notifier).state = null;
@@ -63,7 +68,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.pop(),
         ),
         title: const Text('프로필 수정', style: PicpleTypography.title1),
         centerTitle: true,
@@ -82,18 +87,18 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                     children: [
                       CircleAvatar(
                         radius: 125,
-                        backgroundImage: state.profileImageUrl != null
-                            ? NetworkImage(state.profileImageUrl!)
-                            : const AssetImage('assets/images/default_profile.png') as ImageProvider,
+                        backgroundImage: state.imagePath != null ? 
+                          FileImage(File(state.imagePath!)) :
+                          state.profileImageUrl != null ? 
+                          NetworkImage(state.profileImageUrl!) :
+                          const AssetImage('assets/images/default_profile.png'),
                         backgroundColor: Colors.grey[200],
                       ),
                       Positioned(
                         bottom: 0,
                         right: 0,
                         child: GestureDetector(
-                          onTap: () {
-                            // TODO: 이미지 변경 기능 구현
-                          },
+                          onTap: () => ref.read(profileEditStateProvider.notifier).changeProfileImage(),
                           child: Container(
                             decoration: BoxDecoration(
                               color: Colors.white,

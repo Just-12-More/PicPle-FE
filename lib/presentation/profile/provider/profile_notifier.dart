@@ -37,6 +37,14 @@ class ProfileNotifier extends Notifier<ProfileState> {
     }
   }
 
+  void setNickname(String nickname) {
+    state = state.copyWith(nickname: nickname);
+  }
+
+  void setProfileImage(String? imageUrl) {
+    state = state.copyWith(profileImage: imageUrl);
+  }
+
   void navigateTo(String route) {
     ref.read(profileEffectProvider.notifier).state = NavigateTo(route);
   }
