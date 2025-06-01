@@ -1,0 +1,47 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:picple/data/repository/profile_repository.dart';
+import 'package:picple/data/service_providers.dart';
+import '../provider/profile_contract.dart';
+
+final profileStateProvider = NotifierProvider<ProfileNotifier, ProfileState>(() => ProfileNotifier());
+final profileEffectProvider = StateProvider<ProfileEffect?>((ref) => null);
+
+class ProfileNotifier extends Notifier<ProfileState> {
+  late final ProfileRepository _profileRepository;
+
+  @override
+  ProfileState build() {
+    _profileRepository = ref.watch(profileRepositoryProvider);
+    Future.microtask(() => _fetchProfile());
+    return ProfileState();
+  }
+
+  Future<void> _fetchProfile() async {
+    state = state.copyWith(isLoading: true);
+
+    try {
+      final response = await _profileRepository.getProfile();
+      if (response.isSuccess) {
+        state = state.copyWith(
+          isLoading: false,
+          profileImage: response.data?.profileImgUrl,
+          nickname: response.data?.nickname,
+        );
+      } else {
+        showToast("프로필 정보를 가져오지 못했습니다.");
+      }
+    } catch (e) {
+      showToast("오류 발생: $e");
+    } finally {
+      state = state.copyWith(isLoading: false);
+    }
+  }
+
+  void navigateTo(String route) {
+    ref.read(profileEffectProvider.notifier).state = NavigateTo(route);
+  }
+
+  void showToast(String message) {
+    ref.read(profileEffectProvider.notifier).state = ShowToast(message);
+  }
+}
