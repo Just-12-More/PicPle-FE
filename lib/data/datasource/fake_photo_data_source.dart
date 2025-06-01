@@ -1,11 +1,51 @@
 import 'package:picple/data/datasource/photo_data_source.dart';
 import 'package:picple/data/model/response/nearby_photos_response.dart';
 
+import '../model/request/geo_photos_request.dart';
 import '../model/request/nearby_photos_request.dart';
 import '../model/request/upload_photo_request.dart';
 import '../model/response/base_response.dart';
+import '../model/response/geo_photos_response.dart';
 
 class FakePhotoDataSource implements PhotoDataSource {
+
+  int _photoIdCounter = 1;
+
+  @override
+  Future<BaseResponse<GeoPhotosData>> getGeoPhotos(GeoPhotosRequest request) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    final photos = List.generate(10, (index) {
+      final id = _photoIdCounter++;
+      return {
+        "id": id,
+        "title": "사진 $id",
+        "imgUrl": "https://picsum.photos/id/${100 + id}/300/300",
+        "description": "설명 $id",
+        "nickname": "유저$id",
+        "profileImgUrl": "https://picsum.photos/seed/user$id/48/48",
+        "likeCount": id * 5,
+        "isLiked": id % 2 == 0,
+        "address": "서울시 강남구",
+        "latitude": request.latitude + (index * 0.001),
+        "longitude": request.longitude + (index * 0.001),
+        "createdAt": DateTime.now().subtract(Duration(days: index)).toIso8601String(),
+      };
+    });
+
+    return BaseResponse<GeoPhotosData>.fromJson(
+        {
+          "isSuccess": true,
+          "data": {
+            "address": "서울시 강남구 테헤란로",
+            "photos": photos,
+          },
+          "error": null
+        },
+        GeoPhotosData.fromJson
+    );
+  }
+
   @override
   Future<BaseResponse<NearbyPhotosData>> getNearbyPhotos(NearbyPhotosRequest request) async {
     await Future.delayed(const Duration(milliseconds: 500));
@@ -24,6 +64,8 @@ class FakePhotoDataSource implements PhotoDataSource {
             "likeCount": 120,
             "isLiked": true,
             "address": "서울시 강남구",
+            "latitude": 37.5665,
+            "longitude": 126.978,
             "createdAt": "2024-04-01T12:00:00Z"
           },
           "nearbyPhotos": List.generate(5, (index) {
@@ -37,6 +79,8 @@ class FakePhotoDataSource implements PhotoDataSource {
               "likeCount": (index + 1) * 10,
               "isLiked": index % 2 == 0,
               "address": "서울시",
+              "latitude": 37.5665 + (index * 0.001),
+              "longitude": 126.978 + (index * 0.001),
               "createdAt": "2024-04-01T0${index + 1}:00:00Z"
             };
           }),
@@ -63,6 +107,8 @@ class FakePhotoDataSource implements PhotoDataSource {
           "likeCount": 0,
           "isLiked": false,
           "address": "서울시 강남구",
+          "latitude": request.latitude,
+          "longitude": request.longitude,
           "createdAt": DateTime.now().toIso8601String()
         },
         "error": null

@@ -1,5 +1,7 @@
 import 'package:picple/data/datasource/photo_data_source.dart';
+import 'package:picple/data/model/response/geo_photos_response.dart';
 
+import '../model/request/geo_photos_request.dart';
 import '../model/request/nearby_photos_request.dart';
 import '../model/request/upload_photo_request.dart';
 import '../model/response/base_response.dart';
@@ -9,6 +11,22 @@ class PhotoRepository {
   final PhotoDataSource _dataSource;
 
   PhotoRepository(this._dataSource);
+
+  Future<BaseResponse<GeoPhotosData>> getGeoPhotos(
+    double latitude,
+    double longitude,
+    double radius,
+  ) async {
+    final response = await _dataSource.getGeoPhotos(
+      GeoPhotosRequest(
+        latitude: latitude,
+        longitude: longitude,
+        radius: radius,
+      ),
+    );
+
+    return response;
+  }
 
   Future<BaseResponse<NearbyPhotosData>> getNearbyPhotos(
     double latitude,
