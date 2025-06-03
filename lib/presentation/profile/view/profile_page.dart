@@ -44,7 +44,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
           );
           break;
         case NavigateTo():
-          context.go(next.route);
+          context.push(next.route);
           break;
       }
 

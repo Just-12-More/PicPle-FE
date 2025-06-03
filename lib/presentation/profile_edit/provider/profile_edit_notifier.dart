@@ -1,8 +1,9 @@
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:picple/data/repository/profile_repository.dart';
 import 'package:picple/data/service_providers.dart';
 import 'package:picple/presentation/profile/provider/profile_notifier.dart';
+import 'package:picple/routes.dart';
 import 'profile_edit_contract.dart';
 
 final profileEditStateProvider = NotifierProvider<ProfileEditNotifier, ProfileEditState>(() => ProfileEditNotifier());
@@ -52,13 +53,14 @@ class ProfileEditNotifier extends Notifier<ProfileEditState> {
   }
 
   void changeProfileImage() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
-      allowMultiple: false,
-    );
-    if (result != null && result.files.isNotEmpty) {
-      final file = result.files.first;
-      ref.read(profileEditStateProvider.notifier).setImagePath(file.path);
+    ImagePicker imagePicker = ImagePicker();
+    final pickedFile = await imagePicker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      final filePath = pickedFile.path;
+      ref.read(profileEditStateProvider.notifier).setImagePath(filePath);
+    } else {
+      _showToast("이미지를 선택하지 않았습니다.");
     }
   }
 
@@ -70,7 +72,7 @@ class ProfileEditNotifier extends Notifier<ProfileEditState> {
         ref.watch(profileStateProvider.notifier).setNickname(response.data!.nickname);
         ref.watch(profileStateProvider.notifier).setProfileImage(response.data!.profileImgUrl);
         _showToast("변경사항이 저장되었습니다.");
-        _navigateTo("/profile");
+        _navigateTo(Routes.profile.path);
       } else {
         _showToast("저장 실패: ${response.error?.message ?? '알 수 없는 오류'}");
       }
