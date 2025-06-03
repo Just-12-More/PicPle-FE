@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as path;
 import 'package:picple/presentation/upload/provider/upload_contract.dart';
 
+import '../../../core/util/image_utils.dart';
 import '../../../data/repository/photo_repository.dart';
 import '../../../data/service_providers.dart';
 
@@ -29,9 +30,9 @@ class UploadNotifier extends Notifier<UploadState> {
       double latitude,
       double longitude,
       ) async {
-    final file = state.photo;
+    final originalFile = state.photo;
 
-    if (file == null || file.path.isEmpty) {
+    if (originalFile == null || originalFile.path.isEmpty) {
       _showToast("선택된 사진이 없습니다");
       return;
     }
@@ -39,7 +40,9 @@ class UploadNotifier extends Notifier<UploadState> {
     state = state.copyWith(isLoading: true);
 
     try {
-      final filename = path.basename(file.path);
+      final compressedFile = await resizeAndCompressImageFile(file: originalFile);
+
+      final filename = path.basename(compressedFile.path);
       final presignResult = await _photoRepository.postPreSignedUrl(filename);
 
       if (!presignResult.isSuccess || presignResult.data?.preSignedUrl == null) {
@@ -49,7 +52,11 @@ class UploadNotifier extends Notifier<UploadState> {
 
       final preSignedUrl = presignResult.data!.preSignedUrl;
       final fileImgUrl = presignResult.data!.key;
-      final uploadSuccess = await _photoRepository.uploadFileToPreSignedUrl(file, preSignedUrl);
+
+      final uploadSuccess = await _photoRepository.uploadFileToPreSignedUrl(
+        compressedFile,
+        preSignedUrl,
+      );
 
       if (!uploadSuccess) {
         _showToast("사진 업로드 실패 (S3)");
