@@ -183,7 +183,9 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
               final title = _titleController.text.trim();
               final description = _descriptionController.text.trim();
 
-              _handleUpload(context, ref, title, description);
+              ref.read(uploadStateProvider.notifier).getPreSignedUrl();
+
+              //_handleUpload(context, ref, title, description);
             } : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: PicpleColors.primary1,

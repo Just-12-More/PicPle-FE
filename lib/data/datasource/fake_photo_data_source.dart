@@ -1,5 +1,7 @@
 import 'package:picple/data/datasource/photo_data_source.dart';
+import 'package:picple/data/model/request/presigned_url_request.dart';
 import 'package:picple/data/model/response/nearby_photos_response.dart';
+import 'package:picple/data/model/response/presigned_url_response.dart';
 
 import '../model/request/geo_photos_request.dart';
 import '../model/request/nearby_photos_request.dart';
@@ -114,6 +116,22 @@ class FakePhotoDataSource implements PhotoDataSource {
         "error": null
       },
       PhotoData.fromJson
+    );
+  }
+
+  @override
+  Future<BaseResponse<PreSignedUrlData>> getPreSignedUrl(PreSignedUrlRequest request) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    return BaseResponse<PreSignedUrlData>.fromJson(
+      {
+        "isSuccess": true,
+        "data": {
+          "url": "https://mock-s3-url.com/${request.filename}",
+          "fileName": request.filename
+        },
+        "error": null
+      },
+      PreSignedUrlData.fromJson
     );
   }
 }

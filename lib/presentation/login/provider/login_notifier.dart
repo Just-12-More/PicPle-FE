@@ -4,6 +4,7 @@ import 'package:picple/data/repository/auth_repository.dart';
 
 import '../../../data/model/request/login_request.dart';
 import '../../../data/service_providers.dart';
+import '../../../routes.dart';
 import 'login_contract.dart';
 
 final loginStateProvider = NotifierProvider<LoginNotifier, LoginState>(() => LoginNotifier());
@@ -33,7 +34,7 @@ class LoginNotifier extends Notifier<LoginState> {
 
         if (result.isSuccess) {
           _showToast("로그인 성공");
-          _navigateTo("/home");
+          _navigateTo(Routes.home.path);
         } else {
           _showToast("로그인 실패");
         }

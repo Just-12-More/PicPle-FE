@@ -3,9 +3,11 @@ import 'package:picple/data/model/response/geo_photos_response.dart';
 
 import '../model/request/geo_photos_request.dart';
 import '../model/request/nearby_photos_request.dart';
+import '../model/request/presigned_url_request.dart';
 import '../model/request/upload_photo_request.dart';
 import '../model/response/base_response.dart';
 import '../model/response/nearby_photos_response.dart';
+import '../model/response/presigned_url_response.dart';
 
 class PhotoRepository {
   final PhotoDataSource _dataSource;
@@ -58,6 +60,12 @@ class PhotoRepository {
         imageUrl: imageUrl,
       ),
     );
+
+    return response;
+  }
+
+  Future<BaseResponse<PreSignedUrlData>> getPreSignedUrl(String filename) async {
+    final response = await _dataSource.getPreSignedUrl(PreSignedUrlRequest(filename: filename));
 
     return response;
   }

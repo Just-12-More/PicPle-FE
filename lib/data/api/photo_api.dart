@@ -1,10 +1,13 @@
 import 'package:picple/data/model/request/geo_photos_request.dart';
 import 'package:picple/data/model/request/nearby_photos_request.dart';
+import 'package:picple/data/model/request/upload_photo_request.dart';
 import 'package:picple/data/model/response/nearby_photos_response.dart';
 
 import '../dio_client.dart';
+import '../model/request/presigned_url_request.dart';
 import '../model/response/base_response.dart';
 import '../model/response/geo_photos_response.dart';
+import '../model/response/presigned_url_response.dart';
 
 class PhotoApi {
   final DioClient _dioClient;
@@ -67,19 +70,13 @@ class PhotoApi {
     }
   }
 
-  Future<BaseResponse<PhotoData>> uploadFeed(
-    String imageUrl,
-    String title,
-    String description,
+  Future<BaseResponse<PhotoData>> uploadPhoto(
+    UploadPhotoRequest request
   ) async {
     try {
       final response = await _dioClient.dio.post(
-        '/photos',
-        data: {
-          'imageUrl': imageUrl,
-          'title': title,
-          'description': description,
-        },
+        '/photos/upload',
+        data: request.toJson(),
       );
 
       final uploadResponse = BaseResponse<PhotoData>.fromJson(
@@ -94,6 +91,29 @@ class PhotoApi {
         error: ResponseError(
           code: "500",
           message: 'An error occurred while uploading the photo: $e',
+        ),
+      );
+    }
+  }
+
+  Future<BaseResponse<PreSignedUrlData>> getPreSignedUrl(
+    PreSignedUrlRequest request,
+  ) async {
+    try {
+      final response = await _dioClient.dio.post(
+        '/s3/geturl',
+        data: request.toJson(),
+      );
+
+      return BaseResponse<PreSignedUrlData>.fromJson(
+        response.data, PreSignedUrlData.fromJson
+      );
+    } catch (e) {
+      return BaseResponse(
+        isSuccess: false,
+        error: ResponseError(
+          code: "500",
+          message: 'An error occurred while uploading the file: $e',
         ),
       );
     }
