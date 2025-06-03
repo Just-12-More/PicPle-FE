@@ -76,6 +76,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
   }
 
   Widget _buildProfileContent(ProfileState state) {
+    final state = ref.watch(profileStateProvider);
+
     return Container(
       color: PicpleColors.white,
       child: SafeArea(
@@ -124,7 +126,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
             Expanded(
               child: TabBarView(
                 controller: _tabController,
-                children: [_buildPhotoGrid(), _buildPhotoGrid()],
+                children: [_buildPhotoGrid(state.myPhotos), _buildPhotoGrid(state.myLikedPhotos)],
               ),
             ),
           ],
@@ -133,21 +135,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
     );
   }
 
-  Widget _buildPhotoGrid() {
-    final List<String> images = List.generate(
-      12,
-      (index) =>
-          'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
-    );
+  Widget _buildPhotoGrid(List<String> photos) {
     return GridView.builder(
-      itemCount: images.length,
+      itemCount: photos.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         crossAxisSpacing: 4,
         mainAxisSpacing: 4,
       ),
       itemBuilder: (context, index) {
-        return Image.network(images[index], fit: BoxFit.cover);
+        return Image.network(photos[index], fit: BoxFit.cover);
       },
     );
   }
