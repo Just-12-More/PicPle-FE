@@ -4,7 +4,8 @@ import 'package:picple/presentation/component/picple_bottom_navigation_bar.dart'
 import 'package:picple/presentation/home/view/home_page.dart';
 import 'package:picple/presentation/login/view/login_page.dart';
 import 'package:picple/presentation/profile/view/profile_page.dart';
-import 'package:picple/presentation/setting/setting_page.dart';
+import 'package:picple/presentation/profile_edit/view/profile_edit_page.dart';
+import 'package:picple/presentation/setting/view/setting_page.dart';
 import 'package:picple/presentation/shared/view/photo_list_page.dart';
 import 'package:picple/presentation/splash/view/splash_page.dart';
 import 'package:picple/presentation/upload/view/upload_page.dart';
@@ -15,6 +16,7 @@ enum Routes {
   home(name: 'Home', path: '/home'),
   upload(name: 'Upload', path: '/upload'),
   profile(name: 'Profile', path: '/profile'),
+  profileEdit(name: 'ProfileEdit', path: '/profile_edit'),
   setting(name: 'Setting', path: '/setting'),
   photoList(name: 'PhotoList', path: '/photo_list');
 
@@ -25,7 +27,7 @@ enum Routes {
 }
 
 final router = GoRouter(
-  initialLocation: Routes.home.path,
+  initialLocation: Routes.splash.path,
   routes: [
     GoRoute(
       path: Routes.splash.path,
@@ -43,10 +45,14 @@ final router = GoRouter(
       path: Routes.photoList.path,
       builder: (context, state) => const PhotoListPage(),
     ),
+    GoRoute(
+      path: Routes.profileEdit.path,
+      builder: (context, state) => const ProfileEditPage(),
+    ),
 
     GoRoute(
         path: Routes.upload.path,
-        builder: (context, state) => UploadPage(),
+        builder: (context, state) => const UploadPage(),
         routes: []
     ),
 
@@ -72,7 +78,7 @@ final router = GoRouter(
                   routes: []
               ),
             ]
-        ),
+        )
       ]
     )
   ],

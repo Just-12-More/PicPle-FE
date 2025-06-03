@@ -52,6 +52,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   kakao_flutter_sdk: ^1.9.7+3
+  file_picker: ^10.1.9
 
 dev_dependencies:
   flutter_test:
