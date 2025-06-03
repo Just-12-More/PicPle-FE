@@ -23,7 +23,12 @@ class UploadNotifier extends Notifier<UploadState> {
     state = state.copyWith(photo: file);
   }
 
-  Future<void> getPreSignedUrl() async {
+  Future<void> uploadPhoto(
+      String title,
+      String description,
+      double latitude,
+      double longitude,
+      ) async {
     final file = state.photo;
 
     if (file == null || file.path.isEmpty) {
@@ -35,44 +40,38 @@ class UploadNotifier extends Notifier<UploadState> {
 
     try {
       final filename = path.basename(file.path);
-      final result = await _photoRepository.getPreSignedUrl(filename);
+      final presignResult = await _photoRepository.postPreSignedUrl(filename);
 
-      if (result.isSuccess) {
-        _showToast("Pre-signed URL retrieved successfully");
-      } else {
-        _showToast("Failed to retrieve pre-signed URL: ${result.error?.message ?? 'Unknown error'}");
+      if (!presignResult.isSuccess || presignResult.data?.preSignedUrl == null) {
+        _showToast("Pre-signed URL 발급 실패: ${presignResult.error?.message ?? 'Unknown error'}");
+        return;
       }
-    } catch (e) {
-      _showToast("Error occurred: $e");
-    } finally {
-      state = state.copyWith(isLoading: false);
-    }
-  }
 
-  Future<void> uploadPhoto(
-    String title,
-    String description,
-    double latitude,
-    double longitude,
-  ) async {
-    state = state.copyWith(isLoading: true);
+      final preSignedUrl = presignResult.data!.preSignedUrl;
+      final fileImgUrl = presignResult.data!.key;
+      final uploadSuccess = await _photoRepository.uploadFileToPreSignedUrl(file, preSignedUrl);
 
-    try {
-      final result = await _photoRepository.uploadPhoto(
-        state.photo?.path ?? '',
+      if (!uploadSuccess) {
+        _showToast("파일 업로드 실패 (S3)");
+        return;
+      }
+
+      final uploadResult = await _photoRepository.uploadPhoto(
+        fileImgUrl,
         title,
         description,
         latitude,
         longitude,
       );
 
-      if (result.isSuccess) {
-        _showToast("Upload successful");
+      if (uploadResult.isSuccess) {
+        _showToast("사진 업로드 완료!");
       } else {
-        _showToast("Upload failed: ${result.error?.message ?? 'Unknown error'}");
+        _showToast("메타데이터 저장 실패: ${uploadResult.error?.message ?? 'Unknown error'}");
       }
+
     } catch (e) {
-      _showToast("Error occurred: $e");
+      _showToast("오류 발생: $e");
     } finally {
       state = state.copyWith(isLoading: false);
     }

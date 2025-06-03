@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:picple/data/datasource/photo_data_source.dart';
 import 'package:picple/data/model/request/presigned_url_request.dart';
 import 'package:picple/data/model/response/nearby_photos_response.dart';
@@ -102,7 +104,7 @@ class FakePhotoDataSource implements PhotoDataSource {
         "data": {
           "id": 100,
           "title": request.title,
-          "imgUrl": request.imageUrl,
+          "imgUrl": request.photoUrl,
           "description": request.description,
           "nickname": "테스트유저",
           "profileImgUrl": "https://picsum.photos/seed/testuser/48/48",
@@ -120,18 +122,24 @@ class FakePhotoDataSource implements PhotoDataSource {
   }
 
   @override
-  Future<BaseResponse<PreSignedUrlData>> getPreSignedUrl(PreSignedUrlRequest request) async {
+  Future<BaseResponse<PreSignedUrlData>> postPreSignedUrl(PreSignedUrlRequest request) async {
     await Future.delayed(const Duration(milliseconds: 500));
     return BaseResponse<PreSignedUrlData>.fromJson(
       {
         "isSuccess": true,
         "data": {
-          "url": "https://mock-s3-url.com/${request.filename}",
-          "fileName": request.filename
+          "preSignedUrl": "https://mock-s3-url.com/${request.filename}",
+          "key": request.filename
         },
         "error": null
       },
       PreSignedUrlData.fromJson
     );
+  }
+
+  @override
+  Future<bool> uploadFileToPreSignedUrl(File file, String preSignedUrl) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    return true;
   }
 }

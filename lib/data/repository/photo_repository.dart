@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:picple/data/datasource/photo_data_source.dart';
 import 'package:picple/data/model/response/geo_photos_response.dart';
 
@@ -57,15 +59,21 @@ class PhotoRepository {
         description: description,
         latitude: latitude,
         longitude: longitude,
-        imageUrl: imageUrl,
+        photoUrl: imageUrl,
       ),
     );
 
     return response;
   }
 
-  Future<BaseResponse<PreSignedUrlData>> getPreSignedUrl(String filename) async {
-    final response = await _dataSource.getPreSignedUrl(PreSignedUrlRequest(filename: filename));
+  Future<BaseResponse<PreSignedUrlData>> postPreSignedUrl(String filename) async {
+    final response = await _dataSource.postPreSignedUrl(PreSignedUrlRequest(filename: filename));
+
+    return response;
+  }
+
+  Future<bool> uploadFileToPreSignedUrl(File file, String preSignedUrl) async {
+    final response = await _dataSource.uploadFileToPreSignedUrl(file, preSignedUrl);
 
     return response;
   }

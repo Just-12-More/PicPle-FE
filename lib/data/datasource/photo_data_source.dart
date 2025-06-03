@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:picple/data/model/request/geo_photos_request.dart';
 import 'package:picple/data/model/request/presigned_url_request.dart';
 import 'package:picple/data/model/request/upload_photo_request.dart';
@@ -16,7 +18,9 @@ abstract class PhotoDataSource {
 
   Future<BaseResponse<PhotoData>> uploadPhoto(UploadPhotoRequest request);
 
-  Future<BaseResponse<PreSignedUrlData>> getPreSignedUrl(PreSignedUrlRequest request);
+  Future<BaseResponse<PreSignedUrlData>> postPreSignedUrl(PreSignedUrlRequest request);
+
+  Future<bool> uploadFileToPreSignedUrl(File file, String preSignedUrl);
 }
 
 class PhotoDataSourceImpl implements PhotoDataSource {
@@ -40,7 +44,12 @@ class PhotoDataSourceImpl implements PhotoDataSource {
   }
 
   @override
-  Future<BaseResponse<PreSignedUrlData>> getPreSignedUrl(PreSignedUrlRequest request) {
-    return _photoApi.getPreSignedUrl(request);
+  Future<BaseResponse<PreSignedUrlData>> postPreSignedUrl(PreSignedUrlRequest request) {
+    return _photoApi.postPreSignedUrl(request);
+  }
+
+  @override
+  Future<bool> uploadFileToPreSignedUrl(File file, String preSignedUrl) async {
+    return _photoApi.uploadFileToPreSignedUrl(file: file, preSignedUrl: preSignedUrl);
   }
 }

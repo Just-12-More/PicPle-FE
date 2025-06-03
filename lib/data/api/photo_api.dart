@@ -1,3 +1,9 @@
+import 'dart:developer';
+import 'dart:io';
+
+import 'package:dio/dio.dart';
+import 'package:http_parser/http_parser.dart';
+import 'package:mime/mime.dart';
 import 'package:picple/data/model/request/geo_photos_request.dart';
 import 'package:picple/data/model/request/nearby_photos_request.dart';
 import 'package:picple/data/model/request/upload_photo_request.dart';
@@ -96,12 +102,12 @@ class PhotoApi {
     }
   }
 
-  Future<BaseResponse<PreSignedUrlData>> getPreSignedUrl(
+  Future<BaseResponse<PreSignedUrlData>> postPreSignedUrl(
     PreSignedUrlRequest request,
   ) async {
     try {
       final response = await _dioClient.dio.post(
-        '/s3/geturl',
+        '/s3/posturl',
         data: request.toJson(),
       );
 
@@ -116,6 +122,37 @@ class PhotoApi {
           message: 'An error occurred while uploading the file: $e',
         ),
       );
+    }
+  }
+
+  Future<bool> uploadFileToPreSignedUrl({
+    required File file,
+    required String preSignedUrl,
+  }) async {
+    try {
+      if (!await file.exists()) return false;
+
+      final mimeType = lookupMimeType(file.path) ?? 'application/octet-stream';
+      final mediaType = MediaType.parse(mimeType);
+      final fileLength = await file.length();
+
+      final dio = Dio();
+
+      final response = await dio.put(
+        preSignedUrl,
+        data: file.openRead(),
+        options: Options(
+          headers: {
+            Headers.contentLengthHeader: fileLength,
+            Headers.contentTypeHeader: mediaType.toString(),
+          },
+        ),
+      );
+
+      return response.statusCode == 200;
+    } catch (e, stackTrace) {
+      log('[uploadFileToPreSignedUrl] Upload failed: $e\n$stackTrace');
+      return false;
     }
   }
 }
