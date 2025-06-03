@@ -25,7 +25,7 @@ class PhotoApi {
   ) async {
     try {
       final response = await _dioClient.dio.post(
-          '/photos',
+          '/photos/search/location',
           data: {
             'latitude': request.latitude,
             'longitude': request.longitude,
