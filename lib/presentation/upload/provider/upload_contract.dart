@@ -21,6 +21,7 @@ class UploadState {
 }
 
 abstract class UploadEffect { }
+class NavigateBack extends UploadEffect {}
 class ShowToast extends UploadEffect {
   final String message;
   ShowToast(this.message);

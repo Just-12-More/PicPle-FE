@@ -52,7 +52,7 @@ class UploadNotifier extends Notifier<UploadState> {
       final uploadSuccess = await _photoRepository.uploadFileToPreSignedUrl(file, preSignedUrl);
 
       if (!uploadSuccess) {
-        _showToast("파일 업로드 실패 (S3)");
+        _showToast("사진 업로드 실패 (S3)");
         return;
       }
 
@@ -65,7 +65,7 @@ class UploadNotifier extends Notifier<UploadState> {
       );
 
       if (uploadResult.isSuccess) {
-        _showToast("사진 업로드 완료!");
+        ref.read(uploadEffectProvider.notifier).state = NavigateBack();
       } else {
         _showToast("메타데이터 저장 실패: ${uploadResult.error?.message ?? 'Unknown error'}");
       }
