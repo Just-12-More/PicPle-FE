@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:picple/presentation/theme/picple_colors.dart';
 import 'package:picple/presentation/theme/picple_typography.dart';
-import 'package:go_router/go_router.dart';
 import 'package:picple/routes.dart';
-import '../provider/setting_notifier.dart';
+
 import '../provider/setting_contract.dart';
+import '../provider/setting_notifier.dart';
 
 
 class SettingPage extends ConsumerWidget {
@@ -56,7 +57,7 @@ class SettingPage extends ConsumerWidget {
             _SettingItem(
               icon: Icons.person_outline,
               label: '프로필 수정',
-              onTap: () => notifier.navigateTo(Routes.profileEdit.path),
+              onTap: () => notifier.navigateTo("${Routes.profile.path}/${Routes.profileEdit.path}"),
             ),
             _SettingItem(
               icon: Icons.description_outlined,

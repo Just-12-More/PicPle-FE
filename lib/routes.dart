@@ -15,10 +15,11 @@ enum Routes {
   login(name: 'Login', path: '/login'),
   home(name: 'Home', path: '/home'),
   upload(name: 'Upload', path: '/upload'),
+  photoList(name: 'PhotoList', path: '/photo_list'),
+
   profile(name: 'Profile', path: '/profile'),
-  profileEdit(name: 'ProfileEdit', path: '/profile_edit'),
-  setting(name: 'Setting', path: '/setting'),
-  photoList(name: 'PhotoList', path: '/photo_list');
+  profileEdit(name: 'ProfileEdit', path: 'profile_edit'),
+  setting(name: 'Setting', path: 'setting');
 
   final String name;
   final String path;
@@ -27,33 +28,26 @@ enum Routes {
 }
 
 final router = GoRouter(
-  initialLocation: Routes.login.path,
+  initialLocation: Routes.splash.path,
   routes: [
     GoRoute(
       path: Routes.splash.path,
       builder: (context, state) => const SplashPage(),
     ),
+
     GoRoute(
       path: Routes.login.path,
       builder: (context, state) => const LoginPage(),
     ),
-    GoRoute(
-      path: Routes.setting.path,
-      builder: (context, state) => const SettingPage(),
-    ),
+
     GoRoute(
       path: Routes.photoList.path,
       builder: (context, state) => const PhotoListPage(),
     ),
-    GoRoute(
-      path: Routes.profileEdit.path,
-      builder: (context, state) => const ProfileEditPage(),
-    ),
 
     GoRoute(
-        path: Routes.upload.path,
-        builder: (context, state) => const UploadPage(),
-        routes: []
+      path: Routes.upload.path,
+      builder: (context, state) => const UploadPage(),
     ),
 
     StatefulShellRoute.indexedStack(
@@ -75,7 +69,16 @@ final router = GoRouter(
               GoRoute(
                   path: Routes.profile.path,
                   builder: (context, state) => const ProfilePage(),
-                  routes: []
+                  routes: [
+                    GoRoute(
+                      path: Routes.profileEdit.path,
+                      builder: (context, state) => const ProfileEditPage(),
+                    ),
+                    GoRoute(
+                      path: Routes.setting.path,
+                      builder: (context, state) => const SettingPage(),
+                    ),
+                  ]
               ),
             ]
         )

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:picple/presentation/theme/picple_colors.dart';
 import 'package:picple/presentation/theme/picple_typography.dart';
 import 'package:picple/routes.dart';
+
 import '../provider/profile_contract.dart';
 import '../provider/profile_notifier.dart';
 
@@ -65,7 +66,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
             icon: const Icon(Icons.settings_rounded),
             onPressed: () => ref
                 .read(profileStateProvider.notifier)
-                .navigateTo(Routes.setting.path),
+                .navigateTo("${Routes.profile.path}/${Routes.setting.path}"),
           ),
         ],
       ),
