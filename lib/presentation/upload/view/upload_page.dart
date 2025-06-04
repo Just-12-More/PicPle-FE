@@ -99,6 +99,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: PicpleColors.white,
+        scrolledUnderElevation: 0,
         title: Text(
           '사진 올리기',
           style: PicpleTypography.title1.copyWith(

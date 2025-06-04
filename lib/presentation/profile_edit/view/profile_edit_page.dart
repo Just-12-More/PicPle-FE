@@ -72,6 +72,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
         centerTitle: true,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
+        scrolledUnderElevation: 0,
       ),
       backgroundColor: Colors.white,
       body: SafeArea(
