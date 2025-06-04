@@ -57,10 +57,10 @@ class PhotoData {
     return PhotoData(
       id: json['id'],
       title: json['title'],
-      imgUrl: json['imgUrl'],
+      imgUrl: json['imgUrl'] ?? '',
       description: json['description'],
-      nickname: json['nickname'],
-      profileImgUrl: json['profileImgUrl'],
+      nickname: json['nickname'] ?? '',
+      profileImgUrl: json['profileImgUrl'] ?? '',
       likeCount: json['likeCount'],
       isLiked: json['isLiked'],
       address: json['address'],

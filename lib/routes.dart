@@ -27,7 +27,7 @@ enum Routes {
 }
 
 final router = GoRouter(
-  initialLocation: Routes.splash.path,
+  initialLocation: Routes.login.path,
   routes: [
     GoRoute(
       path: Routes.splash.path,

@@ -11,7 +11,6 @@ import 'package:picple/data/repository/profile_repository.dart';
 
 import 'api/photo_api.dart';
 import 'datasource/auth_data_source.dart';
-import 'datasource/fake_photo_data_source.dart';
 import 'datasource/photo_data_source.dart';
 
 final dioClientProvider = Provider<DioClient>((ref) => DioClient());
@@ -51,7 +50,9 @@ final profileRepositoryProvider = Provider<ProfileRepository>((ref) =>
 final photoApiProvider = Provider<PhotoApi>((ref) =>
     PhotoApi(ref.watch(dioClientProvider))
 );
-final photoDataSourceProvider = Provider<PhotoDataSource>((ref) => FakePhotoDataSource());
+final photoDataSourceProvider = Provider<PhotoDataSource>((ref) {
+    return PhotoDataSourceImpl(ref.watch(photoApiProvider));
+});
 final photoRepositoryProvider = Provider<PhotoRepository>((ref) {
     return PhotoRepository(
         ref.watch(photoDataSourceProvider)
