@@ -20,6 +20,7 @@ Future<void> addMarkerWithPlaceholderImage({
   required NLatLng position,
   required String imageUrl,
   int zIndex = 0,
+  void Function()? onTap,
 }) async {
   const placeholder = NOverlayImage.fromAssetImage('assets/images/img_placeholder.png');
 
@@ -30,19 +31,16 @@ Future<void> addMarkerWithPlaceholderImage({
     size: const Size(48, 48),
   );
 
+  marker.setOnTapListener((NMarker marker) {
+    onTap?.call();
+  });
+
   controller.addOverlay(marker);
 
   try {
     final realImage = await createOverlayImageFromUrl(imageUrl);
 
-    controller.deleteOverlay(marker.info);
-    final updatedMarker = NMarker(
-      id: id,
-      position: position,
-      icon: realImage,
-      size: const Size(48, 48),
-    );
-    controller.addOverlay(updatedMarker);
+    marker.setIcon(realImage);
   } catch (e) {
     log('Error loading image from URL: $e');
   }

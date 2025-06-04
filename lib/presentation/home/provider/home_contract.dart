@@ -41,6 +41,10 @@ class HomeState {
 }
 
 abstract class HomeEffect {}
+class NavigateTo extends HomeEffect {
+  final String route;
+  NavigateTo(this.route);
+}
 class ShowToast extends HomeEffect {
   final String message;
   ShowToast(this.message);

@@ -42,7 +42,10 @@ final router = GoRouter(
 
     GoRoute(
       path: Routes.photoList.path,
-      builder: (context, state) => const PhotoListPage(),
+      builder: (context, state)  {
+        final id = state.uri.queryParameters['id'];
+        return const PhotoListPage();
+      }
     ),
 
     GoRoute(
