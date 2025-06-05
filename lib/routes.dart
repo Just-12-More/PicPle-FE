@@ -61,7 +61,7 @@ final router = GoRouter(
         if (id == null) {
           return const Scaffold(body: Center(child: Text('Invalid photo ID')));
         }
-        return const PhotoListPage();
+        return PhotoListPage(centerPhotoId: id);
       }
     ),
 

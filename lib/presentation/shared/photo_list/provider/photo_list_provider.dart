@@ -16,11 +16,11 @@ class PhotoListNotifier extends Notifier<PhotoListState> {
     return PhotoListState();
   }
 
-  Future<void> fetchPhotoList() async {
+  Future<void> fetchPhotoList(int centerPhotoId) async {
     state = state.copyWith(isLoading: true);
 
     try {
-      final result = await _photoRepository.getNearbyPhotos(37.5665, 126.978);
+      final result = await _photoRepository.getNearbyPhotos(centerPhotoId);
 
       if (result.isSuccess) {
         state = state.copyWith(

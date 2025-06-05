@@ -8,23 +8,27 @@ import '../provider/photo_list_contract.dart';
 import '../provider/photo_list_provider.dart';
 
 class PhotoListPage extends StatelessWidget {
-  const PhotoListPage({super.key});
+  final int centerPhotoId;
+
+  const PhotoListPage({super.key, required this.centerPhotoId});
 
   @override
   Widget build(BuildContext context) {
-    return const PhotoListScreen();
+    return PhotoListScreen(centerPhotoId: centerPhotoId);
   }
 }
 
 class PhotoListScreen extends ConsumerWidget {
-  const PhotoListScreen({super.key});
+  final int centerPhotoId;
+
+  const PhotoListScreen({super.key, required this.centerPhotoId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(photoListStateProvider);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(photoListStateProvider.notifier).fetchPhotoList();
+      ref.read(photoListStateProvider.notifier).fetchPhotoList(centerPhotoId);
     });
 
     ref.listen<PhotoListEffect?>(photoListEffectProvider, (previous, next) {
