@@ -6,7 +6,6 @@ import 'package:picple/data/model/response/nearby_photos_response.dart';
 import 'package:picple/data/model/response/presigned_url_response.dart';
 
 import '../model/request/geo_photos_request.dart';
-import '../model/request/nearby_photos_request.dart';
 import '../model/request/upload_photo_request.dart';
 import '../model/response/base_response.dart';
 import '../model/response/geo_photos_response.dart';
@@ -51,7 +50,7 @@ class FakePhotoDataSource implements PhotoDataSource {
   }
 
   @override
-  Future<BaseResponse<NearbyPhotosData>> getNearbyPhotos(NearbyPhotosRequest request) async {
+  Future<BaseResponse<NearbyPhotosData>> getNearbyPhotos(int centerPhotoId) async {
     await Future.delayed(const Duration(milliseconds: 500));
     return BaseResponse<NearbyPhotosData>.fromJson(
       {
@@ -59,7 +58,7 @@ class FakePhotoDataSource implements PhotoDataSource {
         "data": {
           "address": "서울시 강남구 테헤란로",
           "centerPhoto": {
-            "id": 1,
+            "id": centerPhotoId,
             "title": "중앙 사진",
             "imgUrl": "https://picsum.photos/id/101/300/300",
             "description": "이곳이 중심이에요!",

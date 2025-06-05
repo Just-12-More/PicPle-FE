@@ -5,7 +5,6 @@ import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 import 'package:picple/data/model/request/geo_photos_request.dart';
-import 'package:picple/data/model/request/nearby_photos_request.dart';
 import 'package:picple/data/model/request/upload_photo_request.dart';
 import 'package:picple/data/model/response/nearby_photos_response.dart';
 
@@ -51,12 +50,11 @@ class PhotoApi {
   }
 
   Future<BaseResponse<NearbyPhotosData>> getNearbyPhotos(
-    NearbyPhotosRequest request
+    int centerPhotoId
   ) async {
     try {
-      final response = await _dioClient.dio.post(
-        '/photos/nearby',
-        data: request.toJson(),
+      final response = await _dioClient.dio.get(
+        '/photos/nearby/$centerPhotoId',
       );
 
       final nearbyPhotosResponse = BaseResponse<NearbyPhotosData>.fromJson(
