@@ -46,6 +46,12 @@ class PhotoRepository {
     return response;
   }
 
+  Future<BaseResponse<PhotoData>> getPhotoDetail(int photoId) async {
+    final response = await _dataSource.getPhotoDetail(photoId);
+
+    return response;
+  }
+
   Future<BaseResponse<PhotoData>> uploadPhoto(
     String imageUrl,
     String title,

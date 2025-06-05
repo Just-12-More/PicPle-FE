@@ -16,6 +16,8 @@ abstract class PhotoDataSource {
 
   Future<BaseResponse<NearbyPhotosData>> getNearbyPhotos(NearbyPhotosRequest request);
 
+  Future<BaseResponse<PhotoData>> getPhotoDetail(int photoId);
+
   Future<BaseResponse<PhotoData>> uploadPhoto(UploadPhotoRequest request);
 
   Future<BaseResponse<PreSignedUrlData>> postPreSignedUrl(PreSignedUrlRequest request);
@@ -36,6 +38,11 @@ class PhotoDataSourceImpl implements PhotoDataSource {
   @override
   Future<BaseResponse<NearbyPhotosData>> getNearbyPhotos(NearbyPhotosRequest request) {
     return _photoApi.getNearbyPhotos(request);
+  }
+
+  @override
+  Future<BaseResponse<PhotoData>> getPhotoDetail(int photoId) {
+    return _photoApi.getPhotoDetail(photoId);
   }
 
   @override

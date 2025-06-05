@@ -76,6 +76,27 @@ class PhotoApi {
     }
   }
 
+  Future<BaseResponse<PhotoData>> getPhotoDetail(int photoId) async {
+    try {
+      final response = await _dioClient.dio.get('/photos/$photoId');
+
+      final photoData = BaseResponse<PhotoData>.fromJson(
+        response.data,
+        PhotoData.fromJson,
+      );
+
+      return photoData;
+    } catch (e) {
+      return BaseResponse<PhotoData>(
+        isSuccess: false,
+        error: ResponseError(
+          code: "500",
+          message: 'An error occurred while fetching photo details: $e',
+        ),
+      );
+    }
+  }
+
   Future<BaseResponse<PhotoData>> uploadPhoto(
     UploadPhotoRequest request
   ) async {

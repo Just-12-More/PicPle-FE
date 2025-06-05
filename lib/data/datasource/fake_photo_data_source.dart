@@ -96,6 +96,32 @@ class FakePhotoDataSource implements PhotoDataSource {
   }
 
   @override
+  Future<BaseResponse<PhotoData>> getPhotoDetail(int photoId) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    return BaseResponse<PhotoData>.fromJson(
+      {
+        "isSuccess": true,
+        "data": {
+          "id": photoId,
+          "title": "사진 $photoId",
+          "imgUrl": "https://picsum.photos/id/${100 + photoId}/300/300",
+          "description": "설명 $photoId",
+          "nickname": "유저$photoId",
+          "profileImgUrl": "https://picsum.photos/seed/user$photoId/48/48",
+          "likeCount": photoId * 5,
+          "isLiked": photoId % 2 == 0,
+          "address": "서울시 강남구",
+          "latitude": 37.5665 + (photoId * 0.001),
+          "longitude": 126.978 + (photoId * 0.001),
+          "createdAt": DateTime.now().subtract(Duration(days: photoId)).toIso8601String()
+        },
+        "error": null
+      },
+      PhotoData.fromJson
+    );
+  }
+
+  @override
   Future<BaseResponse<PhotoData>> uploadPhoto(UploadPhotoRequest request) async {
     await Future.delayed(const Duration(milliseconds: 500));
     return BaseResponse<PhotoData>.fromJson(
