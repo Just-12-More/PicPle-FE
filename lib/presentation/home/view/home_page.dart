@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:picple/presentation/theme/picple_colors.dart';
 import 'package:picple/presentation/theme/picple_typography.dart';
 
 import '../../../core/util/naver_map_utils.dart';
 import '../../../data/model/response/nearby_photos_response.dart';
+import '../../../routes.dart';
 import '../provider/home_contract.dart';
 import '../provider/home_provider.dart';
 
@@ -50,6 +52,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (next == null) return;
 
       switch (next) {
+        case NavigateTo():
+          context.push(next.route);
+          break;
         case ShowToast():
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(next.message)),
@@ -170,6 +175,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         id: markerId,
         position: NLatLng(photo.latitude, photo.longitude),
         imageUrl: photo.imgUrl,
+        onTap: () {
+          context.push(
+            "${Routes.photoList.path}?id=${photo.id}",
+          );
+        }
       );
 
       _renderedPhotoIds.add(markerId);

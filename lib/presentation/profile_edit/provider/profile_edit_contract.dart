@@ -22,10 +22,7 @@ class ProfileEditState {
 }
 
 abstract class ProfileEditEffect {}
-class NavigateTo extends ProfileEditEffect {
-  final String route;
-  NavigateTo(this.route);
-}
+class NavigateBack extends ProfileEditEffect {}
 class ShowToast extends ProfileEditEffect {
   final String message;
   ShowToast(this.message);

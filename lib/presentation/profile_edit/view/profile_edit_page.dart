@@ -1,12 +1,14 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:picple/presentation/component/picple_text_field.dart';
 import 'package:picple/presentation/theme/picple_colors.dart';
 import 'package:picple/presentation/theme/picple_typography.dart';
-import '../provider/profile_edit_notifier.dart';
+
 import '../provider/profile_edit_contract.dart';
-import 'package:picple/presentation/component/picple_text_field.dart';
+import '../provider/profile_edit_notifier.dart';
 
 class ProfileEditPage extends ConsumerStatefulWidget {
   const ProfileEditPage({super.key});
@@ -53,8 +55,8 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
             SnackBar(content: Text(next.message)),
           );
           break;
-        case NavigateTo():
-          context.push(next.route);
+        case NavigateBack():
+          context.pop();
           break;
       }
       ref.read(profileEditEffectProvider.notifier).state = null;
@@ -70,6 +72,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
         centerTitle: true,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
+        scrolledUnderElevation: 0,
       ),
       backgroundColor: Colors.white,
       body: SafeArea(
