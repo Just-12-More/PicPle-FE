@@ -38,7 +38,7 @@ class PhotoData {
 
   String get formattedTime => formatPostedTimeFromString(createdAt);
 
-  PhotoData({
+  const PhotoData({
     required this.id,
     required this.title,
     required this.imgUrl,

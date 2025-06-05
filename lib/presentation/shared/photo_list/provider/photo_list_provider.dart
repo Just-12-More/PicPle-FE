@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:picple/data/repository/photo_repository.dart';
-import 'package:picple/presentation/shared/provider/photo_list_contract.dart';
+import 'package:picple/presentation/shared/photo_list/provider/photo_list_contract.dart';
 
-import '../../../data/service_providers.dart';
+import '../../../../data/service_providers.dart';
 
 final photoListStateProvider = NotifierProvider<PhotoListNotifier, PhotoListState>(() => PhotoListNotifier());
 final photoListEffectProvider = StateProvider<PhotoListEffect?>((ref) => null);

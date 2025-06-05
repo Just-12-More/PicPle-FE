@@ -6,7 +6,8 @@ import 'package:picple/presentation/login/view/login_page.dart';
 import 'package:picple/presentation/profile/view/profile_page.dart';
 import 'package:picple/presentation/profile_edit/view/profile_edit_page.dart';
 import 'package:picple/presentation/setting/view/setting_page.dart';
-import 'package:picple/presentation/shared/view/photo_list_page.dart';
+import 'package:picple/presentation/shared/photo_detail/view/photo_detail_page.dart';
+import 'package:picple/presentation/shared/photo_list/view/photo_list_page.dart';
 import 'package:picple/presentation/splash/view/splash_page.dart';
 import 'package:picple/presentation/upload/view/upload_page.dart';
 
@@ -15,6 +16,8 @@ enum Routes {
   login(name: 'Login', path: '/login'),
   home(name: 'Home', path: '/home'),
   upload(name: 'Upload', path: '/upload'),
+
+  photoDetail(name: 'PhotoDetail', path: '/photo_detail'),
   photoList(name: 'PhotoList', path: '/photo_list'),
 
   profile(name: 'Profile', path: '/profile'),
@@ -38,6 +41,14 @@ final router = GoRouter(
     GoRoute(
       path: Routes.login.path,
       builder: (context, state) => const LoginPage(),
+    ),
+
+    GoRoute(
+      path: Routes.photoDetail.path,
+      builder: (context, state) {
+        final id = int.tryParse(state.uri.queryParameters['id']!);
+        return PhotoDetailPage(photoId: id!); // Replace with actual PhotoDetailPage(id: id);
+      }
     ),
 
     GoRoute(
