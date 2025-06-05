@@ -1,23 +1,23 @@
 import 'package:picple/data/model/response/nearby_photos_response.dart';
 
 class PhotoListState {
-  final bool isLoading;
+  final bool isInitialized;
   final String address;
   final List<PhotoData> photos;
 
   PhotoListState({
-    this.isLoading = false,
+    this.isInitialized = false,
     this.address = '',
     this.photos = const [],
   });
 
   PhotoListState copyWith({
-    bool? isLoading,
+    bool? isInitialized,
     String? address,
     List<PhotoData>? photos,
   }) {
     return PhotoListState(
-      isLoading: isLoading ?? this.isLoading,
+      isInitialized: isInitialized ?? this.isInitialized,
       address: address ?? this.address,
       photos: photos ?? this.photos,
     );

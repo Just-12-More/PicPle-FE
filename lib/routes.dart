@@ -6,7 +6,8 @@ import 'package:picple/presentation/login/view/login_page.dart';
 import 'package:picple/presentation/profile/view/profile_page.dart';
 import 'package:picple/presentation/profile_edit/view/profile_edit_page.dart';
 import 'package:picple/presentation/setting/view/setting_page.dart';
-import 'package:picple/presentation/shared/view/photo_list_page.dart';
+import 'package:picple/presentation/shared/photo_detail/view/photo_detail_page.dart';
+import 'package:picple/presentation/shared/photo_list/view/photo_list_page.dart';
 import 'package:picple/presentation/splash/view/splash_page.dart';
 import 'package:picple/presentation/upload/view/upload_page.dart';
 
@@ -15,6 +16,8 @@ enum Routes {
   login(name: 'Login', path: '/login'),
   home(name: 'Home', path: '/home'),
   upload(name: 'Upload', path: '/upload'),
+
+  photoDetail(name: 'PhotoDetail', path: '/photo_detail'),
   photoList(name: 'PhotoList', path: '/photo_list'),
 
   profile(name: 'Profile', path: '/profile'),
@@ -41,10 +44,24 @@ final router = GoRouter(
     ),
 
     GoRoute(
-      path: Routes.photoList.path,
+      path: "${Routes.photoDetail.path}/:id",
+      builder: (context, state) {
+        final id = int.tryParse(state.pathParameters['id']!);
+        if (id == null) {
+          return const Scaffold(body: Center(child: Text('Invalid photo ID')));
+        }
+        return PhotoDetailPage(photoId: id);
+      }
+    ),
+
+    GoRoute(
+      path: "${Routes.photoList.path}/:id",
       builder: (context, state)  {
-        final id = state.uri.queryParameters['id'];
-        return const PhotoListPage();
+        final id = int.tryParse(state.pathParameters['id']!);
+        if (id == null) {
+          return const Scaffold(body: Center(child: Text('Invalid photo ID')));
+        }
+        return PhotoListPage(centerPhotoId: id);
       }
     ),
 

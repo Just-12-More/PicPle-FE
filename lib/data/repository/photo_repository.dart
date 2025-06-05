@@ -4,7 +4,6 @@ import 'package:picple/data/datasource/photo_data_source.dart';
 import 'package:picple/data/model/response/geo_photos_response.dart';
 
 import '../model/request/geo_photos_request.dart';
-import '../model/request/nearby_photos_request.dart';
 import '../model/request/presigned_url_request.dart';
 import '../model/request/upload_photo_request.dart';
 import '../model/response/base_response.dart';
@@ -33,15 +32,27 @@ class PhotoRepository {
   }
 
   Future<BaseResponse<NearbyPhotosData>> getNearbyPhotos(
-    double latitude,
-    double longitude
+    int centerPhotoId
   ) async {
-    final response = await _dataSource.getNearbyPhotos(
-      NearbyPhotosRequest(
-        latitude: latitude,
-        longitude: longitude,
-      ),
-    );
+    final response = await _dataSource.getNearbyPhotos(centerPhotoId);
+
+    return response;
+  }
+
+  Future<BaseResponse<PhotoData>> getPhotoDetail(int photoId) async {
+    final response = await _dataSource.getPhotoDetail(photoId);
+
+    return response;
+  }
+
+  Future<BaseResponse<void>> likePhoto(int photoId) async {
+    final response = await _dataSource.likePhoto(photoId);
+
+    return response;
+  }
+
+  Future<BaseResponse<void>> unlikePhoto(int photoId) async {
+    final response = await _dataSource.unlikePhoto(photoId);
 
     return response;
   }

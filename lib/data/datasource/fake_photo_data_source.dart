@@ -6,7 +6,6 @@ import 'package:picple/data/model/response/nearby_photos_response.dart';
 import 'package:picple/data/model/response/presigned_url_response.dart';
 
 import '../model/request/geo_photos_request.dart';
-import '../model/request/nearby_photos_request.dart';
 import '../model/request/upload_photo_request.dart';
 import '../model/response/base_response.dart';
 import '../model/response/geo_photos_response.dart';
@@ -51,7 +50,7 @@ class FakePhotoDataSource implements PhotoDataSource {
   }
 
   @override
-  Future<BaseResponse<NearbyPhotosData>> getNearbyPhotos(NearbyPhotosRequest request) async {
+  Future<BaseResponse<NearbyPhotosData>> getNearbyPhotos(int centerPhotoId) async {
     await Future.delayed(const Duration(milliseconds: 500));
     return BaseResponse<NearbyPhotosData>.fromJson(
       {
@@ -59,7 +58,7 @@ class FakePhotoDataSource implements PhotoDataSource {
         "data": {
           "address": "서울시 강남구 테헤란로",
           "centerPhoto": {
-            "id": 1,
+            "id": centerPhotoId,
             "title": "중앙 사진",
             "imgUrl": "https://picsum.photos/id/101/300/300",
             "description": "이곳이 중심이에요!",
@@ -92,6 +91,58 @@ class FakePhotoDataSource implements PhotoDataSource {
         "error": null
       },
       NearbyPhotosData.fromJson
+    );
+  }
+
+  @override
+  Future<BaseResponse<PhotoData>> getPhotoDetail(int photoId) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    return BaseResponse<PhotoData>.fromJson(
+      {
+        "isSuccess": true,
+        "data": {
+          "id": photoId,
+          "title": "사진 $photoId",
+          "imgUrl": "https://picsum.photos/id/${100 + photoId}/300/300",
+          "description": "설명 $photoId",
+          "nickname": "유저$photoId",
+          "profileImgUrl": "https://picsum.photos/seed/user$photoId/48/48",
+          "likeCount": photoId * 5,
+          "isLiked": photoId % 2 == 0,
+          "address": "서울시 강남구",
+          "latitude": 37.5665 + (photoId * 0.001),
+          "longitude": 126.978 + (photoId * 0.001),
+          "createdAt": DateTime.now().subtract(Duration(days: photoId)).toIso8601String()
+        },
+        "error": null
+      },
+      PhotoData.fromJson
+    );
+  }
+
+  @override
+  Future<BaseResponse<void>> likePhoto(int photoId) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    return BaseResponse<void>.fromJson(
+      {
+        "isSuccess": true,
+        "data": null,
+        "error": null
+      },
+      (json) => { }
+    );
+  }
+
+  @override
+  Future<BaseResponse<void>> unlikePhoto(int photoId) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    return BaseResponse<void>.fromJson(
+      {
+        "isSuccess": true,
+        "data": null,
+        "error": null
+      },
+      (json) => { }
     );
   }
 

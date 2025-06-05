@@ -177,7 +177,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         imageUrl: photo.imgUrl,
         onTap: () {
           context.push(
-            "${Routes.photoList.path}?id=${photo.id}",
+            "${Routes.photoList.path}/${photo.id}",
           );
         }
       );

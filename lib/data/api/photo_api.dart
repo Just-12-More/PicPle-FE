@@ -5,7 +5,6 @@ import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 import 'package:picple/data/model/request/geo_photos_request.dart';
-import 'package:picple/data/model/request/nearby_photos_request.dart';
 import 'package:picple/data/model/request/upload_photo_request.dart';
 import 'package:picple/data/model/response/nearby_photos_response.dart';
 
@@ -51,12 +50,11 @@ class PhotoApi {
   }
 
   Future<BaseResponse<NearbyPhotosData>> getNearbyPhotos(
-    NearbyPhotosRequest request
+    int centerPhotoId
   ) async {
     try {
-      final response = await _dioClient.dio.post(
-        '/photos/nearby',
-        data: request.toJson(),
+      final response = await _dioClient.dio.get(
+        '/photos/nearby/$centerPhotoId',
       );
 
       final nearbyPhotosResponse = BaseResponse<NearbyPhotosData>.fromJson(
@@ -71,6 +69,59 @@ class PhotoApi {
         error: ResponseError(
           code: "500",
           message: 'An error occurred while fetching nearby photos: $e',
+        ),
+      );
+    }
+  }
+
+  Future<BaseResponse<PhotoData>> getPhotoDetail(int photoId) async {
+    try {
+      final response = await _dioClient.dio.get('/photos/$photoId');
+
+      final photoData = BaseResponse<PhotoData>.fromJson(
+        response.data,
+        PhotoData.fromJson,
+      );
+
+      return photoData;
+    } catch (e) {
+      return BaseResponse<PhotoData>(
+        isSuccess: false,
+        error: ResponseError(
+          code: "500",
+          message: 'An error occurred while fetching photo details: $e',
+        ),
+      );
+    }
+  }
+
+  Future<BaseResponse<void>> likePhoto(int photoId) async {
+    try {
+      final response = await _dioClient.dio.post('/photos/$photoId/like');
+
+      return BaseResponse<void>.fromJson(response.data, (data) {});
+    } catch (e) {
+      return BaseResponse<void>(
+        isSuccess: false,
+        error: ResponseError(
+          code: "500",
+          message: 'An error occurred while liking the photo: $e',
+        ),
+      );
+    }
+  }
+
+  Future<BaseResponse<void>> unlikePhoto(int photoId) async {
+    try {
+      final response = await _dioClient.dio.delete('/photos/$photoId/like');
+
+      return BaseResponse<void>.fromJson(response.data, (data) {});
+    } catch (e) {
+      return BaseResponse<void>(
+        isSuccess: false,
+        error: ResponseError(
+          code: "500",
+          message: 'An error occurred while unliking the photo: $e',
         ),
       );
     }

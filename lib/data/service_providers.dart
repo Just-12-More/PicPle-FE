@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:picple/data/api/auth_api.dart';
 import 'package:picple/data/api/profile_api.dart';
 import 'package:picple/data/api/storage_api.dart';
+import 'package:picple/data/datasource/fake_photo_data_source.dart';
 import 'package:picple/data/datasource/fake_profile_data_source.dart';
 import 'package:picple/data/datasource/profile_data_source.dart';
 import 'package:picple/data/dio_client.dart';
@@ -51,7 +52,7 @@ final photoApiProvider = Provider<PhotoApi>((ref) =>
     PhotoApi(ref.watch(dioClientProvider))
 );
 final photoDataSourceProvider = Provider<PhotoDataSource>((ref) {
-    return PhotoDataSourceImpl(ref.watch(photoApiProvider));
+    return FakePhotoDataSource();
 });
 final photoRepositoryProvider = Provider<PhotoRepository>((ref) {
     return PhotoRepository(

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:picple/data/repository/profile_repository.dart';
 import 'package:picple/data/service_providers.dart';
+
 import '../provider/profile_contract.dart';
 
 final profileStateProvider = NotifierProvider<ProfileNotifier, ProfileState>(() => ProfileNotifier());
@@ -38,8 +39,8 @@ class ProfileNotifier extends Notifier<ProfileState> {
       if (myLikedPhotosResponse.isSuccess) {
         state = state.copyWith(
           isLoading: false,
-          myLikedPhotos: myLikedPhotosResponse.data!.photos.map((photo) => photo.imgUrl).toList(),
-          myPhotos: myPhotosResponse.data!.photos.map((photo) => photo.imgUrl).toList(),
+          myLikedPhotos: myLikedPhotosResponse.data!.photos,
+          myPhotos: myPhotosResponse.data!.photos,
         );
       } else {
         showToast("나의 사진 목록을 가져오지 못했습니다.");

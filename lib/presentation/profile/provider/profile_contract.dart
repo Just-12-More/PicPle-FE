@@ -1,9 +1,11 @@
+import '../../../data/model/response/nearby_photos_response.dart';
+
 class ProfileState {
   final bool isLoading;
   final String? profileImage;
   final String? nickname;
-  final List<String> myLikedPhotos;
-  final List<String> myPhotos;
+  final List<PhotoData> myLikedPhotos;
+  final List<PhotoData> myPhotos;
 
   ProfileState({
     this.isLoading = false,
@@ -17,8 +19,8 @@ class ProfileState {
     bool? isLoading,
     String? profileImage,
     String? nickname,
-    List<String>? myLikedPhotos,
-    List<String>? myPhotos,
+    List<PhotoData>? myLikedPhotos,
+    List<PhotoData>? myPhotos,
   }) {
     return ProfileState(
       isLoading: isLoading ?? this.isLoading,
