@@ -44,17 +44,23 @@ final router = GoRouter(
     ),
 
     GoRoute(
-      path: Routes.photoDetail.path,
+      path: "${Routes.photoDetail.path}/:id",
       builder: (context, state) {
-        final id = int.tryParse(state.uri.queryParameters['id']!);
-        return PhotoDetailPage(photoId: id!); // Replace with actual PhotoDetailPage(id: id);
+        final id = int.tryParse(state.pathParameters['id']!);
+        if (id == null) {
+          return const Scaffold(body: Center(child: Text('Invalid photo ID')));
+        }
+        return PhotoDetailPage(photoId: id);
       }
     ),
 
     GoRoute(
-      path: Routes.photoList.path,
+      path: "${Routes.photoList.path}/:id",
       builder: (context, state)  {
-        final id = state.uri.queryParameters['id'];
+        final id = int.tryParse(state.pathParameters['id']!);
+        if (id == null) {
+          return const Scaffold(body: Center(child: Text('Invalid photo ID')));
+        }
         return const PhotoListPage();
       }
     ),

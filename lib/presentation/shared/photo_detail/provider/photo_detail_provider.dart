@@ -12,14 +12,16 @@ class PhotoDetailNotifier extends Notifier<PhotoDetailState> {
 
   @override
   PhotoDetailState build() {
-    _photoRepository = ref.watch(photoRepositoryProvider);
+    _photoRepository = ref.watch(photoRepositoryProvider); // Initial fetch with dummy ID
     return PhotoDetailState();
   }
 
   Future<void> fetchPhotoDetail(int photoId) async {
+    if (state.photo.imgUrl.isNotEmpty && !state.isLoading) return;
+
     state = state.copyWith(isLoading: true);
 
-    /*try {
+    try {
       final result = await _photoRepository.getPhotoDetail(photoId);
 
       if (result.isSuccess) {
@@ -32,6 +34,5 @@ class PhotoDetailNotifier extends Notifier<PhotoDetailState> {
     } finally {
       state = state.copyWith(isLoading: false);
     }
-     */
   }
 }

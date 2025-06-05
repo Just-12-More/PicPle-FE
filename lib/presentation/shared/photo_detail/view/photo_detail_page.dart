@@ -31,7 +31,6 @@ class PhotoDetailScreen extends ConsumerWidget {
       ref.read(photoDetailStateProvider.notifier).fetchPhotoDetail(photoId);
     });
 
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: PicpleColors.white,

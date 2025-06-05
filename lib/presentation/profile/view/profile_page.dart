@@ -5,6 +5,7 @@ import 'package:picple/presentation/theme/picple_colors.dart';
 import 'package:picple/presentation/theme/picple_typography.dart';
 import 'package:picple/routes.dart';
 
+import '../../../data/model/response/nearby_photos_response.dart';
 import '../provider/profile_contract.dart';
 import '../provider/profile_notifier.dart';
 
@@ -137,7 +138,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
     );
   }
 
-  Widget _buildPhotoGrid(List<String> photos) {
+  Widget _buildPhotoGrid(List<PhotoData> photos) {
     return GridView.builder(
       itemCount: photos.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -146,7 +147,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
         mainAxisSpacing: 4,
       ),
       itemBuilder: (context, index) {
-        return Image.network(photos[index], fit: BoxFit.cover);
+        return GestureDetector(
+          onTap: () {
+            ref.read(profileStateProvider.notifier).navigateTo(
+              "${Routes.photoDetail.path}/${photos[index].id}",
+            );
+          },
+          child: Image.network(photos[index].imgUrl, fit: BoxFit.cover)
+        );
       },
     );
   }
