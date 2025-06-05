@@ -95,6 +95,38 @@ class PhotoApi {
     }
   }
 
+  Future<BaseResponse<void>> likePhoto(int photoId) async {
+    try {
+      final response = await _dioClient.dio.post('/photos/$photoId/like');
+
+      return BaseResponse<void>.fromJson(response.data, (data) {});
+    } catch (e) {
+      return BaseResponse<void>(
+        isSuccess: false,
+        error: ResponseError(
+          code: "500",
+          message: 'An error occurred while liking the photo: $e',
+        ),
+      );
+    }
+  }
+
+  Future<BaseResponse<void>> unlikePhoto(int photoId) async {
+    try {
+      final response = await _dioClient.dio.delete('/photos/$photoId/like');
+
+      return BaseResponse<void>.fromJson(response.data, (data) {});
+    } catch (e) {
+      return BaseResponse<void>(
+        isSuccess: false,
+        error: ResponseError(
+          code: "500",
+          message: 'An error occurred while unliking the photo: $e',
+        ),
+      );
+    }
+  }
+
   Future<BaseResponse<PhotoData>> uploadPhoto(
     UploadPhotoRequest request
   ) async {

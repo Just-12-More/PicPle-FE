@@ -1,11 +1,11 @@
 import '../../../../data/model/response/nearby_photos_response.dart';
 
 class PhotoDetailState {
-  final bool isLoading;
+  final bool isInitialized;
   final PhotoData photo;
 
   PhotoDetailState({
-    this.isLoading = false,
+    this.isInitialized = false,
     this.photo = const PhotoData(
       id: 0,
       nickname: '',
@@ -23,11 +23,11 @@ class PhotoDetailState {
   });
 
   PhotoDetailState copyWith({
-    bool? isLoading,
+    bool? isInitialized,
     PhotoData? photo,
   }) {
     return PhotoDetailState(
-      isLoading: isLoading ?? this.isLoading,
+      isInitialized: isInitialized ?? this.isInitialized,
       photo: photo ?? this.photo,
     );
   }

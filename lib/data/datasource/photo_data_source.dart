@@ -17,6 +17,10 @@ abstract class PhotoDataSource {
 
   Future<BaseResponse<PhotoData>> getPhotoDetail(int photoId);
 
+  Future<BaseResponse<void>> likePhoto(int photoId);
+
+  Future<BaseResponse<void>> unlikePhoto(int photoId);
+
   Future<BaseResponse<PhotoData>> uploadPhoto(UploadPhotoRequest request);
 
   Future<BaseResponse<PreSignedUrlData>> postPreSignedUrl(PreSignedUrlRequest request);
@@ -42,6 +46,16 @@ class PhotoDataSourceImpl implements PhotoDataSource {
   @override
   Future<BaseResponse<PhotoData>> getPhotoDetail(int photoId) {
     return _photoApi.getPhotoDetail(photoId);
+  }
+
+  @override
+  Future<BaseResponse<void>> likePhoto(int photoId) {
+    return _photoApi.likePhoto(photoId);
+  }
+
+  @override
+  Future<BaseResponse<void>> unlikePhoto(int photoId) {
+    return _photoApi.unlikePhoto(photoId);
   }
 
   @override

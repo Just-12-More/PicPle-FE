@@ -53,6 +53,36 @@ class PhotoData {
     required this.createdAt,
   });
 
+  PhotoData copyWith({
+    int? id,
+    String? title,
+    String? imgUrl,
+    String? description,
+    String? nickname,
+    String? profileImgUrl,
+    int? likeCount,
+    bool? isLiked,
+    String? address,
+    double? latitude,
+    double? longitude,
+    String? createdAt,
+  }) {
+    return PhotoData(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      imgUrl: imgUrl ?? this.imgUrl,
+      description: description ?? this.description,
+      nickname: nickname ?? this.nickname,
+      profileImgUrl: profileImgUrl ?? this.profileImgUrl,
+      likeCount: likeCount ?? this.likeCount,
+      isLiked: isLiked ?? this.isLiked,
+      address: address ?? this.address,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
   factory PhotoData.fromJson(Map<String, dynamic> json) {
     return PhotoData(
       id: json['id'],

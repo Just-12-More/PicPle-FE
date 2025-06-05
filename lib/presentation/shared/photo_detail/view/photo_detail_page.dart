@@ -44,9 +44,9 @@ class PhotoDetailScreen extends ConsumerWidget {
       ),
       backgroundColor: PicpleColors.background,
       body: SafeArea(
-        child: state.isLoading
+        child: !state.isInitialized
             ? const Center(
-              child: CircularProgressIndicator(), // Show loading indicator while isLoading is true
+              child: CircularProgressIndicator(),
             )
           : FeedItem(
               username: state.photo.nickname,
@@ -57,6 +57,7 @@ class PhotoDetailScreen extends ConsumerWidget {
               title: state.photo.title,
               description: state.photo.description,
               time: state.photo.formattedTime,
+              onToggleLike: () => ref.read(photoDetailStateProvider.notifier).toggleLikePhoto(photoId),
             ),
       ),
     );

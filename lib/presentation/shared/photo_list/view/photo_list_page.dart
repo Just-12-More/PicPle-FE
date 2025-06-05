@@ -56,23 +56,28 @@ class PhotoListScreen extends ConsumerWidget {
       ),
       backgroundColor: PicpleColors.background,
       body: SafeArea(
-        child: ListView.builder(
-          itemCount: state.photos.length,
-          itemBuilder: (context, index) {
-            final photo = state.photos[index];
+        child: !state.isInitialized
+            ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : ListView.builder(
+              itemCount: state.photos.length,
+              itemBuilder: (context, index) {
+                final photo = state.photos[index];
 
-            return FeedItem(
-              username: photo.nickname,
-              profileImageUrl: photo.profileImgUrl,
-              imageUrl: photo.imgUrl,
-              isLiked: photo.isLiked,
-              likeCount: photo.likeCount,
-              title: photo.title,
-              description: photo.description,
-              time: photo.formattedTime,
-            );
-          },
-        ),
+                return FeedItem(
+                  username: photo.nickname,
+                  profileImageUrl: photo.profileImgUrl,
+                  imageUrl: photo.imgUrl,
+                  isLiked: photo.isLiked,
+                  likeCount: photo.likeCount,
+                  title: photo.title,
+                  description: photo.description,
+                  time: photo.formattedTime,
+                  onToggleLike: () => ref.read(photoListStateProvider.notifier).toggleLikePhoto(photo.id),
+                );
+              },
+            ),
       ),
     );
   }

@@ -45,6 +45,18 @@ class PhotoRepository {
     return response;
   }
 
+  Future<BaseResponse<void>> likePhoto(int photoId) async {
+    final response = await _dataSource.likePhoto(photoId);
+
+    return response;
+  }
+
+  Future<BaseResponse<void>> unlikePhoto(int photoId) async {
+    final response = await _dataSource.unlikePhoto(photoId);
+
+    return response;
+  }
+
   Future<BaseResponse<PhotoData>> uploadPhoto(
     String imageUrl,
     String title,

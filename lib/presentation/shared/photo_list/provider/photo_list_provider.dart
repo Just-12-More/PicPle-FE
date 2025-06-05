@@ -17,13 +17,14 @@ class PhotoListNotifier extends Notifier<PhotoListState> {
   }
 
   Future<void> fetchPhotoList(int centerPhotoId) async {
-    state = state.copyWith(isLoading: true);
+    if (state.isInitialized) return;
 
     try {
       final result = await _photoRepository.getNearbyPhotos(centerPhotoId);
 
       if (result.isSuccess) {
         state = state.copyWith(
+          isInitialized: true,
           address: result.data!.address,
           photos: [
             result.data!.centerPhoto,
@@ -35,8 +36,34 @@ class PhotoListNotifier extends Notifier<PhotoListState> {
       }
     } catch (e) {
       ref.read(photoListEffectProvider.notifier).state = ShowToast("Error occurred: $e");
-    } finally {
-      state = state.copyWith(isLoading: false);
+    }
+  }
+
+  Future<void> toggleLikePhoto(int photoId) async {
+    try {
+      final targetPhoto = state.photos.firstWhere((photo) => photo.id == photoId);
+
+      final result = await (targetPhoto.isLiked
+          ? _photoRepository.unlikePhoto(photoId)
+          : _photoRepository.likePhoto(photoId));
+
+      if (result.isSuccess) {
+        state = state.copyWith(
+          photos: state.photos.map((photo) {
+            return photo.id == photoId
+                ? photo.copyWith(
+                    isLiked: !photo.isLiked,
+                    likeCount: photo.isLiked
+                        ? photo.likeCount - 1
+                        : photo.likeCount + 1)
+                : photo;
+          }).toList(),
+        );
+      } else {
+        ref.read(photoListEffectProvider.notifier).state = ShowToast("Failed to toggle like");
+      }
+    } catch (e) {
+      ref.read(photoListEffectProvider.notifier).state = ShowToast("Error occurred: $e");
     }
   }
 }

@@ -12,6 +12,7 @@ class FeedItem extends StatelessWidget {
   final String title;
   final String description;
   final String time;
+  final VoidCallback onToggleLike;
 
   const FeedItem({
     super.key,
@@ -23,6 +24,7 @@ class FeedItem extends StatelessWidget {
     required this.title,
     required this.description,
     required this.time,
+    required this.onToggleLike,
   });
 
   @override
@@ -50,13 +52,17 @@ class FeedItem extends StatelessWidget {
 
         AspectRatio(
           aspectRatio: 1,
-          child: Image.network(
-            imageUrl,
-            width: double.infinity,
-            height: double.infinity,
-            fit: BoxFit.cover,
+          child: GestureDetector(
+            onDoubleTap: onToggleLike,
+            child: Image.network(
+              imageUrl,
+              width: double.infinity,
+              height: double.infinity,
+              fit: BoxFit.cover,
+            ),
           ),
         ),
+
 
         Padding(
           padding: const EdgeInsets.all(16),
@@ -65,10 +71,13 @@ class FeedItem extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(
-                    isLiked ? Icons.favorite : Icons.favorite_border,
-                    color: isLiked ? PicpleColors.red : PicpleColors.gray5,
-                    size: 24,
+                  GestureDetector(
+                    onTap: onToggleLike,
+                    child: Icon(
+                      isLiked ? Icons.favorite : Icons.favorite_border,
+                      color: isLiked ? PicpleColors.red : PicpleColors.gray5,
+                      size: 24,
+                    ),
                   ),
                   const SizedBox(width: 4),
                   Text(

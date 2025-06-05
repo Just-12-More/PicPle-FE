@@ -17,22 +17,44 @@ class PhotoDetailNotifier extends Notifier<PhotoDetailState> {
   }
 
   Future<void> fetchPhotoDetail(int photoId) async {
-    if (state.photo.imgUrl.isNotEmpty && !state.isLoading) return;
-
-    state = state.copyWith(isLoading: true);
+    if (state.isInitialized) return;
 
     try {
       final result = await _photoRepository.getPhotoDetail(photoId);
 
       if (result.isSuccess) {
-        state = state.copyWith(photo: result.data);
+        state = state.copyWith(
+          isInitialized: true,
+          photo: result.data
+        );
       } else {
         ref.read(photoDetailEffectProvider.notifier).state = ShowToast("Failed to fetch photo details");
       }
     } catch (e) {
       ref.read(photoDetailEffectProvider.notifier).state = ShowToast("Error occurred: $e");
-    } finally {
-      state = state.copyWith(isLoading: false);
+    }
+  }
+
+  Future<void> toggleLikePhoto(int photoId) async {
+    try {
+      final result = await (state.photo.isLiked
+        ? _photoRepository.unlikePhoto(photoId)
+        : _photoRepository.likePhoto(photoId));
+
+      if (result.isSuccess) {
+        state = state.copyWith(
+            photo: state.photo.copyWith(
+              isLiked: !state.photo.isLiked,
+              likeCount: state.photo.isLiked
+                  ? state.photo.likeCount - 1
+                  : state.photo.likeCount + 1,
+            )
+        );
+      } else {
+        ref.read(photoDetailEffectProvider.notifier).state = ShowToast("Failed to toggle like");
+      }
+    } catch (e) {
+      ref.read(photoDetailEffectProvider.notifier).state = ShowToast("Error occurred: $e");
     }
   }
 }
