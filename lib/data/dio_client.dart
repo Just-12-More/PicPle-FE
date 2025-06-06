@@ -78,23 +78,32 @@ class TokenInterceptor extends Interceptor {
         handler.next(err);
         return;
       }
-
-      final response = await Dio().post(
-        '${Config.baseUrl}/auth/reissue/token',
-        options: Options(headers: {
-          'Authorization': 'Bearer $refreshToken',
-        }),
+      final options = BaseOptions(
+        contentType: Headers.jsonContentType,
+        validateStatus: (status) {
+          return true;
+        },
       );
 
-      final newAccessToken = response.data['accessToken'];
-      final newRefreshToken = response.data['refreshToken'];
+      final dio = Dio(options)
+      ..httpClientAdapter = IOHttpClientAdapter();
+
+      final response = await dio.post(
+        '${Config.baseUrl}/auth/reissue/token',
+        data: {
+          'refreshToken': refreshToken,
+        },
+      );
+
+      final newAccessToken = response.data['data']['token'];
+      final newRefreshToken = response.data['data']['refreshToken'];
       await storage.write(key: Constants.ACCESS_TOKEN_KEY, value: newAccessToken);
       await storage.write(key: Constants.REFRESH_TOKEN_KEY, value: newRefreshToken);
 
       // 원래 요청 재시도
       final originalRequest = err.requestOptions;
       originalRequest.headers['Authorization'] = 'Bearer $newAccessToken';
-      final retryResponse = await Dio().fetch(originalRequest);
+      final retryResponse = await dio.fetch(originalRequest);
       handler.resolve(retryResponse);
       return;
     } catch (e) {
