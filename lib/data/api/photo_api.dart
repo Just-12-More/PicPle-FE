@@ -50,11 +50,12 @@ class PhotoApi {
   }
 
   Future<BaseResponse<NearbyPhotosData>> getNearbyPhotos(
-    int centerPhotoId
-  ) async {
+      int centerPhotoId,
+      ) async {
     try {
       final response = await _dioClient.dio.get(
-        '/photos/nearby/$centerPhotoId',
+        '/photos/nearby',
+        queryParameters: {'photo_id': centerPhotoId},
       );
 
       final nearbyPhotosResponse = BaseResponse<NearbyPhotosData>.fromJson(
@@ -76,7 +77,10 @@ class PhotoApi {
 
   Future<BaseResponse<PhotoData>> getPhotoDetail(int photoId) async {
     try {
-      final response = await _dioClient.dio.get('/photos/$photoId');
+      final response = await _dioClient.dio.get(
+        '/photos/details',
+        queryParameters: {'photo_id': photoId},
+      );
 
       final photoData = BaseResponse<PhotoData>.fromJson(
         response.data,
