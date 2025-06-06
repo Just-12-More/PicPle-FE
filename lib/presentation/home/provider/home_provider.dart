@@ -146,12 +146,12 @@ class HomeNotifier extends Notifier<HomeState> {
 
   double radiusByZoom(int zoom) {
     return switch (zoom) {
-      10 => 2.0,
-      11 => 1.0,
-      12 => 0.5,
-      13 => 0.25,
-      14 => 0.125,
-      _  => 5.0  // fallback
+      10 => 16.0,
+      11 => 14.0,
+      12 => 12.0,
+      13 => 10.0,
+      14 => 8.0,
+      _  => 20.0  // fallback
     };
   }
 }
