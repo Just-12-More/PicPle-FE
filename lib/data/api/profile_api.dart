@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
+import 'package:picple/core/util/image_utils.dart';
 import 'package:picple/data/dio_client.dart';
 import 'package:picple/data/model/response/my_photos_response.dart';
 import 'package:picple/data/model/response/profile_response.dart';
@@ -28,16 +31,16 @@ class ProfileApi {
 
   Future<BaseResponse<ProfileData>> updateProfile(String nickname, String? imagePath) async {
     try {
-      MultipartFile? imageFile;
-
       final formData = FormData();
       formData.fields.add(MapEntry('nickName', nickname));
 
       if (imagePath != null) {
-        imageFile = await MultipartFile.fromFile(
-          imagePath
-        );
+        final compressedFile = await resizeAndCompressImageFile(file: File(imagePath));
 
+        final imageFile = await MultipartFile.fromFile(
+          compressedFile.path,
+          filename: compressedFile.path.split('/').last,
+        );
         formData.files.add(MapEntry('image', imageFile));
       } else {
         formData.files.add(MapEntry('image', MultipartFile.fromBytes([], filename: '')));
