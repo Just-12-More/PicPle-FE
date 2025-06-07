@@ -1,6 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:http_parser/http_parser.dart';
-import 'package:mime/mime.dart';
 import 'package:picple/data/dio_client.dart';
 import 'package:picple/data/model/response/my_photos_response.dart';
 import 'package:picple/data/model/response/profile_response.dart';
@@ -36,17 +34,9 @@ class ProfileApi {
       formData.fields.add(MapEntry('nickName', nickname));
 
       if (imagePath != null) {
-        final mimeType = lookupMimeType(imagePath);
-        final typeParts = mimeType?.split('/');
-
-        if (typeParts != null && typeParts.length == 2) {
-          imageFile = await MultipartFile.fromFile(
-            imagePath,
-            contentType: MediaType(typeParts[0], typeParts[1]),
-          );
-        } else {
-          imageFile = await MultipartFile.fromFile(imagePath);
-        }
+        imageFile = await MultipartFile.fromFile(
+          imagePath
+        );
 
         formData.files.add(MapEntry('image', imageFile));
       } else {
@@ -106,12 +96,5 @@ class ProfileApi {
         ),
       );
     }
-  }
-
-  String? getMimeType(String path) {
-    if (path.endsWith('.png')) return 'image/png';
-    if (path.endsWith('.jpg') || path.endsWith('.jpeg')) return 'image/jpeg';
-    if (path.endsWith('.gif')) return 'image/gif';
-    return null;
   }
 } 

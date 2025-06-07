@@ -92,7 +92,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                             FileImage(File(state.imagePath!)) :
                             state.profileImageUrl != null ?
                             NetworkImage(state.profileImageUrl!) :
-                            const AssetImage('assets/images/default_profile.png'),
+                            const AssetImage('assets/images/img_profile_placeholder.png'),
                             backgroundColor: Colors.grey[200],
                           ),
                           Positioned(

@@ -5,7 +5,7 @@ import 'package:picple/presentation/theme/picple_colors.dart';
 import 'package:picple/presentation/theme/picple_typography.dart';
 import 'package:picple/routes.dart';
 
-import '../../../data/model/response/nearby_photos_response.dart';
+import '../../../data/model/response/my_photos_response.dart';
 import '../provider/profile_contract.dart';
 import '../provider/profile_notifier.dart';
 
@@ -81,64 +81,69 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
   Widget _buildProfileContent(ProfileState state) {
     final state = ref.watch(profileStateProvider);
 
-    return Container(
-      color: PicpleColors.white,
-      child: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24),
-              child: Center(
-                child: Column(
-                  children: [
-                    CircleAvatar(
-                      radius: 44,
-                      backgroundImage: NetworkImage(
-                        state.profileImage ?? 'https://randomuser.me/api/portraits/men/1.jpg',
+    return RefreshIndicator(
+      onRefresh: () async {
+        ref.read(profileStateProvider.notifier).refreshState();
+      },
+      child: Container(
+        color: PicpleColors.white,
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: Center(
+                  child: Column(
+                    children: [
+                      CircleAvatar(
+                        radius: 44,
+                        backgroundImage: state.profileImage != null
+                            ? NetworkImage(state.profileImage!)
+                            : const AssetImage('assets/images/img_profile_placeholder.png') as ImageProvider,
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      state.nickname ?? '닉네임 없음',
-                      style: PicpleTypography.title2,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Container(
-              decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: PicpleColors.gray2)),
-              ),
-              child: TabBar(
-                controller: _tabController,
-                indicatorColor: PicpleColors.primary1,
-                indicator: const UnderlineTabIndicator(
-                  borderSide: BorderSide(
-                    color: PicpleColors.primary1,
-                    width: 2,
+                      const SizedBox(height: 12),
+                      Text(
+                        state.nickname ?? '닉네임 없음',
+                        style: PicpleTypography.title2,
+                      ),
+                    ],
                   ),
                 ),
-                indicatorSize: TabBarIndicatorSize.tab,
-                labelColor: PicpleColors.primary1,
-                unselectedLabelColor: PicpleColors.gray5,
-                labelStyle: PicpleTypography.body1SemiBold,
-                tabs: const [Tab(text: '내가 찍은 사진'), Tab(text: '좋아요한 사진')],
               ),
-            ),
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [_buildPhotoGrid(state.myPhotos), _buildPhotoGrid(state.myLikedPhotos)],
+              Container(
+                decoration: const BoxDecoration(
+                  border: Border(bottom: BorderSide(color: PicpleColors.gray2)),
+                ),
+                child: TabBar(
+                  controller: _tabController,
+                  indicatorColor: PicpleColors.primary1,
+                  indicator: const UnderlineTabIndicator(
+                    borderSide: BorderSide(
+                      color: PicpleColors.primary1,
+                      width: 2,
+                    ),
+                  ),
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  labelColor: PicpleColors.primary1,
+                  unselectedLabelColor: PicpleColors.gray5,
+                  labelStyle: PicpleTypography.body1SemiBold,
+                  tabs: const [Tab(text: '내가 찍은 사진'), Tab(text: '좋아요한 사진')],
+                ),
               ),
-            ),
-          ],
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [_buildPhotoGrid(state.myPhotos), _buildPhotoGrid(state.myLikedPhotos)],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildPhotoGrid(List<PhotoData> photos) {
+  Widget _buildPhotoGrid(List<SimplePhotoData> photos) {
     return GridView.builder(
       itemCount: photos.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

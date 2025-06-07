@@ -1,20 +1,39 @@
-import 'package:picple/data/model/response/nearby_photos_response.dart';
-
 class MyPhotosData {
-  final String address;
-  final List<PhotoData> photos;
+  final List<SimplePhotoData> photos;
 
   MyPhotosData({
-    required this.address,
     required this.photos,
   });
 
   factory MyPhotosData.fromJson(Map<String, dynamic> json) {
     return MyPhotosData(
-      address: json['address'],
-      photos: List<PhotoData>.from(
-        json['photos'].map((x) => PhotoData.fromJson(x)),
+      photos: List<SimplePhotoData>.from(
+        json['photos'].map((x) => SimplePhotoData.fromJson(x)),
       ),
     );
+  }
+}
+
+class SimplePhotoData {
+  final int id;
+  final String imgUrl;
+
+  const SimplePhotoData({
+    required this.id,
+    required this.imgUrl,
+  });
+
+  factory SimplePhotoData.fromJson(Map<String, dynamic> json) {
+    return SimplePhotoData(
+      id: json['id'],
+      imgUrl: json['imgUrl'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'imgUrl': imgUrl,
+    };
   }
 }
