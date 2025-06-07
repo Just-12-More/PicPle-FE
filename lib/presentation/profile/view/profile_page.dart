@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,7 +6,7 @@ import 'package:picple/presentation/theme/picple_colors.dart';
 import 'package:picple/presentation/theme/picple_typography.dart';
 import 'package:picple/routes.dart';
 
-import '../../../data/model/response/nearby_photos_response.dart';
+import '../../../data/model/response/my_photos_response.dart';
 import '../provider/profile_contract.dart';
 import '../provider/profile_notifier.dart';
 
@@ -23,7 +24,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 2, vsync: this)
+      ..addListener(() {
+        if (_tabController.indexIsChanging) {
+          setState(() {});
+        }
+      });
   }
 
   @override
@@ -75,37 +81,41 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
       body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
           : _buildProfileContent(state),
+      backgroundColor: PicpleColors.white,
     );
   }
 
   Widget _buildProfileContent(ProfileState state) {
-    final state = ref.watch(profileStateProvider);
+    final selectedPhotos = _tabController.index == 0
+        ? state.myPhotos
+        : state.myLikedPhotos;
 
-    return Container(
-      color: PicpleColors.white,
-      child: SafeArea(
+    return RefreshIndicator(
+      onRefresh: () async {
+        ref.read(profileStateProvider.notifier).refreshState();
+      },
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24),
-              child: Center(
-                child: Column(
-                  children: [
-                    CircleAvatar(
-                      radius: 44,
-                      backgroundImage: NetworkImage(
-                        state.profileImage ?? 'https://randomuser.me/api/portraits/men/1.jpg',
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      state.nickname ?? '닉네임 없음',
-                      style: PicpleTypography.title2,
-                    ),
-                  ],
-                ),
+            const SizedBox(height: 24),
+            ClipOval(
+              child: CachedNetworkImage(
+                width: 100,
+                height: 100,
+                imageUrl: state.profileImage ?? '',
+                placeholder: (context, url) =>
+                    Image.asset('assets/images/img_profile_placeholder.png'),
+                errorWidget: (context, url, error) =>
+                    Image.asset('assets/images/img_profile_placeholder.png'),
               ),
             ),
+            const SizedBox(height: 12),
+            Text(
+              state.nickname ?? '닉네임 없음',
+              style: PicpleTypography.title2,
+            ),
+            const SizedBox(height: 24),
             Container(
               decoration: const BoxDecoration(
                 border: Border(bottom: BorderSide(color: PicpleColors.gray2)),
@@ -114,23 +124,21 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                 controller: _tabController,
                 indicatorColor: PicpleColors.primary1,
                 indicator: const UnderlineTabIndicator(
-                  borderSide: BorderSide(
-                    color: PicpleColors.primary1,
-                    width: 2,
-                  ),
+                  borderSide: BorderSide(color: PicpleColors.primary1, width: 2),
                 ),
                 indicatorSize: TabBarIndicatorSize.tab,
                 labelColor: PicpleColors.primary1,
                 unselectedLabelColor: PicpleColors.gray5,
                 labelStyle: PicpleTypography.body1SemiBold,
-                tabs: const [Tab(text: '내가 찍은 사진'), Tab(text: '좋아요한 사진')],
+                tabs: const [
+                  Tab(text: '내가 찍은 사진'),
+                  Tab(text: '좋아요한 사진'),
+                ],
               ),
             ),
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [_buildPhotoGrid(state.myPhotos), _buildPhotoGrid(state.myLikedPhotos)],
-              ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: _buildPhotoGrid(selectedPhotos),
             ),
           ],
         ),
@@ -138,8 +146,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
     );
   }
 
-  Widget _buildPhotoGrid(List<PhotoData> photos) {
+  Widget _buildPhotoGrid(List<SimplePhotoData> photos) {
     return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: photos.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,

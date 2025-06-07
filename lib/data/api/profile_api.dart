@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
+import 'package:picple/core/util/image_utils.dart';
 import 'package:picple/data/dio_client.dart';
 import 'package:picple/data/model/response/my_photos_response.dart';
 import 'package:picple/data/model/response/profile_response.dart';
@@ -12,7 +15,7 @@ class ProfileApi {
 
   Future<BaseResponse<ProfileData>> getProfile() async {
     try {
-      final response = await _dioClient.dio.post('/users/info');
+      final response = await _dioClient.dio.get('/users/info');
       final profileResponse = BaseResponse<ProfileData>.fromJson(response.data, ProfileData.fromJson);
       return profileResponse;
     } catch (e) {
@@ -28,15 +31,26 @@ class ProfileApi {
 
   Future<BaseResponse<ProfileData>> updateProfile(String nickname, String? imagePath) async {
     try {
-      final formData = FormData.fromMap({
-        'nickname': nickname,
-        'profileImage': imagePath != null
-            ? await MultipartFile.fromFile(imagePath)
-            : null,
-      });
+      final formData = FormData();
+      formData.fields.add(MapEntry('nickName', nickname));
 
-      final response = await _dioClient.dio.post('/users/update', data: formData);
-      final profileResponse = BaseResponse<ProfileData>.fromJson(response.data, ProfileData.fromJson);
+      if (imagePath != null) {
+        final compressedFile = await resizeAndCompressImageFile(file: File(imagePath));
+
+        final imageFile = await MultipartFile.fromFile(
+          compressedFile.path,
+          filename: compressedFile.path.split('/').last,
+        );
+        formData.files.add(MapEntry('image', imageFile));
+      } else {
+        formData.files.add(MapEntry('image', MultipartFile.fromBytes([], filename: '')));
+      }
+
+      final response = await _dioClient.dio.post('/users/info', data: formData);
+      final profileResponse = BaseResponse<ProfileData>.fromJson(
+        response.data,
+        ProfileData.fromJson,
+      );
       return profileResponse;
     } catch (e) {
       return BaseResponse(

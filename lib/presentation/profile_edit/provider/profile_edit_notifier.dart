@@ -27,8 +27,8 @@ class ProfileEditNotifier extends Notifier<ProfileEditState> {
       if (response.isSuccess) {
         state = state.copyWith(
           isLoading: false,
-          profileImageUrl: response.data?.profileImgUrl,
-          nickname: response.data?.nickname,
+          profileImageUrl: response.data?.profilePath,
+          nickname: response.data?.username,
         );
       } else {
         _showToast("프로필 정보를 가져오지 못했습니다.");
@@ -69,8 +69,8 @@ class ProfileEditNotifier extends Notifier<ProfileEditState> {
     try {
       final response = await _profileRepository.updateProfile(state.nickname, state.imagePath);
       if (response.isSuccess) {
-        ref.watch(profileStateProvider.notifier).setNickname(response.data!.nickname);
-        ref.watch(profileStateProvider.notifier).setProfileImage(response.data!.profileImgUrl);
+        ref.watch(profileStateProvider.notifier).setNickname(response.data!.username);
+        ref.watch(profileStateProvider.notifier).setProfileImage(response.data!.profilePath);
         _showToast("변경사항이 저장되었습니다.");
         _navigateBack();
       } else {

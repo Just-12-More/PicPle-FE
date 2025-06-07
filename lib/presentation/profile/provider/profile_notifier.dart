@@ -36,14 +36,21 @@ class ProfileNotifier extends Notifier<ProfileState> {
     try {
       final myLikedPhotosResponse = await _profileRepository.getMyLikedPhotos();
       final myPhotosResponse = await _profileRepository.getMyPhotos();
+
       if (myLikedPhotosResponse.isSuccess) {
         state = state.copyWith(
-          isLoading: false,
-          myLikedPhotos: myLikedPhotosResponse.data!.photos,
-          myPhotos: myPhotosResponse.data!.photos,
+          myLikedPhotos: myLikedPhotosResponse.data?.photos ?? [],
         );
       } else {
-        showToast("나의 사진 목록을 가져오지 못했습니다.");
+        showToast("좋아요한 사진 목록을 가져오지 못했습니다.");
+      }
+
+      if (myPhotosResponse.isSuccess) {
+        state = state.copyWith(
+          myPhotos: myPhotosResponse.data?.photos ?? [],
+        );
+      } else {
+        showToast("업로드한 사진 목록을 가져오지 못했습니다.");
       }
     } catch (e) {
       showToast("오류 발생: $e");
@@ -60,8 +67,8 @@ class ProfileNotifier extends Notifier<ProfileState> {
       if (response.isSuccess) {
         state = state.copyWith(
           isLoading: false,
-          profileImage: response.data?.profileImgUrl,
-          nickname: response.data?.nickname,
+          profileImage: response.data?.profilePath,
+          nickname: response.data?.username,
         );
       } else {
         showToast("프로필 정보를 가져오지 못했습니다.");
