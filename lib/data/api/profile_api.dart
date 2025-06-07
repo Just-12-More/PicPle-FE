@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:http_parser/http_parser.dart';
+import 'package:mime/mime.dart';
 import 'package:picple/data/dio_client.dart';
 import 'package:picple/data/model/response/my_photos_response.dart';
 import 'package:picple/data/model/response/profile_response.dart';
@@ -12,7 +14,7 @@ class ProfileApi {
 
   Future<BaseResponse<ProfileData>> getProfile() async {
     try {
-      final response = await _dioClient.dio.post('/users/info');
+      final response = await _dioClient.dio.get('/users/info');
       final profileResponse = BaseResponse<ProfileData>.fromJson(response.data, ProfileData.fromJson);
       return profileResponse;
     } catch (e) {
@@ -28,15 +30,34 @@ class ProfileApi {
 
   Future<BaseResponse<ProfileData>> updateProfile(String nickname, String? imagePath) async {
     try {
-      final formData = FormData.fromMap({
-        'nickname': nickname,
-        'profileImage': imagePath != null
-            ? await MultipartFile.fromFile(imagePath)
-            : null,
-      });
+      MultipartFile? imageFile;
 
-      final response = await _dioClient.dio.post('/users/update', data: formData);
-      final profileResponse = BaseResponse<ProfileData>.fromJson(response.data, ProfileData.fromJson);
+      final formData = FormData();
+      formData.fields.add(MapEntry('nickName', nickname));
+
+      if (imagePath != null) {
+        final mimeType = lookupMimeType(imagePath);
+        final typeParts = mimeType?.split('/');
+
+        if (typeParts != null && typeParts.length == 2) {
+          imageFile = await MultipartFile.fromFile(
+            imagePath,
+            contentType: MediaType(typeParts[0], typeParts[1]),
+          );
+        } else {
+          imageFile = await MultipartFile.fromFile(imagePath);
+        }
+
+        formData.files.add(MapEntry('image', imageFile));
+      } else {
+        formData.files.add(MapEntry('image', MultipartFile.fromBytes([], filename: '')));
+      }
+
+      final response = await _dioClient.dio.post('/users/info', data: formData);
+      final profileResponse = BaseResponse<ProfileData>.fromJson(
+        response.data,
+        ProfileData.fromJson,
+      );
       return profileResponse;
     } catch (e) {
       return BaseResponse(
@@ -85,5 +106,12 @@ class ProfileApi {
         ),
       );
     }
+  }
+
+  String? getMimeType(String path) {
+    if (path.endsWith('.png')) return 'image/png';
+    if (path.endsWith('.jpg') || path.endsWith('.jpeg')) return 'image/jpeg';
+    if (path.endsWith('.gif')) return 'image/gif';
+    return null;
   }
 } 

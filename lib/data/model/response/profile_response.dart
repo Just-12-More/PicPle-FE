@@ -1,16 +1,16 @@
 class ProfileData {
-  final String nickname;
-  final String profileImgUrl;
+  final String username;
+  final String profilePath;
 
   ProfileData({
-    required this.nickname,
-    required this.profileImgUrl,
+    required this.username,
+    required this.profilePath,
   });
 
   factory ProfileData.fromJson(Map<String, dynamic> json) {
     return ProfileData(
-      nickname: json['nickname'] as String,
-      profileImgUrl: json['profileImgUrl'] as String,
+      username: json['username'] as String,
+      profilePath: json['profilePath'] as String,
     );
   }
 } 
