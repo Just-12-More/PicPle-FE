@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -95,11 +96,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                 child: Center(
                   child: Column(
                     children: [
-                      CircleAvatar(
-                        radius: 44,
-                        backgroundImage: state.profileImage != null
-                            ? NetworkImage(state.profileImage!)
-                            : const AssetImage('assets/images/img_profile_placeholder.png') as ImageProvider,
+                      ClipOval(
+                        child: CachedNetworkImage(
+                          width: 100,
+                          height: 100,
+                          imageUrl: state.profileImage ?? '',
+                          placeholder: (context, url) => Image.asset('assets/images/img_profile_placeholder.png'),
+                          errorWidget: (context, url, error) => Image.asset('assets/images/img_profile_placeholder.png'),
+                        )
                       ),
                       const SizedBox(height: 12),
                       Text(

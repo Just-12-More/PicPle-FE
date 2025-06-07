@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../theme/picple_colors.dart';
@@ -37,9 +38,14 @@ class FeedItem extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Row(
             children: [
-              CircleAvatar(
-                radius: 15,
-                backgroundImage: NetworkImage(profileImageUrl), // 유저 이미지
+              ClipOval(
+                child: CachedNetworkImage(
+                  width: 30,
+                  height: 30,
+                  imageUrl: profileImageUrl,
+                  placeholder: (context, url) => Image.asset('assets/images/img_profile_placeholder.png'),
+                  errorWidget: (context, url, error) => Image.asset('assets/images/img_profile_placeholder.png'),
+                )
               ),
               const SizedBox(width: 8),
               Text(
