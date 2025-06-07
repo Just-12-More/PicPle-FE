@@ -112,19 +112,34 @@ class ScaffoldWithNavBar extends StatelessWidget {
 
   const ScaffoldWithNavBar({super.key, required this.navigationShell});
 
+  bool _isTopLevelRoute(BuildContext context) {
+    final location = GoRouter.of(context).routeInformationProvider.value.uri.path;
+
+    final topLevelRoutes = [
+      Routes.home.path,
+      Routes.profile.path,
+    ];
+
+    return topLevelRoutes.contains(location);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final showBottomBar = _isTopLevelRoute(context);
+
     return Scaffold(
       body: navigationShell,
-      bottomNavigationBar: PicpleBottomNavigationBar(
-        currentIndex: navigationShell.currentIndex,
-        onTap: (index) {
-          navigationShell.goBranch(index);
-        },
-        onUploadTap: () {
-          context.push(Routes.upload.path);
-        },
-      )
+      bottomNavigationBar: showBottomBar
+        ? PicpleBottomNavigationBar(
+            currentIndex: navigationShell.currentIndex,
+            onTap: (index) {
+              navigationShell.goBranch(index);
+            },
+            onUploadTap: () {
+              context.push(Routes.upload.path);
+            },
+          )
+        : null,
     );
   }
 }
