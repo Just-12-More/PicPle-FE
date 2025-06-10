@@ -8,10 +8,10 @@ import '../../../data/repository/photo_repository.dart';
 import '../../../data/service_providers.dart';
 import 'home_contract.dart';
 
-final homeStateProvider = NotifierProvider<HomeNotifier, HomeState>(() => HomeNotifier());
-final homeEffectProvider = StateProvider<HomeEffect?>((ref) => null);
+final homeStateProvider = NotifierProvider.autoDispose<HomeNotifier, HomeState>(() => HomeNotifier());
+final homeEffectProvider = StateProvider.autoDispose<HomeEffect?>((ref) => null);
 
-class HomeNotifier extends Notifier<HomeState> {
+class HomeNotifier extends AutoDisposeNotifier<HomeState> {
   late final PhotoRepository _photoRepository;
   StreamSubscription<Position>? _positionSubscription;
 

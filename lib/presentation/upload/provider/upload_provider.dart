@@ -8,10 +8,10 @@ import '../../../core/util/image_utils.dart';
 import '../../../data/repository/photo_repository.dart';
 import '../../../data/service_providers.dart';
 
-final uploadStateProvider = NotifierProvider<UploadNotifier, UploadState>(() => UploadNotifier());
-final uploadEffectProvider = StateProvider<UploadEffect?>((ref) => null);
+final uploadStateProvider = NotifierProvider.autoDispose<UploadNotifier, UploadState>(() => UploadNotifier());
+final uploadEffectProvider = StateProvider.autoDispose<UploadEffect?>((ref) => null);
 
-class UploadNotifier extends Notifier<UploadState> {
+class UploadNotifier extends AutoDisposeNotifier<UploadState> {
   late final PhotoRepository _photoRepository;
 
   @override

@@ -4,13 +4,11 @@ import 'package:picple/presentation/shared/photo_detail/provider/photo_detail_co
 
 import '../../../../data/service_providers.dart';
 
-final photoDetailStateProvider = NotifierProvider<PhotoDetailNotifier, PhotoDetailState>(() => PhotoDetailNotifier());
-final photoDetailEffectProvider = StateProvider<PhotoDetailEffect?>((ref) => null);
+final photoDetailStateProvider = NotifierProvider.autoDispose<PhotoDetailNotifier, PhotoDetailState>(() => PhotoDetailNotifier());
+final photoDetailEffectProvider = StateProvider.autoDispose<PhotoDetailEffect?>((ref) => null);
 
-class PhotoDetailNotifier extends Notifier<PhotoDetailState> {
+class PhotoDetailNotifier extends AutoDisposeNotifier<PhotoDetailState> {
   late final PhotoRepository _photoRepository;
-
-  int? _lastFetchedPhotoId;
 
   @override
   PhotoDetailState build() {
@@ -19,10 +17,7 @@ class PhotoDetailNotifier extends Notifier<PhotoDetailState> {
   }
 
   Future<void> fetchPhotoDetail(int photoId) async {
-    if (state.isInitialized && photoId == _lastFetchedPhotoId) return;
-    if (photoId != _lastFetchedPhotoId) {
-      state = state.copyWith(isInitialized: false, photo: null);
-    }
+    if (state.isInitialized) return;
 
     try {
       final result = await _photoRepository.getPhotoDetail(photoId);
@@ -32,7 +27,6 @@ class PhotoDetailNotifier extends Notifier<PhotoDetailState> {
           isInitialized: true,
           photo: result.data
         );
-        _lastFetchedPhotoId = photoId;
       } else {
         ref.read(photoDetailEffectProvider.notifier).state = ShowToast("Failed to fetch photo details");
       }

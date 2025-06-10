@@ -7,10 +7,10 @@ import '../../../data/service_providers.dart';
 import '../../../routes.dart';
 import 'login_contract.dart';
 
-final loginStateProvider = NotifierProvider<LoginNotifier, LoginState>(() => LoginNotifier());
-final loginEffectProvider = StateProvider<LoginEffect?>((ref) => null);
+final loginStateProvider = NotifierProvider.autoDispose<LoginNotifier, LoginState>(() => LoginNotifier());
+final loginEffectProvider = StateProvider.autoDispose<LoginEffect?>((ref) => null);
 
-class LoginNotifier extends Notifier<LoginState> {
+class LoginNotifier extends AutoDisposeNotifier<LoginState> {
   late final AuthRepository _authRepository;
 
   @override

@@ -5,10 +5,10 @@ import 'package:picple/presentation/splash/provider/splash_contract.dart';
 import '../../../data/api/storage_api.dart';
 import '../../../routes.dart';
 
-final splashStateProvider = NotifierProvider<SplashNotifier, SplashState>(() => SplashNotifier());
-final splashEffectProvider = StateProvider<SplashEffect?>((ref) => null);
+final splashStateProvider = NotifierProvider.autoDispose<SplashNotifier, SplashState>(() => SplashNotifier());
+final splashEffectProvider = StateProvider.autoDispose<SplashEffect?>((ref) => null);
 
-class SplashNotifier extends Notifier<SplashState> {
+class SplashNotifier extends AutoDisposeNotifier<SplashState> {
   late final StorageApi _storageApi;
 
   @override

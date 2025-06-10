@@ -4,13 +4,11 @@ import 'package:picple/presentation/shared/photo_list/provider/photo_list_contra
 
 import '../../../../data/service_providers.dart';
 
-final photoListStateProvider = NotifierProvider<PhotoListNotifier, PhotoListState>(() => PhotoListNotifier());
-final photoListEffectProvider = StateProvider<PhotoListEffect?>((ref) => null);
+final photoListStateProvider = NotifierProvider.autoDispose<PhotoListNotifier, PhotoListState>(() => PhotoListNotifier());
+final photoListEffectProvider = StateProvider.autoDispose<PhotoListEffect?>((ref) => null);
 
-class PhotoListNotifier extends Notifier<PhotoListState> {
+class PhotoListNotifier extends AutoDisposeNotifier<PhotoListState> {
   late final PhotoRepository _photoRepository;
-
-  int? _lastCenterPhotoId;
 
   @override
   PhotoListState build() {
@@ -19,10 +17,7 @@ class PhotoListNotifier extends Notifier<PhotoListState> {
   }
 
   Future<void> fetchPhotoList(int centerPhotoId) async {
-    if (state.isInitialized && centerPhotoId == _lastCenterPhotoId) return;
-    if (centerPhotoId != _lastCenterPhotoId) {
-      state = state.copyWith(isInitialized: false, address: null, photos: []);
-    }
+    if (state.isInitialized) return;
 
     try {
       final result = await _photoRepository.getNearbyPhotos(centerPhotoId);
@@ -36,7 +31,6 @@ class PhotoListNotifier extends Notifier<PhotoListState> {
             ...result.data!.nearbyPhotos,
           ]
         );
-        _lastCenterPhotoId = centerPhotoId;
       } else {
         ref.read(photoListEffectProvider.notifier).state = ShowToast("Failed to fetch photos");
       }

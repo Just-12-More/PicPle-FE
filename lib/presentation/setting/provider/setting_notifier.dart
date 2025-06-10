@@ -5,10 +5,10 @@ import 'package:picple/data/service_providers.dart';
 
 import 'setting_contract.dart';
 
-final settingStateProvider = NotifierProvider<SettingNotifier, SettingState>(() => SettingNotifier());
-final settingEffectProvider = StateProvider<SettingEffect?>((ref) => null);
+final settingStateProvider = NotifierProvider.autoDispose<SettingNotifier, SettingState>(() => SettingNotifier());
+final settingEffectProvider = StateProvider.autoDispose<SettingEffect?>((ref) => null);
 
-class SettingNotifier extends Notifier<SettingState> {
+class SettingNotifier extends AutoDisposeNotifier<SettingState> {
   late final AuthRepository _authRepository;
 
   @override
