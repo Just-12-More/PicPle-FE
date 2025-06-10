@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:picple/data/model/response/nearby_photos_response.dart';
 import 'package:picple/presentation/component/picple_bottom_navigation_bar.dart';
+import 'package:picple/presentation/home/provider/home_provider.dart';
 import 'package:picple/presentation/home/view/home_page.dart';
 import 'package:picple/presentation/login/view/login_page.dart';
 import 'package:picple/presentation/profile/view/profile_page.dart';
@@ -135,8 +138,13 @@ class ScaffoldWithNavBar extends StatelessWidget {
             onTap: (index) {
               navigationShell.goBranch(index);
             },
-            onUploadTap: () {
-              context.push(Routes.upload.path);
+            onUploadTap: () async {
+              final container = ProviderScope.containerOf(context);
+              final result = await context.push(Routes.upload.path);
+
+              if (result != null && result is PhotoData) {
+                container.read(homeStateProvider.notifier).addPhoto(result);
+              }
             },
           )
         : null,

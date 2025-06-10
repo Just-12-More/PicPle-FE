@@ -22,26 +22,26 @@ Future<void> addMarkerWithPlaceholderImage({
   int zIndex = 0,
   void Function()? onTap,
 }) async {
-  const placeholder = NOverlayImage.fromAssetImage('assets/images/img_placeholder.png');
-
-  final marker = NMarker(
-    id: id,
-    position: position,
-    icon: placeholder,
-    size: const Size(48, 48),
-  );
-
-  marker.setOnTapListener((NMarker marker) {
-    onTap?.call();
-  });
-
-  controller.addOverlay(marker);
-
   try {
-    final realImage = await createOverlayImageFromUrl(imageUrl);
+    const placeholder = NOverlayImage.fromAssetImage(
+        'assets/images/img_placeholder.png');
 
+    final marker = NMarker(
+      id: id,
+      position: position,
+      icon: placeholder,
+      size: const Size(48, 48),
+    );
+
+    marker.setOnTapListener((NMarker marker) {
+      onTap?.call();
+    });
+
+    controller.addOverlay(marker);
+
+    final realImage = await createOverlayImageFromUrl(imageUrl);
     marker.setIcon(realImage);
   } catch (e) {
-    log('Error loading image from URL: $e');
+    log('Error adding marker: $e');
   }
 }

@@ -165,7 +165,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     _mapController!.addOverlay(_myLocationMarker!);
   }
 
-  void _renderPhotoMarkers(List<PhotoData> photos){
+  void _renderPhotoMarkers(List<PhotoData> photos) {
     for (final photo in photos) {
       final markerId = 'photo_${photo.id}';
       if (_renderedPhotoIds.contains(markerId)) continue;

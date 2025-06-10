@@ -72,11 +72,10 @@ class UploadNotifier extends Notifier<UploadState> {
       );
 
       if (uploadResult.isSuccess) {
-        ref.read(uploadEffectProvider.notifier).state = NavigateBack();
+        ref.read(uploadEffectProvider.notifier).state = UploadSuccess(uploadResult.data!);
       } else {
         _showToast("메타데이터 저장 실패: ${uploadResult.error?.message ?? 'Unknown error'}");
       }
-
     } catch (e) {
       _showToast("오류 발생: $e");
     } finally {
