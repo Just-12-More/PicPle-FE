@@ -24,8 +24,8 @@ class SettingPage extends ConsumerWidget {
             SnackBar(content: Text(next.message)),
           );
           break;
-        case NavigateTo():
-          context.go(next.route);
+        case BackToLogin():
+          context.go(Routes.login.path);
           break;
       }
       ref.read(settingEffectProvider.notifier).state = null;
