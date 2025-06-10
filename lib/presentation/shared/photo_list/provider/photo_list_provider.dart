@@ -10,6 +10,8 @@ final photoListEffectProvider = StateProvider<PhotoListEffect?>((ref) => null);
 class PhotoListNotifier extends Notifier<PhotoListState> {
   late final PhotoRepository _photoRepository;
 
+  int? _lastCenterPhotoId;
+
   @override
   PhotoListState build() {
     _photoRepository = ref.watch(photoRepositoryProvider);
@@ -17,7 +19,10 @@ class PhotoListNotifier extends Notifier<PhotoListState> {
   }
 
   Future<void> fetchPhotoList(int centerPhotoId) async {
-    if (state.isInitialized) return;
+    if (state.isInitialized && centerPhotoId == _lastCenterPhotoId) return;
+    if (centerPhotoId != _lastCenterPhotoId) {
+      state = state.copyWith(isInitialized: false, address: null, photos: []);
+    }
 
     try {
       final result = await _photoRepository.getNearbyPhotos(centerPhotoId);
@@ -31,6 +36,7 @@ class PhotoListNotifier extends Notifier<PhotoListState> {
             ...result.data!.nearbyPhotos,
           ]
         );
+        _lastCenterPhotoId = centerPhotoId;
       } else {
         ref.read(photoListEffectProvider.notifier).state = ShowToast("Failed to fetch photos");
       }

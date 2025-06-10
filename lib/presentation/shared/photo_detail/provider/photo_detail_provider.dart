@@ -10,6 +10,8 @@ final photoDetailEffectProvider = StateProvider<PhotoDetailEffect?>((ref) => nul
 class PhotoDetailNotifier extends Notifier<PhotoDetailState> {
   late final PhotoRepository _photoRepository;
 
+  int? _lastFetchedPhotoId;
+
   @override
   PhotoDetailState build() {
     _photoRepository = ref.watch(photoRepositoryProvider); // Initial fetch with dummy ID
@@ -17,7 +19,10 @@ class PhotoDetailNotifier extends Notifier<PhotoDetailState> {
   }
 
   Future<void> fetchPhotoDetail(int photoId) async {
-    if (state.isInitialized) return;
+    if (state.isInitialized && photoId == _lastFetchedPhotoId) return;
+    if (photoId != _lastFetchedPhotoId) {
+      state = state.copyWith(isInitialized: false, photo: null);
+    }
 
     try {
       final result = await _photoRepository.getPhotoDetail(photoId);
@@ -27,6 +32,7 @@ class PhotoDetailNotifier extends Notifier<PhotoDetailState> {
           isInitialized: true,
           photo: result.data
         );
+        _lastFetchedPhotoId = photoId;
       } else {
         ref.read(photoDetailEffectProvider.notifier).state = ShowToast("Failed to fetch photo details");
       }
