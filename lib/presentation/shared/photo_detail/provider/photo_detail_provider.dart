@@ -4,10 +4,10 @@ import 'package:picple/presentation/shared/photo_detail/provider/photo_detail_co
 
 import '../../../../data/service_providers.dart';
 
-final photoDetailStateProvider = NotifierProvider<PhotoDetailNotifier, PhotoDetailState>(() => PhotoDetailNotifier());
-final photoDetailEffectProvider = StateProvider<PhotoDetailEffect?>((ref) => null);
+final photoDetailStateProvider = NotifierProvider.autoDispose<PhotoDetailNotifier, PhotoDetailState>(() => PhotoDetailNotifier());
+final photoDetailEffectProvider = StateProvider.autoDispose<PhotoDetailEffect?>((ref) => null);
 
-class PhotoDetailNotifier extends Notifier<PhotoDetailState> {
+class PhotoDetailNotifier extends AutoDisposeNotifier<PhotoDetailState> {
   late final PhotoRepository _photoRepository;
 
   @override

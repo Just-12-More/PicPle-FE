@@ -8,10 +8,10 @@ import '../../../core/util/image_utils.dart';
 import '../../../data/repository/photo_repository.dart';
 import '../../../data/service_providers.dart';
 
-final uploadStateProvider = NotifierProvider<UploadNotifier, UploadState>(() => UploadNotifier());
-final uploadEffectProvider = StateProvider<UploadEffect?>((ref) => null);
+final uploadStateProvider = NotifierProvider.autoDispose<UploadNotifier, UploadState>(() => UploadNotifier());
+final uploadEffectProvider = StateProvider.autoDispose<UploadEffect?>((ref) => null);
 
-class UploadNotifier extends Notifier<UploadState> {
+class UploadNotifier extends AutoDisposeNotifier<UploadState> {
   late final PhotoRepository _photoRepository;
 
   @override
@@ -72,11 +72,10 @@ class UploadNotifier extends Notifier<UploadState> {
       );
 
       if (uploadResult.isSuccess) {
-        ref.read(uploadEffectProvider.notifier).state = NavigateBack();
+        ref.read(uploadEffectProvider.notifier).state = UploadSuccess(uploadResult.data!);
       } else {
         _showToast("메타데이터 저장 실패: ${uploadResult.error?.message ?? 'Unknown error'}");
       }
-
     } catch (e) {
       _showToast("오류 발생: $e");
     } finally {

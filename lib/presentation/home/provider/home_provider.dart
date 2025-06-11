@@ -3,14 +3,15 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 
+import '../../../data/model/response/nearby_photos_response.dart';
 import '../../../data/repository/photo_repository.dart';
 import '../../../data/service_providers.dart';
 import 'home_contract.dart';
 
-final homeStateProvider = NotifierProvider<HomeNotifier, HomeState>(() => HomeNotifier());
-final homeEffectProvider = StateProvider<HomeEffect?>((ref) => null);
+final homeStateProvider = NotifierProvider.autoDispose<HomeNotifier, HomeState>(() => HomeNotifier());
+final homeEffectProvider = StateProvider.autoDispose<HomeEffect?>((ref) => null);
 
-class HomeNotifier extends Notifier<HomeState> {
+class HomeNotifier extends AutoDisposeNotifier<HomeState> {
   late final PhotoRepository _photoRepository;
   StreamSubscription<Position>? _positionSubscription;
 
@@ -142,6 +143,14 @@ class HomeNotifier extends Notifier<HomeState> {
     } finally {
       state = state.copyWith(isLoading: false);
     }
+  }
+
+  void addPhoto(PhotoData photo) {
+    final currentPhotos = state.photos;
+
+    List<PhotoData> updatedPhotos;
+    updatedPhotos = List.from(currentPhotos)..add(photo);
+    state = state.copyWith(photos: updatedPhotos);
   }
 
   double radiusByZoom(int zoom) {

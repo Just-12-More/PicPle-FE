@@ -108,6 +108,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                     Image.asset('assets/images/img_profile_placeholder.png'),
                 errorWidget: (context, url, error) =>
                     Image.asset('assets/images/img_profile_placeholder.png'),
+                fit: BoxFit.cover,
               ),
             ),
             const SizedBox(height: 12),
@@ -136,10 +137,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: _buildPhotoGrid(selectedPhotos),
-            ),
+            _buildPhotoGrid(selectedPhotos),
           ],
         ),
       ),

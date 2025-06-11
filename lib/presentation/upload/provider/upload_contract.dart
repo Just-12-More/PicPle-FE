@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import '../../../data/model/response/nearby_photos_response.dart';
+
 class UploadState {
   final bool isLoading;
   final File? photo;
@@ -21,7 +23,10 @@ class UploadState {
 }
 
 abstract class UploadEffect { }
-class NavigateBack extends UploadEffect {}
+class UploadSuccess extends UploadEffect {
+  final PhotoData photo;
+  UploadSuccess(this.photo);
+}
 class ShowToast extends UploadEffect {
   final String message;
   ShowToast(this.message);

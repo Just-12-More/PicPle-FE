@@ -4,10 +4,10 @@ import 'package:picple/data/service_providers.dart';
 
 import '../provider/profile_contract.dart';
 
-final profileStateProvider = NotifierProvider<ProfileNotifier, ProfileState>(() => ProfileNotifier());
-final profileEffectProvider = StateProvider<ProfileEffect?>((ref) => null);
+final profileStateProvider = NotifierProvider.autoDispose<ProfileNotifier, ProfileState>(() => ProfileNotifier());
+final profileEffectProvider = StateProvider.autoDispose<ProfileEffect?>((ref) => null);
 
-class ProfileNotifier extends Notifier<ProfileState> {
+class ProfileNotifier extends AutoDisposeNotifier<ProfileState> {
   late final ProfileRepository _profileRepository;
 
   @override

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gal/gal.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -39,6 +40,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
     final state = ref.watch(uploadStateProvider);
 
     return state.photo != null &&
+        state.photo!.existsSync() &&
         _titleController.text.trim().isNotEmpty &&
         _descriptionController.text.trim().isNotEmpty;
   }
@@ -47,8 +49,11 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
     final pickedFile = await _picker.pickImage(source: ImageSource.camera);
 
     if (pickedFile != null) {
+      Gal.putImage(pickedFile.path);
+      await Future.delayed(const Duration(milliseconds: 300)); // 안전한 딜레이
+      if (!mounted) return;
       ref.read(uploadStateProvider.notifier).setPhoto(File(pickedFile.path));
-      setState(() { });
+      setState(() {});
     }
   }
 
@@ -83,8 +88,8 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
       if (next == null) return;
 
       switch (next) {
-        case NavigateBack():
-          context.pop();
+        case UploadSuccess():
+          context.pop(next.photo);
           break;
         case ShowToast():
           ScaffoldMessenger.of(context).showSnackBar(
@@ -127,24 +132,24 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
                   // 사진 미리보기
                   AspectRatio(
                     aspectRatio: 1.0,
-                    child: state.photo != null
+                    child: state.photo != null && state.photo!.existsSync()
                         ? Image.file(
-                      state.photo!,
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.cover,
-                    )
+                          state.photo!,
+                          width: double.infinity,
+                          height: double.infinity,
+                          fit: BoxFit.cover,
+                        )
                         : GestureDetector(
-                      onTap: _checkCameraPermissionAndTakePhoto,
-                      child: Container(
-                        color: PicpleColors.gray2,
-                        child: const Center(
-                          child: Icon(
-                            Icons.camera_alt,
-                            size: 48,
-                            color: Colors.grey,
-                          ),
-                        ),
+                            onTap: _checkCameraPermissionAndTakePhoto,
+                            child: Container(
+                              color: PicpleColors.gray2,
+                              child: const Center(
+                                child: Icon(
+                                  Icons.camera_alt,
+                                  size: 48,
+                                  color: Colors.grey,
+                                ),
+                              ),
                       ),
                     ),
                   ),

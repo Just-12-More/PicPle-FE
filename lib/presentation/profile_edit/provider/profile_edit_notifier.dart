@@ -6,10 +6,10 @@ import 'package:picple/presentation/profile/provider/profile_notifier.dart';
 
 import 'profile_edit_contract.dart';
 
-final profileEditStateProvider = NotifierProvider<ProfileEditNotifier, ProfileEditState>(() => ProfileEditNotifier());
-final profileEditEffectProvider = StateProvider<ProfileEditEffect?>((ref) => null);
+final profileEditStateProvider = NotifierProvider.autoDispose<ProfileEditNotifier, ProfileEditState>(() => ProfileEditNotifier());
+final profileEditEffectProvider = StateProvider.autoDispose<ProfileEditEffect?>((ref) => null);
 
-class ProfileEditNotifier extends Notifier<ProfileEditState> {
+class ProfileEditNotifier extends AutoDisposeNotifier<ProfileEditState> {
   late final ProfileRepository _profileRepository;
 
   @override
