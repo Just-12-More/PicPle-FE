@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gal/gal.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -48,6 +49,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
     final pickedFile = await _picker.pickImage(source: ImageSource.camera);
 
     if (pickedFile != null) {
+      Gal.putImage(pickedFile.path);
       await Future.delayed(const Duration(milliseconds: 300)); // 안전한 딜레이
       if (!mounted) return;
       ref.read(uploadStateProvider.notifier).setPhoto(File(pickedFile.path));

@@ -145,6 +145,46 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.1"
+  camera:
+    dependency: "direct main"
+    description:
+      name: camera
+      sha256: "413d2b34fe28496c35c69ede5b232fb9dd5ca2c3a4cb606b14efc1c7546cc8cb"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.11.1"
+  camera_android_camerax:
+    dependency: transitive
+    description:
+      name: camera_android_camerax
+      sha256: "68d7ec97439108ac22cfba34bb74d0ab53adbc017175116d2cbc5a3d8fc8ea5e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.18+2"
+  camera_avfoundation:
+    dependency: transitive
+    description:
+      name: camera_avfoundation
+      sha256: ca244564876d5a76f2126bca501aec25243cad23ba1784819242aea2fd25cf70
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.9.19+2"
+  camera_platform_interface:
+    dependency: transitive
+    description:
+      name: camera_platform_interface
+      sha256: "2f757024a48696ff4814a789b0bd90f5660c0fb25f393ab4564fb483327930e2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.10.0"
+  camera_web:
+    dependency: transitive
+    description:
+      name: camera_web
+      sha256: "595f28c89d1fb62d77c73c633193755b781c6d2e0ebcd8dc25b763b514e6ba8f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.5"
   characters:
     dependency: transitive
     description:
@@ -273,14 +313,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.1"
-  file_picker:
-    dependency: "direct main"
-    description:
-      name: file_picker
-      sha256: "77f8e81d22d2a07d0dee2c62e1dda71dc1da73bf43bb2d45af09727406167964"
-      url: "https://pub.dev"
-    source: hosted
-    version: "10.1.9"
   file_selector_linux:
     dependency: transitive
     description:
@@ -448,6 +480,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
+  gal:
+    dependency: "direct main"
+    description:
+      name: gal
+      sha256: "2771519c8b29f784d5e27f4efc2667667eef51c6c47cccaa0435a8fe8aa208e4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.1"
   geolocator:
     dependency: "direct main"
     description:
@@ -796,10 +836,10 @@ packages:
     dependency: transitive
     description:
       name: mime
-      sha256: "801fd0b26f14a4a58ccb09d5892c3fbdeff209594300a542492cf13fba9d247a"
+      sha256: "41a20518f0cb1256669420fdba0cd90d21561e560ac240f26ef8322e45bb7ed6"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.6"
+    version: "2.0.0"
   octo_image:
     dependency: transitive
     description:
@@ -1345,10 +1385,10 @@ packages:
     dependency: transitive
     description:
       name: webview_flutter_platform_interface
-      sha256: "7cb32b21825bd65569665c32bb00a34ded5779786d6201f5350979d2d529940d"
+      sha256: f0dc2dc3a2b1e3a6abdd6801b9355ebfeb3b8f6cde6b9dc7c9235909c4a1f147
       url: "https://pub.dev"
     source: hosted
-    version: "2.13.0"
+    version: "2.13.1"
   webview_flutter_wkwebview:
     dependency: transitive
     description:
@@ -1391,4 +1431,4 @@ packages:
     version: "3.1.3"
 sdks:
   dart: "3.7.2"
-  flutter: ">=3.27.0"
+  flutter: ">=3.29.0"
