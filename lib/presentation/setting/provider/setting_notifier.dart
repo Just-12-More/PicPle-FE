@@ -25,16 +25,16 @@ class SettingNotifier extends AutoDisposeNotifier<SettingState> {
     ref.read(settingEffectProvider.notifier).state = NavigateTo(route);
   }
 
-  void logout() {
+  void logout() async {
     _authRepository.logout();
-    UserApi.instance.logout();
+    await UserApi.instance.unlink();
     navigateBackToLogin();
     _showToast("로그아웃되었습니다.");
   }
 
-  void withdraw() {
+  void withdraw() async {
     _authRepository.withdrawal();
-    UserApi.instance.logout();
+    await UserApi.instance.unlink();
     navigateBackToLogin();
     _showToast("탈퇴가 완료되었습니다.");
   }
