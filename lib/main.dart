@@ -18,7 +18,7 @@ Future<void> main() async {
     clientId: Config.naverClientId,
     onAuthFailed: (e) {
       log("NaverMapSdk auth failed: $e");
-    }
+    },
   );
 
   runApp(const ProviderScope(child: MyApp()));

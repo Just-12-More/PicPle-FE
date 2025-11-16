@@ -18,9 +18,14 @@ if (kakaoNativeAppKey == null) {
     throw new GradleException("kakao.native.app.key is missing in local.properties")
 }
 
+def naverClientId = localProperties.getProperty("naver.client.id")
+if (naverClientId == null) {
+    throw new GradleException("naver.client.id is missing in local.properties")
+}
+
 android {
     namespace = "com.just.twelve.more.picple"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     ndkVersion = "27.0.12077973"
 
     compileOptions {
@@ -38,7 +43,7 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 23
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
@@ -46,6 +51,11 @@ android {
             "string",
             "KAKAO_NATIVE_APP_KEY",
             kakaoNativeAppKey
+        )
+        resValue(
+            "string",
+            "NAVER_CLIENT_ID",
+            naverClientId
         )
     }
 
