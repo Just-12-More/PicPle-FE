@@ -58,15 +58,15 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
   }
 
   Future<void> _checkCameraPermissionAndTakePhoto() async {
-    final granted = await requestPermission(
+    final cameraGranted = await requestPermission(
       context: context,
       permission: Permission.camera,
       errorMessage: '카메라 권한이 필요합니다.',
     );
 
-    if (granted) {
-      _takePhoto();
-    }
+    if (!cameraGranted) return;
+
+    _takePhoto();
   }
 
   @override
