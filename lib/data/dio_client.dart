@@ -86,7 +86,17 @@ class TokenInterceptor extends Interceptor {
       );
 
       final dio = Dio(options)
-      ..httpClientAdapter = IOHttpClientAdapter();
+        ..httpClientAdapter = IOHttpClientAdapter()
+        ..interceptors.add(
+          PrettyDioLogger(
+            requestHeader: true,
+            requestBody: true,
+            responseBody: true,
+            responseHeader: false,
+            error: true,
+            compact: true,
+          ),
+        );
 
       final response = await dio.post(
         '${Config.baseUrl}/auth/reissue/token',
@@ -95,8 +105,18 @@ class TokenInterceptor extends Interceptor {
         },
       );
 
-      final newAccessToken = response.data['data']['token'];
-      final newRefreshToken = response.data['data']['refreshToken'];
+      final responseData = response.data;
+      if (responseData is! Map || responseData['data'] is! Map) {
+        throw Exception('Unexpected refresh token response: $responseData');
+      }
+
+      final data = responseData['data'] as Map;
+      final newAccessToken = data['token'];
+      final newRefreshToken = data['refreshToken'];
+
+      if (newAccessToken == null || newRefreshToken == null) {
+        throw Exception('Refresh token response missing fields: $data');
+      }
       await storage.write(key: Constants.ACCESS_TOKEN_KEY, value: newAccessToken);
       await storage.write(key: Constants.REFRESH_TOKEN_KEY, value: newRefreshToken);
 
