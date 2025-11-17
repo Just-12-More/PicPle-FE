@@ -49,7 +49,21 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
     final pickedFile = await _picker.pickImage(source: ImageSource.camera);
 
     if (pickedFile != null) {
-      Gal.putImage(pickedFile.path);
+      try {
+        await Gal.putImage(pickedFile.path);
+      } catch (error, stackTrace) {
+        debugPrint('Failed to save photo to gallery: $error');
+        debugPrint('$stackTrace');
+        if (mounted) {
+          ScaffoldMessenger.of(context)
+            ..removeCurrentSnackBar()
+            ..showSnackBar(
+              const SnackBar(
+                content: Text('갤러리에 사진을 저장하지 못했습니다.'),
+              ),
+            );
+        }
+      }
       await Future.delayed(const Duration(milliseconds: 300)); // 안전한 딜레이
       if (!mounted) return;
       ref.read(uploadStateProvider.notifier).setPhoto(File(pickedFile.path));
