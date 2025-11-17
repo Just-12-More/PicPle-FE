@@ -745,7 +745,7 @@ packages:
     source: hosted
     version: "1.9.7+3"
   kakao_flutter_sdk_common:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: kakao_flutter_sdk_common
       sha256: "1c4944cc50c363d4626e9006ab39ee496c8f5ca602b96154272b90d40544aaca"
@@ -1261,6 +1261,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  stomp_dart_client:
+    dependency: "direct main"
+    description:
+      name: stomp_dart_client
+      sha256: "54a73fd73f160a2956036fa39539e283f58535c3e84bff3a40e16003dd320123"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.1"
   stream_channel:
     dependency: transitive
     description:
