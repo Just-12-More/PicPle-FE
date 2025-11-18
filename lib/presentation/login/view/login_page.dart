@@ -12,7 +12,9 @@ class LoginPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(loginStateProvider);
+    final isLoading = ref.watch(
+      loginStateProvider.select((state) => state.isLoading),
+    );
 
     ref.listen<LoginEffect?>(loginEffectProvider, (previous, next) {
       if (next == null) return;
@@ -35,49 +37,55 @@ class LoginPage extends ConsumerWidget {
       backgroundColor: PicpleColors.white,
       body: SafeArea(
         child: Center(
-          child: state.isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : Column(
-                children: [
-                  const SizedBox(height: 100),
-                  Image.asset(
-                    'assets/icons/ic_picple.png',
-                    width: 300,
-                    height: 200,
-                  ),
-                  const Expanded(child: SizedBox()),
-                  state.isLoading
-                      ? const CircularProgressIndicator()
-                      : LoginButtons(
+          child: Column(
+            children: [
+              const SizedBox(height: 100),
+              Image.asset(
+                'assets/icons/ic_picple.png',
+                width: 300,
+                height: 200,
+              ),
+              const Expanded(child: SizedBox()),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: isLoading
+                    ? const SizedBox(
+                        key: ValueKey('login_loading'),
+                        height: 48,
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    : LoginButtons(
+                        key: const ValueKey('login_buttons'),
                         onPressed: () {
                           ref
                               .read(loginStateProvider.notifier)
                               .loginWithKakao();
                         },
                       ),
-                  const SizedBox(height: 20),
-                  RichText(
-                    text: const TextSpan(
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Color(0xFF808080),
-                      ),
-                      children: [
-                        TextSpan(text: '첫 로그인 시, '),
-                        TextSpan(
-                          text: '서비스 이용약관',
-                          style: TextStyle(
-                            decoration: TextDecoration.underline,
-                            color: PicpleColors.gray5,
-                          ),
-                        ),
-                        TextSpan(text: '에 동의한 것으로 간주합니다.'),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                ],
               ),
+              const SizedBox(height: 20),
+              RichText(
+                text: const TextSpan(
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF808080),
+                  ),
+                  children: [
+                    TextSpan(text: '첫 로그인 시, '),
+                    TextSpan(
+                      text: '서비스 이용약관',
+                      style: TextStyle(
+                        decoration: TextDecoration.underline,
+                        color: PicpleColors.gray5,
+                      ),
+                    ),
+                    TextSpan(text: '에 동의한 것으로 간주합니다.'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
       ),
     );
