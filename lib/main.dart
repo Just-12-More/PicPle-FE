@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -6,6 +7,8 @@ import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
 import 'package:picple/core/socket/socket_manager.dart';
+import 'package:picple/data/model/response/hot_places_response.dart';
+import 'package:picple/presentation/hot_place/provider/hot_place_provider.dart';
 import 'package:picple/routes.dart';
 
 import 'config.dart';
@@ -49,6 +52,7 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
             log(
               'Socket message from ${message.destination}: ${message.body}',
             );
+            _handleSocketMessage(message);
           });
         },
       );
@@ -90,5 +94,25 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
       ),
       routerConfig: router,
     );
+  }
+}
+
+extension on _MyAppState {
+  void _handleSocketMessage(SocketMessage message) {
+    final destination = Config.socketDestination;
+    if (destination != null && message.destination != destination) {
+      return;
+    }
+
+    final body = message.body;
+    if (body == null) return;
+
+    try {
+      final decoded = jsonDecode(body) as Map<String, dynamic>;
+      final hotPlaces = HotPlacesData.fromJson(decoded).hotPlaces;
+      ref.read(hotPlaceProvider.notifier).setHotPlaces(hotPlaces);
+    } catch (e, stack) {
+      log('Failed to handle hot places message: $e', stackTrace: stack);
+    }
   }
 }
