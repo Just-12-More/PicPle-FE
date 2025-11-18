@@ -20,13 +20,12 @@ class ProfileEditNotifier extends AutoDisposeNotifier<ProfileEditState> {
   }
 
   Future<void> _fetchProfile() async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isFetching: true);
 
     try {
       final response = await _profileRepository.getProfile();
       if (response.isSuccess) {
         state = state.copyWith(
-          isLoading: false,
           profileImageUrl: response.data?.profilePath,
           nickname: response.data?.username,
         );
@@ -36,7 +35,7 @@ class ProfileEditNotifier extends AutoDisposeNotifier<ProfileEditState> {
     } catch (e) {
       _showToast("오류 발생: $e");
     } finally {
-      state = state.copyWith(isLoading: false);
+      state = state.copyWith(isFetching: false);
     }
   }
 
@@ -58,14 +57,14 @@ class ProfileEditNotifier extends AutoDisposeNotifier<ProfileEditState> {
 
     if (pickedFile != null) {
       final filePath = pickedFile.path;
-      ref.read(profileEditStateProvider.notifier).setImagePath(filePath);
+      setImagePath(filePath);
     } else {
       _showToast("이미지를 선택하지 않았습니다.");
     }
   }
 
   Future<void> saveChanges() async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isSaving: true);
     try {
       final response = await _profileRepository.updateProfile(state.nickname, state.imagePath);
       if (response.isSuccess) {
@@ -79,7 +78,7 @@ class ProfileEditNotifier extends AutoDisposeNotifier<ProfileEditState> {
     } catch (e) {
       _showToast("저장 실패: $e");
     } finally {
-      state = state.copyWith(isLoading: false);
+      state = state.copyWith(isSaving: false);
     }
   }
 
