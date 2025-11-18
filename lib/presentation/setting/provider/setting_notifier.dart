@@ -30,7 +30,7 @@ class SettingNotifier extends AutoDisposeNotifier<SettingState> {
   Future<void> logout() async {
     await _runAsyncAction(
       action: () async {
-        _authRepository.logout();
+        await _authRepository.logout();
         await UserApi.instance.unlink();
       },
       onSuccess: () {
@@ -43,7 +43,7 @@ class SettingNotifier extends AutoDisposeNotifier<SettingState> {
   Future<void> withdraw() async {
     await _runAsyncAction(
       action: () async {
-        _authRepository.withdrawal();
+        await _authRepository.withdrawal();
         await UserApi.instance.unlink();
       },
       onSuccess: () {
