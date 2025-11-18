@@ -11,10 +11,6 @@ class SplashPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(splashStateProvider.notifier).checkLogin();
-    });
-
     ref.listen<SplashEffect?>(splashEffectProvider, (previous, next) {
       if (next == null) return;
 

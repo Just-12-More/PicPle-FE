@@ -26,8 +26,9 @@ class HomeNotifier extends AutoDisposeNotifier<HomeState> {
   @override
   HomeState build() {
     _photoRepository = ref.watch(photoRepositoryProvider);
-
-    Future.microtask(_initLocationTracking);
+    if (_positionSubscription == null) {
+      Future.microtask(_initLocationTracking);
+    }
 
     ref.onDispose(() {
       _positionSubscription?.cancel();

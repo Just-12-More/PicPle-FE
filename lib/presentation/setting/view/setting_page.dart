@@ -14,7 +14,10 @@ class SettingPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final notifier = ref.watch(settingStateProvider.notifier);
+    final isProcessing = ref.watch(
+      settingStateProvider.select((state) => state.isProcessing),
+    );
+    final notifier = ref.read(settingStateProvider.notifier);
 
     ref.listen<SettingEffect?>(settingEffectProvider, (previous, next) {
       if (next == null) return;
@@ -50,70 +53,83 @@ class SettingPage extends ConsumerWidget {
         ),
         centerTitle: true,
       ),
-      body: Container(
-        color: PicpleColors.white,
-        width: double.infinity,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _SettingItem(
-              icon: Icons.person_outline,
-              label: '프로필 수정',
-              onTap: () => notifier.navigateTo("${Routes.profile.path}/${Routes.profileEdit.path}"),
-            ),
-            _SettingItem(
-              icon: Icons.description_outlined,
-              label: '서비스 이용약관',
-              onTap: () {},
-            ),
-            _SettingItem(
-              icon: Icons.location_on_outlined,
-              label: '위치정보 이용약관',
-              onTap: () {},
-            ),
-            _SettingItem(
-              icon: Icons.assignment_outlined,
-              label: '개인정보 처리방침',
-              onTap: () {},
-            ),
-            _SettingItem(
-              icon: Icons.logout,
-              label: '로그아웃',
-              onTap: () => notifier.logout(),
-            ),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              child: Row(
-                children: [
-                  Icon(Icons.info_outline, color: PicpleColors.gray5, size: 24),
-                  SizedBox(width: 16),
-                  Text(
-                    '버전 정보',
-                    style: PicpleTypography.body1,
+      body: Stack(
+        children: [
+          Container(
+            color: PicpleColors.white,
+            width: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _SettingItem(
+                  icon: Icons.person_outline,
+                  label: '프로필 수정',
+                  onTap: () => notifier.navigateTo("${Routes.profile.path}/${Routes.profileEdit.path}"),
+                ),
+                _SettingItem(
+                  icon: Icons.description_outlined,
+                  label: '서비스 이용약관',
+                  onTap: () {},
+                ),
+                _SettingItem(
+                  icon: Icons.location_on_outlined,
+                  label: '위치정보 이용약관',
+                  onTap: () {},
+                ),
+                _SettingItem(
+                  icon: Icons.assignment_outlined,
+                  label: '개인정보 처리방침',
+                  onTap: () {},
+                ),
+                _SettingItem(
+                  icon: Icons.logout,
+                  label: '로그아웃',
+                  onTap: isProcessing ? null : notifier.logout,
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline, color: PicpleColors.gray5, size: 24),
+                      SizedBox(width: 16),
+                      Text(
+                        '버전 정보',
+                        style: PicpleTypography.body1,
+                      ),
+                      Spacer(),
+                      Text(
+                        'v1.0.0',
+                        style: PicpleTypography.body1,
+                      ),
+                    ],
                   ),
-                  Spacer(),
-                  Text(
-                    'v1.0.0',
-                    style: PicpleTypography.body1,
+                ),
+                Center(
+                  child: TextButton(
+                    onPressed: isProcessing ? null : notifier.withdraw,
+                    child: const Text(
+                      '탈퇴하기',
+                      style: TextStyle(
+                        color: PicpleColors.gray5,
+                        fontSize: 14,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            Center(
-              child: TextButton(
-                onPressed: () => notifier.withdraw(),
-                child: const Text(
-                  '탈퇴하기',
-                  style: TextStyle(
-                    color: PicpleColors.gray5,
-                    fontSize: 14,
-                    decoration: TextDecoration.underline,
-                  ),
+          ),
+          if (isProcessing)
+            const Positioned.fill(
+              child: ColoredBox(
+                color: Colors.black26,
+                child: Center(
+                  child: CircularProgressIndicator(),
                 ),
               ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }

@@ -1,11 +1,11 @@
 class SettingState {
-  final bool isLoading;
+  final bool isProcessing;
 
-  SettingState({this.isLoading = false});
+  SettingState({this.isProcessing = false});
 
-  SettingState copyWith({bool? isLoading}) {
+  SettingState copyWith({bool? isProcessing}) {
     return SettingState(
-      isLoading: isLoading ?? this.isLoading,
+      isProcessing: isProcessing ?? this.isProcessing,
     );
   }
 }
