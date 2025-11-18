@@ -23,29 +23,36 @@ class LoginNotifier extends AutoDisposeNotifier<LoginState> {
     state = state.copyWith(isLoading: true);
 
     try {
-      if (await isKakaoTalkInstalled()) {
-        final token = await UserApi.instance.loginWithKakaoTalk();
-        final request = LoginRequest(
-          accessToken: token.accessToken,
-          provider: LoginProvider.kakao,
-        );
+      final token = await _obtainKakaoToken();
+      final request = LoginRequest(
+        accessToken: token.accessToken,
+        provider: LoginProvider.kakao,
+      );
 
-        final result = await _authRepository.login(request.accessToken, request.provider);
+      final result = await _authRepository.login(request.accessToken, request.provider);
 
-        if (result.isSuccess) {
-          _showToast("로그인 성공");
-          _navigateTo(Routes.home.path);
-        } else {
-          _showToast("로그인 실패");
-        }
+      if (result.isSuccess) {
+        _showToast("로그인 성공");
+        _navigateTo(Routes.home.path);
       } else {
-        _showToast("카카오톡 미설치");
+        _showToast("로그인 실패");
       }
     } catch (e) {
       _showToast("오류 발생: $e");
     } finally {
       state = state.copyWith(isLoading: false);
     }
+  }
+
+  Future<OAuthToken> _obtainKakaoToken() async {
+    if (await isKakaoTalkInstalled()) {
+      try {
+        return await UserApi.instance.loginWithKakaoTalk();
+      } catch (_) {
+        // 카카오톡 로그인 실패 시 계정 로그인으로 재시도
+      }
+    }
+    return UserApi.instance.loginWithKakaoAccount();
   }
 
   void _navigateTo(String route) {

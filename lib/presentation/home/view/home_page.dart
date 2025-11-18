@@ -1,16 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
-import 'package:picple/presentation/theme/picple_colors.dart';
-import 'package:picple/presentation/theme/picple_typography.dart';
 
-import '../../../core/util/naver_map_utils.dart';
-import '../../../data/model/response/nearby_photos_response.dart';
-import '../../../routes.dart';
-import '../provider/home_contract.dart';
-import '../provider/home_provider.dart';
+import '../../../data/model/response/hot_places_response.dart';
+import '../../theme/picple_colors.dart';
+import '../../theme/picple_typography.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -29,265 +23,218 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  NaverMapController? _mapController;
-  NMarker? _myLocationMarker;
-  final List<String> _renderedPhotoIds = [];
-
   @override
   Widget build(BuildContext context) {
-    ref.listen<List<PhotoData>>(
-      homeStateProvider.select((state) => state.photos),
-      (previous, next) {
-        _renderPhotoMarkers(next);
-      },
-    );
-
-    ref.listen<({double? latitude, double? longitude})>(
-      homeStateProvider.select(
-        (state) => (latitude: state.userLatitude, longitude: state.userLongitude),
+    return Scaffold(
+      backgroundColor: PicpleColors.white,
+      body: SafeArea(
+        top: false,
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(child: _buildHeader()),
+            SliverToBoxAdapter(child: _buildHotPlaceSection()),
+            SliverToBoxAdapter(child: _buildHashtagSection("#잔잔한")),
+            SliverToBoxAdapter(child: _buildHashtagSection("#고요한"))
+          ]
+        ),
       ),
-      (previous, next) {
-        final hasPosition = next.latitude != null && next.longitude != null;
-        if (!hasPosition) return;
-
-        _updateMyLocationMarker(next.latitude!, next.longitude!);
-      },
     );
+  }
 
-    ref.listen<HomeEffect?>(homeEffectProvider, (previous, next) {
-      if (next == null) return;
-
-      switch (next) {
-        case NavigateTo():
-          context.push(next.route);
-          break;
-        case ShowToast():
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(next.message)),
-          );
-          break;
-        case MoveCamera():
-          if (_mapController != null) {
-            _mapController!.updateCamera(
-              NCameraUpdate.scrollAndZoomTo(
-                target: NLatLng(next.latitude, next.longitude),
-                zoom: 14,
-              ),
-            );
-          }
-          break;
-      }
-
-      ref.read(homeEffectProvider.notifier).state = null;
-    });
-
-    return SafeArea(
+  Widget _buildHeader() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF2A3A5F), Color(0xFF09131E)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      height: 280,
       child: Stack(
         children: [
-          _buildMap(),
-          SearchFromHereButton(onTap: () {
-            if (_mapController == null) return;
+          Positioned(
+            top: 30,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    "Picple",
+                    style: PicpleTypography.title2.copyWith(
+                        color: PicpleColors.white
+                    ),
+                  ),
+                ),
 
-            final latitude = _mapController!.nowCameraPosition.target.latitude;
-            final longitude = _mapController!.nowCameraPosition.target.longitude;
-
-            ref.read(homeStateProvider.notifier).fetchGeoPhotos(latitude, longitude);
-          }),
-          MoveToMyLocationButton(
-            onTap: () => ref.read(homeStateProvider.notifier).moveToMyLocation()
+                Padding(
+                  padding: const EdgeInsets.only(left: 20.0),
+                  child: Text(
+                    "주변의 사진 명소를\n찾아보세요!",
+                    style: PicpleTypography.head2.copyWith(
+                        color: PicpleColors.white
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
+          Positioned(
+            right: 0,
+            bottom: 0,
+            child: Image.asset(
+              'assets/images/img_picple_big_logo.png',
+              width: 200,
+              height: 200,
+            ),
+          ),
+        ],
+      )
+    );
+  }
+
+  Widget _buildHotPlaceSection() {
+    final hotPlaces = [
+      HotPlace(
+        order: 1,
+        locationLabel: "경기도 수원시 팔달구 지동",
+        photoCnt: 3,
+        latitude: 37.2816337,
+        longitude: 127.0222369,
+      ),
+      HotPlace(
+        order: 2,
+        locationLabel: "경기도 수원시 팔달구 행궁동",
+        photoCnt: 32,
+        latitude: 37.2841940,
+        longitude: 127.0191077,
+      ),
+      HotPlace(
+        order: 3,
+        locationLabel: "서울특별시 강남구 역삼1동",
+        photoCnt: 13,
+        latitude: 37.5050333,
+        longitude: 127.0412409,
+      ),
+      HotPlace(
+        order: 4,
+        locationLabel: "경기도 용인시 처인구 포곡읍",
+        photoCnt: 212,
+        latitude: 37.2933272,
+        longitude: 127.2013221,
+      ),
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 20, left: 16, right: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionTitle("오늘의 인기 장소"),
+          const SizedBox(height: 10),
+          ...hotPlaces.map(_buildHotPlaceItem),
         ],
       ),
     );
   }
 
-  Widget _buildMap() {
-    return NaverMap(
-      options: const NaverMapViewOptions(
-        indoorEnable: true,
-        locationButtonEnable: false,
-        consumeSymbolTapEvents: false,
-        rotationGesturesEnable: true,
-        scrollGesturesEnable: true,
-        zoomGesturesEnable: true,
-        minZoom: 10,
-      ),
-      onMapReady: (controller) async {
-        _mapController = controller;
-        _renderedPhotoIds.clear();
-
-        final currentState = ref.read(homeStateProvider);
-        _renderPhotoMarkers(currentState.photos);
-
-        final latitude = currentState.userLatitude;
-        final longitude = currentState.userLongitude;
-        if (latitude != null && longitude != null) {
-          await _updateMyLocationMarker(latitude, longitude);
-        }
-      },
-      onCameraIdle: () {
-        final camera = _mapController!.nowCameraPosition;
-
-        ref.read(homeStateProvider.notifier).setCameraPosition(
-          camera.target.latitude,
-          camera.target.longitude,
-          camera.zoom.toInt(),
-        );
-      },
+  Widget _buildSectionTitle(String title) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+            title,
+            style: PicpleTypography.title1
+        ),
+        const Icon(Icons.chevron_right),
+      ],
     );
   }
 
-  Future<void> _updateMyLocationMarker(
-    double latitude,
-    double longitude
-  ) async {
-    if (_mapController == null) return;
-
-    final newPosition = NLatLng(latitude, longitude);
-
-    final markerIcon = await NOverlayImage.fromWidget(
-      context: context,
-      widget: Container(
-        width: 20,
-        height: 20,
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-          color: PicpleColors.white,
-        ),
-        child: Center(
-          child: Container(
-            width: 12,
-            height: 12,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: PicpleColors.primary1,
+  Widget _buildHotPlaceItem(HotPlace place) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  place.locationLabel,
+                  style: PicpleTypography.title2,
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    const Icon(Icons.camera_alt, size: 16, color: PicpleColors.gray5),
+                    const SizedBox(width: 4),
+                    Text(
+                      "새로운 사진 ${place.photoCnt}개",
+                      style: PicpleTypography.body2SemiBold.copyWith(
+                        color: PicpleColors.gray5
+                      )
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-        ),
+
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: CachedNetworkImage(
+              imageUrl: "https://picsum.photos/${300 + place.order}",
+              width: 80,
+              height: 80,
+              fit: BoxFit.cover,
+            ),
+          )
+        ],
       ),
-      size: const Size(20, 20),
     );
-
-    if (_myLocationMarker != null) {
-      _mapController!.deleteOverlay(_myLocationMarker!.info);
-    }
-
-    _myLocationMarker = NMarker(
-      id: 'my_location',
-      position: newPosition,
-      icon: markerIcon,
-    );
-
-    _mapController!.addOverlay(_myLocationMarker!);
   }
 
-  void _renderPhotoMarkers(List<PhotoData> photos) {
-    if (_mapController == null) return;
+  Widget _buildHashtagSection(String tag) {
+    final imageUrls = List.generate(
+        5, (i) => "https://picsum.photos/${300 + i}");
 
-    for (final photo in photos) {
-      final markerId = 'photo_${photo.id}';
-      if (_renderedPhotoIds.contains(markerId)) continue;
-
-      addMarkerWithPlaceholderImage(
-        controller: _mapController!,
-        id: markerId,
-        position: NLatLng(photo.latitude, photo.longitude),
-        imageUrl: photo.imgUrl,
-        onTap: () {
-          context.push(
-            "${Routes.photoList.path}/${photo.id}",
-          );
-        }
-      );
-
-      _renderedPhotoIds.add(markerId);
-    }
-  }
-}
-
-class SearchFromHereButton extends StatelessWidget {
-  final VoidCallback onTap;
-  const SearchFromHereButton({super.key, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      top: 40,
-      left: 0,
-      right: 0,
-      child: Center(
-        child: TextButton(
-          onPressed: onTap,
-          style: ButtonStyle(
-            backgroundColor: WidgetStateProperty.all(Colors.white),
-            padding: WidgetStateProperty.all(
-              const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 20.0),
+            child: Text(
+              tag,
+              style: PicpleTypography.body2SemiBold,
             ),
-            shape: WidgetStateProperty.all(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(42),
-              ),
-            ),
-            overlayColor: WidgetStateProperty.resolveWith<Color?>(
-                  (Set<WidgetState> states) {
-                if (states.contains(WidgetState.pressed)) {
-                  return PicpleColors.gray2;
-                }
-                return null;
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 96,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              itemCount: imageUrls.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (context, index) {
+                return ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: CachedNetworkImage(
+                    imageUrl: imageUrls[index],
+                    width: 96,
+                    height: 96,
+                    fit: BoxFit.cover,
+                  ),
+                );
               },
             ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '현 지도에서 검색',
-                style: PicpleTypography.body1SemiBold.copyWith(color: PicpleColors.primary1),
-              ),
-              const SizedBox(width: 10),
-              SvgPicture.asset(
-                'assets/icons/ic_refresh.svg',
-                width: 12,
-                height: 12,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class MoveToMyLocationButton extends StatelessWidget {
-  final VoidCallback onTap;
-
-  const MoveToMyLocationButton({super.key, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      bottom: 24,
-      right: 24,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(10),
-        onTap: onTap,
-        child: Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: PicpleColors.white,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: PicpleColors.white, width: 2),
-          ),
-          child: Center(
-            child: SvgPicture.asset(
-              "assets/icons/ic_location.svg",
-              width: 36,
-              height: 36,
-              colorFilter: const ColorFilter.mode(PicpleColors.primary1, BlendMode.srcIn),
-            ),
-          ),
-        ),
+          )
+        ],
       ),
     );
   }
