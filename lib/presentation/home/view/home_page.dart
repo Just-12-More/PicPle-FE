@@ -62,7 +62,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.only(top: 16.0, bottom: 16.0, left: 20.0),
                   child: Text(
                     "Picple",
                     style: PicpleTypography.title2.copyWith(
@@ -99,7 +99,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildHotPlaceSection(List<HotPlace> hotPlaces) {
     return Padding(
-      padding: const EdgeInsets.only(top: 20, left: 16, right: 16),
+      padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -190,7 +190,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             padding: const EdgeInsets.only(left: 20.0),
             child: Text(
               tag,
-              style: PicpleTypography.body2SemiBold,
+              style: PicpleTypography.body1SemiBold.copyWith(
+                color: PicpleColors.black
+              ),
             ),
           ),
           const SizedBox(height: 10),
