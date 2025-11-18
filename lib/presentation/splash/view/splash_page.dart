@@ -6,11 +6,24 @@ import '../../theme/picple_colors.dart';
 import '../provider/splash_contract.dart';
 import '../provider/splash_notifier.dart';
 
-class SplashPage extends ConsumerWidget {
+class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SplashPage> createState() => _SplashPageState();
+}
+
+class _SplashPageState extends ConsumerState<SplashPage> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(splashStateProvider.notifier).checkLogin();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     ref.listen<SplashEffect?>(splashEffectProvider, (previous, next) {
       if (next == null) return;
 

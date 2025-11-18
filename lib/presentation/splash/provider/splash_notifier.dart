@@ -14,7 +14,6 @@ class SplashNotifier extends AutoDisposeNotifier<SplashState> {
   @override
   SplashState build() {
     _storageApi = ref.watch(storageApiProvider);
-    Future.delayed(const Duration(seconds: 1), checkLogin);
     return SplashState();
   }
 
