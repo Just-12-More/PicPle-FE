@@ -25,11 +25,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
     super.initState();
     final nickname = ref.read(profileEditStateProvider).nickname;
     _controller = TextEditingController(text: nickname);
-    _controller.addListener(() {
-      if (_controller.text != ref.read(profileEditStateProvider).nickname) {
-        ref.read(profileEditStateProvider.notifier).setNickname(_controller.text);
-      }
-    });
+    _controller.addListener(_handleNicknameChange);
   }
 
   @override
@@ -38,14 +34,41 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
     super.dispose();
   }
 
+  void _handleNicknameChange() {
+    final currentNickname = ref.read(profileEditStateProvider).nickname;
+    if (_controller.text == currentNickname) return;
+
+    ref.read(profileEditStateProvider.notifier).setNickname(_controller.text);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(profileEditStateProvider);
+    ref.listen<String>(
+      profileEditStateProvider.select((state) => state.nickname),
+      (previous, next) {
+        if (_controller.text == next) return;
+        _controller.value = TextEditingValue(
+          text: next,
+          selection: TextSelection.collapsed(offset: next.length),
+        );
+      },
+    );
 
-    if (_controller.text != state.nickname) {
-      _controller.text = state.nickname;
-      _controller.selection = TextSelection.fromPosition(TextPosition(offset: _controller.text.length));
-    }
+    final isFetching = ref.watch(
+      profileEditStateProvider.select((state) => state.isFetching),
+    );
+    final isSaving = ref.watch(
+      profileEditStateProvider.select((state) => state.isSaving),
+    );
+    final nickname = ref.watch(
+      profileEditStateProvider.select((state) => state.nickname),
+    );
+    final profileImageUrl = ref.watch(
+      profileEditStateProvider.select((state) => state.profileImageUrl),
+    );
+    final imagePath = ref.watch(
+      profileEditStateProvider.select((state) => state.imagePath),
+    );
 
     ref.listen<ProfileEditEffect?>(profileEditEffectProvider, (previous, next) {
       if (next == null) return;
@@ -76,7 +99,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
       ),
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: state.isLoading
+        child: isFetching
                 ? const Center(child: CircularProgressIndicator())
                 : SingleChildScrollView(
                   padding: const EdgeInsets.only(bottom: 32), // 키보드에 가려지지 않게
@@ -88,11 +111,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                         children: [
                           CircleAvatar(
                             radius: 125,
-                            backgroundImage: state.imagePath != null ?
-                            FileImage(File(state.imagePath!)) :
-                            state.profileImageUrl != null ?
-                            NetworkImage(state.profileImageUrl!) :
-                            const AssetImage('assets/images/img_profile_placeholder.png'),
+                            backgroundImage: _buildAvatarImage(imagePath, profileImageUrl),
                             backgroundColor: Colors.grey[200],
                           ),
                           Positioned(
@@ -139,7 +158,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                             color: PicpleColors.gray3,
                             fontSize: 18,
                           ),
-                          enabled: !state.isLoading,
+                          enabled: !isSaving,
                           textColor: Colors.black,
                           borderColor: PicpleColors.gray2,
                           focusedBorderColor: PicpleColors.primary1,
@@ -147,7 +166,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                           borderRadius: 12,
                           borderWidth: 1.0,
                           suffixIconAsset:
-                              state.nickname.isNotEmpty
+                              nickname.isNotEmpty
                                   ? 'assets/icons/ic_close.svg'
                                   : null,
                           onSuffixIconPressed:
@@ -179,7 +198,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                 ),
               ),
               onPressed:
-                  state.isLoading
+                  isSaving
                       ? null
                       : () => ref.read(profileEditStateProvider.notifier)
                               .saveChanges(),
@@ -194,5 +213,17 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
         ),
       ),
     );
+  }
+
+  ImageProvider _buildAvatarImage(String? imagePath, String? profileImageUrl) {
+    if (imagePath != null && imagePath.isNotEmpty) {
+      return FileImage(File(imagePath));
+    }
+
+    if (profileImageUrl != null && profileImageUrl.isNotEmpty) {
+      return NetworkImage(profileImageUrl);
+    }
+
+    return const AssetImage('assets/images/img_profile_placeholder.png');
   }
 }

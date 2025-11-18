@@ -8,11 +8,13 @@ import '../../../data/repository/photo_repository.dart';
 import '../../../data/service_providers.dart';
 import 'home_contract.dart';
 
-final homeStateProvider = NotifierProvider.autoDispose<HomeNotifier, HomeState>(() => HomeNotifier());
+final homeStateProvider = NotifierProvider.autoDispose<HomeNotifier, HomeState>(
+  () => HomeNotifier(),
+);
 final homeEffectProvider = StateProvider.autoDispose<HomeEffect?>((ref) => null);
 
 class HomeNotifier extends AutoDisposeNotifier<HomeState> {
-  late final PhotoRepository _photoRepository;
+  late PhotoRepository _photoRepository;
   StreamSubscription<Position>? _positionSubscription;
 
   Timer? _throttleTimer;
@@ -24,8 +26,9 @@ class HomeNotifier extends AutoDisposeNotifier<HomeState> {
   @override
   HomeState build() {
     _photoRepository = ref.watch(photoRepositoryProvider);
-
-    _initLocationTracking();
+    if (_positionSubscription == null) {
+      Future.microtask(_initLocationTracking);
+    }
 
     ref.onDispose(() {
       _positionSubscription?.cancel();

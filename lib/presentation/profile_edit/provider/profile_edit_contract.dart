@@ -2,21 +2,30 @@ class ProfileEditState {
   final String nickname;
   final String? profileImageUrl;
   final String? imagePath;
-  final bool isLoading;
+  final bool isFetching;
+  final bool isSaving;
 
   ProfileEditState({
     this.nickname = '',
     this.profileImageUrl,
     this.imagePath,
-    this.isLoading = false,
+    this.isFetching = false,
+    this.isSaving = false,
   });
 
-  ProfileEditState copyWith({String? nickname, String? profileImageUrl, bool? isLoading, String? imagePath}) {
+  ProfileEditState copyWith({
+    String? nickname,
+    String? profileImageUrl,
+    bool? isFetching,
+    bool? isSaving,
+    String? imagePath,
+  }) {
     return ProfileEditState(
       nickname: nickname ?? this.nickname,
       profileImageUrl: profileImageUrl ?? this.profileImageUrl,
       imagePath: imagePath ?? this.imagePath,
-      isLoading: isLoading ?? this.isLoading,
+      isFetching: isFetching ?? this.isFetching,
+      isSaving: isSaving ?? this.isSaving,
     );
   }
 }
