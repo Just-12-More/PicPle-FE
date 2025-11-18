@@ -1,0 +1,4 @@
+<paths>
+    <external-files-path name="camera_images" path="Pictures/" />
+    <cache-path name="camera_cache" path="" />
+</paths>
