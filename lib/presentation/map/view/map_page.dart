@@ -9,26 +9,26 @@ import 'package:picple/presentation/theme/picple_typography.dart';
 import '../../../core/util/naver_map_utils.dart';
 import '../../../data/model/response/nearby_photos_response.dart';
 import '../../../routes.dart';
-import '../provider/home_contract.dart';
-import '../provider/home_provider.dart';
+import '../provider/map_contract.dart';
+import '../provider/map_provider.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class MapPage extends StatelessWidget {
+  const MapPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const HomeScreen();
+    return const MapScreen();
   }
 }
 
-class HomeScreen extends ConsumerStatefulWidget {
-  const HomeScreen({super.key});
+class MapScreen extends ConsumerStatefulWidget {
+  const MapScreen({super.key});
 
   @override
-  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<MapScreen> createState() => _MapScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _MapScreenState extends ConsumerState<MapScreen> {
   NaverMapController? _mapController;
   NMarker? _myLocationMarker;
   final List<String> _renderedPhotoIds = [];
@@ -36,14 +36,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     ref.listen<List<PhotoData>>(
-      homeStateProvider.select((state) => state.photos),
+      mapStateProvider.select((state) => state.photos),
       (previous, next) {
         _renderPhotoMarkers(next);
       },
     );
 
     ref.listen<({double? latitude, double? longitude})>(
-      homeStateProvider.select(
+      mapStateProvider.select(
         (state) => (latitude: state.userLatitude, longitude: state.userLongitude),
       ),
       (previous, next) {
@@ -54,7 +54,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       },
     );
 
-    ref.listen<HomeEffect?>(homeEffectProvider, (previous, next) {
+    ref.listen<HomeEffect?>(mapEffectProvider, (previous, next) {
       if (next == null) return;
 
       switch (next) {
@@ -78,7 +78,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           break;
       }
 
-      ref.read(homeEffectProvider.notifier).state = null;
+      ref.read(mapEffectProvider.notifier).state = null;
     });
 
     return SafeArea(
@@ -91,10 +91,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             final latitude = _mapController!.nowCameraPosition.target.latitude;
             final longitude = _mapController!.nowCameraPosition.target.longitude;
 
-            ref.read(homeStateProvider.notifier).fetchGeoPhotos(latitude, longitude);
+            ref.read(mapStateProvider.notifier).fetchGeoPhotos(latitude, longitude);
           }),
           MoveToMyLocationButton(
-            onTap: () => ref.read(homeStateProvider.notifier).moveToMyLocation()
+            onTap: () => ref.read(mapStateProvider.notifier).moveToMyLocation()
           ),
         ],
       ),
@@ -116,7 +116,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         _mapController = controller;
         _renderedPhotoIds.clear();
 
-        final currentState = ref.read(homeStateProvider);
+        final currentState = ref.read(mapStateProvider);
         _renderPhotoMarkers(currentState.photos);
 
         final latitude = currentState.userLatitude;
@@ -128,7 +128,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       onCameraIdle: () {
         final camera = _mapController!.nowCameraPosition;
 
-        ref.read(homeStateProvider.notifier).setCameraPosition(
+        ref.read(mapStateProvider.notifier).setCameraPosition(
           camera.target.latitude,
           camera.target.longitude,
           camera.zoom.toInt(),

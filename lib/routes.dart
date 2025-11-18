@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:picple/data/model/response/nearby_photos_response.dart';
 import 'package:picple/presentation/component/picple_bottom_navigation_bar.dart';
-import 'package:picple/presentation/home/provider/home_provider.dart';
-import 'package:picple/presentation/home/view/home_page.dart';
 import 'package:picple/presentation/login/view/login_page.dart';
+import 'package:picple/presentation/map/provider/map_provider.dart';
+import 'package:picple/presentation/map/view/map_page.dart';
 import 'package:picple/presentation/profile/view/profile_page.dart';
 import 'package:picple/presentation/profile_edit/view/profile_edit_page.dart';
 import 'package:picple/presentation/setting/view/setting_page.dart';
@@ -17,7 +17,7 @@ import 'package:picple/presentation/upload/view/upload_page.dart';
 enum Routes {
   splash(name: 'Splash', path: '/'),
   login(name: 'Login', path: '/login'),
-  home(name: 'Home', path: '/home'),
+  home(name: 'Home', path: '/map'),
   map(name: 'Map', path: '/map'),
   upload(name: 'Upload', path: '/upload'),
 
@@ -83,7 +83,7 @@ final router = GoRouter(
           routes: [
             GoRoute(
                 path: Routes.home.path,
-                builder: (context, state) => const HomePage(),
+                builder: (context, state) => const MapPage(),
                 routes: []
             ),
           ]
@@ -92,7 +92,7 @@ final router = GoRouter(
           routes: [
             GoRoute(
                 path: Routes.map.path,
-                builder: (context, state) => const HomePage(),
+                builder: (context, state) => const MapPage(),
                 routes: []
             ),
           ]
@@ -154,7 +154,7 @@ class ScaffoldWithNavBar extends StatelessWidget {
               final result = await context.push(Routes.upload.path);
 
               if (result != null && result is PhotoData) {
-                container.read(homeStateProvider.notifier).addPhoto(result);
+                container.read(mapStateProvider.notifier).addPhoto(result);
               }
             },
           )

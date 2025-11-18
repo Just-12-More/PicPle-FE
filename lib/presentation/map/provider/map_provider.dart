@@ -6,14 +6,14 @@ import 'package:geolocator/geolocator.dart';
 import '../../../data/model/response/nearby_photos_response.dart';
 import '../../../data/repository/photo_repository.dart';
 import '../../../data/service_providers.dart';
-import 'home_contract.dart';
+import 'map_contract.dart';
 
-final homeStateProvider = NotifierProvider.autoDispose<HomeNotifier, HomeState>(
-  () => HomeNotifier(),
+final mapStateProvider = NotifierProvider.autoDispose<MapNotifier, MapState>(
+  () => MapNotifier(),
 );
-final homeEffectProvider = StateProvider.autoDispose<HomeEffect?>((ref) => null);
+final mapEffectProvider = StateProvider.autoDispose<HomeEffect?>((ref) => null);
 
-class HomeNotifier extends AutoDisposeNotifier<HomeState> {
+class MapNotifier extends AutoDisposeNotifier<MapState> {
   late PhotoRepository _photoRepository;
   StreamSubscription<Position>? _positionSubscription;
 
@@ -24,7 +24,7 @@ class HomeNotifier extends AutoDisposeNotifier<HomeState> {
   double? _lastFetchedLongitude;
 
   @override
-  HomeState build() {
+  MapState build() {
     _photoRepository = ref.watch(photoRepositoryProvider);
     if (_positionSubscription == null) {
       Future.microtask(_initLocationTracking);
@@ -35,7 +35,7 @@ class HomeNotifier extends AutoDisposeNotifier<HomeState> {
       _throttleTimer?.cancel();
     });
 
-    return HomeState();
+    return MapState();
   }
 
   Future<void> _initLocationTracking() async {
@@ -43,7 +43,7 @@ class HomeNotifier extends AutoDisposeNotifier<HomeState> {
 
     if (permission == LocationPermission.denied ||
         permission == LocationPermission.deniedForever) {
-      ref.read(homeEffectProvider.notifier).state =
+      ref.read(mapEffectProvider.notifier).state =
           ShowToast("위치 권한이 필요합니다.");
       return;
     }
@@ -78,14 +78,14 @@ class HomeNotifier extends AutoDisposeNotifier<HomeState> {
 
   void moveToMyLocation() {
     if (state.userLatitude == null || state.userLongitude == null) {
-      ref.read(homeEffectProvider.notifier).state = ShowToast("위치 정보를 가져올 수 없습니다.");
+      ref.read(mapEffectProvider.notifier).state = ShowToast("위치 정보를 가져올 수 없습니다.");
       return;
     }
 
     final latitude = state.userLatitude!;
     final longitude = state.userLongitude!;
 
-    ref.read(homeEffectProvider.notifier).state = MoveCamera(latitude, longitude);
+    ref.read(mapEffectProvider.notifier).state = MoveCamera(latitude, longitude);
   }
 
   void setCameraPosition(double latitude, double longitude, int zoomLevel) {
@@ -139,10 +139,10 @@ class HomeNotifier extends AutoDisposeNotifier<HomeState> {
           photos: result.data!.photos
         );
       } else {
-        ref.read(homeEffectProvider.notifier).state = ShowToast("사진을 불러오는 데 실패했습니다.");
+        ref.read(mapEffectProvider.notifier).state = ShowToast("사진을 불러오는 데 실패했습니다.");
       }
     } catch (e) {
-      ref.read(homeEffectProvider.notifier).state = ShowToast("오류 발생: $e");
+      ref.read(mapEffectProvider.notifier).state = ShowToast("오류 발생: $e");
     } finally {
       state = state.copyWith(isLoading: false);
     }
