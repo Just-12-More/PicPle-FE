@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/model/response/hot_places_response.dart';
+import '../../hot_place/provider/hot_place_provider.dart';
 import '../../theme/picple_colors.dart';
 import '../../theme/picple_typography.dart';
 
@@ -25,6 +26,8 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
+    final hotPlaces = ref.watch(hotPlaceProvider);
+
     return Scaffold(
       backgroundColor: PicpleColors.white,
       body: SafeArea(
@@ -32,7 +35,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(child: _buildHeader()),
-            SliverToBoxAdapter(child: _buildHotPlaceSection()),
+            SliverToBoxAdapter(child: _buildHotPlaceSection(hotPlaces)),
             SliverToBoxAdapter(child: _buildHashtagSection("#잔잔한")),
             SliverToBoxAdapter(child: _buildHashtagSection("#고요한"))
           ]
@@ -85,8 +88,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             bottom: 0,
             child: Image.asset(
               'assets/images/img_picple_big_logo.png',
-              width: 200,
-              height: 200,
+              width: 160,
+              height: 160
             ),
           ),
         ],
@@ -94,38 +97,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildHotPlaceSection() {
-    final hotPlaces = [
-      HotPlace(
-        order: 1,
-        locationLabel: "경기도 수원시 팔달구 지동",
-        photoCnt: 3,
-        latitude: 37.2816337,
-        longitude: 127.0222369,
-      ),
-      HotPlace(
-        order: 2,
-        locationLabel: "경기도 수원시 팔달구 행궁동",
-        photoCnt: 32,
-        latitude: 37.2841940,
-        longitude: 127.0191077,
-      ),
-      HotPlace(
-        order: 3,
-        locationLabel: "서울특별시 강남구 역삼1동",
-        photoCnt: 13,
-        latitude: 37.5050333,
-        longitude: 127.0412409,
-      ),
-      HotPlace(
-        order: 4,
-        locationLabel: "경기도 용인시 처인구 포곡읍",
-        photoCnt: 212,
-        latitude: 37.2933272,
-        longitude: 127.2013221,
-      ),
-    ];
-
+  Widget _buildHotPlaceSection(List<HotPlace> hotPlaces) {
     return Padding(
       padding: const EdgeInsets.only(top: 20, left: 16, right: 16),
       child: Column(
@@ -133,7 +105,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         children: [
           _buildSectionTitle("오늘의 인기 장소"),
           const SizedBox(height: 10),
-          ...hotPlaces.map(_buildHotPlaceItem),
+          if (hotPlaces.isEmpty)
+            const SizedBox(
+              height: 120,
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            )
+          else
+            ...hotPlaces.map(_buildHotPlaceItem),
         ],
       ),
     );
