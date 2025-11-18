@@ -18,12 +18,10 @@ class ProfileNotifier extends AutoDisposeNotifier<ProfileState> {
   }
 
   Future<void> _initialize() async {
-    state = state.copyWith(isLoading: true);
     await Future.wait([
       _fetchProfile(),
       _fetchPhotos(),
     ]);
-    state = state.copyWith(isLoading: false);
   }
 
   void refreshState() {
@@ -31,7 +29,7 @@ class ProfileNotifier extends AutoDisposeNotifier<ProfileState> {
   }
 
   Future<void> _fetchPhotos() async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isPhotosLoading: true);
 
     try {
       final myLikedPhotosResponse = await _profileRepository.getMyLikedPhotos();
@@ -55,18 +53,17 @@ class ProfileNotifier extends AutoDisposeNotifier<ProfileState> {
     } catch (e) {
       showToast("오류 발생: $e");
     } finally {
-      state = state.copyWith(isLoading: false);
+      state = state.copyWith(isPhotosLoading: false);
     }
   }
 
   Future<void> _fetchProfile() async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isProfileLoading: true);
 
     try {
       final response = await _profileRepository.getProfile();
       if (response.isSuccess) {
         state = state.copyWith(
-          isLoading: false,
           profileImage: response.data?.profilePath,
           nickname: response.data?.username,
         );
@@ -76,7 +73,7 @@ class ProfileNotifier extends AutoDisposeNotifier<ProfileState> {
     } catch (e) {
       showToast("오류 발생: $e");
     } finally {
-      state = state.copyWith(isLoading: false);
+      state = state.copyWith(isProfileLoading: false);
     }
   }
 

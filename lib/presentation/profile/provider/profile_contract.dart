@@ -1,14 +1,16 @@
 import 'package:picple/data/model/response/my_photos_response.dart';
 
 class ProfileState {
-  final bool isLoading;
+  final bool isProfileLoading;
+  final bool isPhotosLoading;
   final String? profileImage;
   final String? nickname;
   final List<SimplePhotoData> myLikedPhotos;
   final List<SimplePhotoData> myPhotos;
 
   ProfileState({
-    this.isLoading = false,
+    this.isProfileLoading = false,
+    this.isPhotosLoading = false,
     this.profileImage,
     this.nickname,
     this.myLikedPhotos = const [],
@@ -16,20 +18,24 @@ class ProfileState {
   });
 
   ProfileState copyWith({
-    bool? isLoading,
+    bool? isProfileLoading,
+    bool? isPhotosLoading,
     String? profileImage,
     String? nickname,
     List<SimplePhotoData>? myLikedPhotos,
     List<SimplePhotoData>? myPhotos,
   }) {
     return ProfileState(
-      isLoading: isLoading ?? this.isLoading,
+      isProfileLoading: isProfileLoading ?? this.isProfileLoading,
+      isPhotosLoading: isPhotosLoading ?? this.isPhotosLoading,
       profileImage: profileImage ?? this.profileImage,
       nickname: nickname ?? this.nickname,
       myLikedPhotos: myLikedPhotos ?? this.myLikedPhotos,
       myPhotos: myPhotos ?? this.myPhotos,
     );
   }
+
+  bool get isLoading => isProfileLoading || isPhotosLoading;
 }
 
 abstract class ProfileEffect {}

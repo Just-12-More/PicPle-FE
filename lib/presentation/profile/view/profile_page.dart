@@ -40,7 +40,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(profileStateProvider);
+    final isLoading = ref.watch(
+      profileStateProvider.select((state) => state.isLoading),
+    );
 
     ref.listen<ProfileEffect?>(profileEffectProvider, (previous, next) {
       if (next == null) return;
@@ -78,17 +80,36 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
           ),
         ],
       ),
-      body: state.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _buildProfileContent(state),
+      body: Stack(
+        children: [
+          _buildProfileContent(ref),
+          if (isLoading)
+            const Positioned.fill(
+              child: ColoredBox(
+                color: Colors.transparent,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            ),
+        ],
+      ),
       backgroundColor: PicpleColors.white,
     );
   }
 
-  Widget _buildProfileContent(ProfileState state) {
-    final selectedPhotos = _tabController.index == 0
-        ? state.myPhotos
-        : state.myLikedPhotos;
+  Widget _buildProfileContent(WidgetRef ref) {
+    final profileInfo = ref.watch(
+      profileStateProvider.select(
+        (state) => (image: state.profileImage, nickname: state.nickname),
+      ),
+    );
+    final myPhotos = ref.watch(
+      profileStateProvider.select((state) => state.myPhotos),
+    );
+    final likedPhotos = ref.watch(
+      profileStateProvider.select((state) => state.myLikedPhotos),
+    );
+
+    final selectedPhotos = _tabController.index == 0 ? myPhotos : likedPhotos;
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -103,7 +124,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
               child: CachedNetworkImage(
                 width: 100,
                 height: 100,
-                imageUrl: state.profileImage ?? '',
+                imageUrl: profileInfo.image ?? '',
                 placeholder: (context, url) =>
                     Image.asset('assets/images/img_profile_placeholder.png'),
                 errorWidget: (context, url, error) =>
@@ -113,7 +134,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
             ),
             const SizedBox(height: 12),
             Text(
-              state.nickname ?? '닉네임 없음',
+              profileInfo.nickname ?? '닉네임 없음',
               style: PicpleTypography.title2,
             ),
             const SizedBox(height: 24),
