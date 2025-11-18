@@ -36,6 +36,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   final List<String> _renderedPhotoIds = [];
   final Map<String, NMarker> _hotPlaceMarkers = {};
 
+  static const int _photoMarkerZIndex = 0;
+  static const int _hotPlaceMarkerZIndex = 10;
+  static const int _myLocationMarkerZIndex = 20;
+
+  static const int _photoMarkerGlobalZIndex = 200000;
+  static const int _hotPlaceMarkerGlobalZIndex = 200010;
+  static const int _myLocationMarkerGlobalZIndex = 200020;
+
   @override
   Widget build(BuildContext context) {
     ref.listen<List<PhotoData>>(
@@ -189,6 +197,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       icon: markerIcon,
     );
 
+    _myLocationMarker!
+      ..setZIndex(_myLocationMarkerZIndex)
+      ..setGlobalZIndex(_myLocationMarkerGlobalZIndex);
+
     _mapController!.addOverlay(_myLocationMarker!);
   }
 
@@ -204,6 +216,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         id: markerId,
         position: NLatLng(photo.latitude, photo.longitude),
         imageUrl: photo.imgUrl,
+        zIndex: _photoMarkerZIndex,
+        globalZIndex: _photoMarkerGlobalZIndex,
         onTap: () {
           context.push(
             "${Routes.photoList.path}/${photo.id}",
@@ -232,6 +246,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         icon: const NOverlayImage.fromAssetImage('assets/images/img_hotplace.png'),
         size: const Size(48, 48),
       );
+
+      marker
+        ..setZIndex(_hotPlaceMarkerZIndex)
+        ..setGlobalZIndex(_hotPlaceMarkerGlobalZIndex);
 
       controller.addOverlay(marker);
       _hotPlaceMarkers[markerId] = marker;
