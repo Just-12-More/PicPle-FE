@@ -29,43 +29,33 @@ class PicpleBottomNavigationBar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildNavItem(
-                  index: 0,
                   iconPath: 'assets/icons/ic_home.svg',
                   label: '홈',
                   isSelected: currentIndex == 0,
-                  rightPadding: 16,
                   onTap: () => onTap(0),
                 ),
 
                 _buildNavItem(
-                  index: 1,
-                  iconPath: 'assets/icons/ic_profile.svg',
-                  label: '프로필',
+                  iconPath: 'assets/icons/ic_map.svg',
+                  label: '지도',
                   isSelected: currentIndex == 1,
-                  leftPadding: 16,
                   onTap: () => onTap(1),
                 ),
-              ],
-            ),
-          ),
-      
-          // 가운데 카메라 버튼
-          Positioned(
-            child: SizedBox(
-              width: 64,
-              height: 64,
-              child: FloatingActionButton(
-                onPressed: onUploadTap,
-                backgroundColor: PicpleColors.primary1,
-                shape: const CircleBorder(),
-                elevation: 0,
-                child: SvgPicture.asset(
-                  'assets/icons/ic_upload.svg',
-                  width: 48,
-                  height: 48,
-                  colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+
+                _buildNavItem(
+                  iconPath: 'assets/icons/ic_upload.svg',
+                  label: '업로드',
+                  isSelected: false,
+                  onTap: onUploadTap
                 ),
-              ),
+
+                _buildNavItem(
+                  iconPath: 'assets/icons/ic_profile.svg',
+                  label: '프로필',
+                  isSelected: currentIndex == 2,
+                  onTap: () => onTap(2),
+                )
+              ],
             ),
           ),
         ],
@@ -74,7 +64,6 @@ class PicpleBottomNavigationBar extends StatelessWidget {
   }
 
   Widget _buildNavItem({
-    required int index,
     required String iconPath,
     required String label,
     required bool isSelected,

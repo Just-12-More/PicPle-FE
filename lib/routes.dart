@@ -18,6 +18,7 @@ enum Routes {
   splash(name: 'Splash', path: '/'),
   login(name: 'Login', path: '/login'),
   home(name: 'Home', path: '/home'),
+  map(name: 'Map', path: '/map'),
   upload(name: 'Upload', path: '/upload'),
 
   photoDetail(name: 'PhotoDetail', path: '/photo_detail'),
@@ -81,29 +82,38 @@ final router = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: Routes.home.path,
-              builder: (context, state) => const HomePage(),
-              routes: []
+                path: Routes.home.path,
+                builder: (context, state) => const HomePage(),
+                routes: []
             ),
           ]
         ),
         StatefulShellBranch(
-            routes: [
-              GoRoute(
-                  path: Routes.profile.path,
-                  builder: (context, state) => const ProfilePage(),
-                  routes: [
-                    GoRoute(
-                      path: Routes.profileEdit.path,
-                      builder: (context, state) => const ProfileEditPage(),
-                    ),
-                    GoRoute(
-                      path: Routes.setting.path,
-                      builder: (context, state) => const SettingPage(),
-                    ),
-                  ]
-              ),
-            ]
+          routes: [
+            GoRoute(
+                path: Routes.map.path,
+                builder: (context, state) => const HomePage(),
+                routes: []
+            ),
+          ]
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+                path: Routes.profile.path,
+                builder: (context, state) => const ProfilePage(),
+                routes: [
+                  GoRoute(
+                    path: Routes.profileEdit.path,
+                    builder: (context, state) => const ProfileEditPage(),
+                  ),
+                  GoRoute(
+                    path: Routes.setting.path,
+                    builder: (context, state) => const SettingPage(),
+                  ),
+                ]
+            ),
+          ]
         )
       ]
     )
@@ -120,6 +130,7 @@ class ScaffoldWithNavBar extends StatelessWidget {
 
     final topLevelRoutes = [
       Routes.home.path,
+      Routes.map.path,
       Routes.profile.path,
     ];
 
