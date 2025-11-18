@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:picple/data/model/response/nearby_photos_response.dart';
 import 'package:picple/presentation/component/picple_bottom_navigation_bar.dart';
+import 'package:picple/presentation/home/view/home_page.dart';
 import 'package:picple/presentation/login/view/login_page.dart';
 import 'package:picple/presentation/map/provider/map_provider.dart';
 import 'package:picple/presentation/map/view/map_page.dart';
@@ -12,12 +13,13 @@ import 'package:picple/presentation/setting/view/setting_page.dart';
 import 'package:picple/presentation/shared/photo_detail/view/photo_detail_page.dart';
 import 'package:picple/presentation/shared/photo_list/view/photo_list_page.dart';
 import 'package:picple/presentation/splash/view/splash_page.dart';
+import 'package:picple/presentation/theme/picple_colors.dart';
 import 'package:picple/presentation/upload/view/upload_page.dart';
 
 enum Routes {
   splash(name: 'Splash', path: '/'),
   login(name: 'Login', path: '/login'),
-  home(name: 'Home', path: '/map'),
+  home(name: 'Home', path: '/home'),
   map(name: 'Map', path: '/map'),
   upload(name: 'Upload', path: '/upload'),
 
@@ -83,7 +85,7 @@ final router = GoRouter(
           routes: [
             GoRoute(
                 path: Routes.home.path,
-                builder: (context, state) => const MapPage(),
+                builder: (context, state) => const HomePage(),
                 routes: []
             ),
           ]
@@ -143,6 +145,7 @@ class ScaffoldWithNavBar extends StatelessWidget {
 
     return Scaffold(
       body: navigationShell,
+      backgroundColor: PicpleColors.white,
       bottomNavigationBar: showBottomBar
         ? PicpleBottomNavigationBar(
             currentIndex: navigationShell.currentIndex,
