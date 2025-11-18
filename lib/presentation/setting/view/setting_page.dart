@@ -84,7 +84,11 @@ class SettingPage extends ConsumerWidget {
                 _SettingItem(
                   icon: Icons.logout,
                   label: '로그아웃',
-                  onTap: isProcessing ? null : notifier.logout,
+                  onTap: isProcessing
+                      ? null
+                      : () async {
+                          await notifier.logout();
+                        },
                 ),
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -106,7 +110,11 @@ class SettingPage extends ConsumerWidget {
                 ),
                 Center(
                   child: TextButton(
-                    onPressed: isProcessing ? null : notifier.withdraw,
+                    onPressed: isProcessing
+                        ? null
+                        : () async {
+                          await notifier.withdraw();
+                        },
                     child: const Text(
                       '탈퇴하기',
                       style: TextStyle(
