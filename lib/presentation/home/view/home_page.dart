@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,16 +35,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(homeStateProvider);
+    ref.listen<List<PhotoData>>(
+      homeStateProvider.select((state) => state.photos),
+      (previous, next) {
+        _renderPhotoMarkers(next);
+      },
+    );
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _renderPhotoMarkers(state.photos);
-      if (state.userLatitude != null && state.userLongitude != null) {
-        _updateMyLocationMarker(state.userLatitude!, state.userLongitude!);
-      } else {
-        log('No initial location data available');
-      }
-    });
+    ref.listen<({double? latitude, double? longitude})>(
+      homeStateProvider.select(
+        (state) => (latitude: state.userLatitude, longitude: state.userLongitude),
+      ),
+      (previous, next) {
+        final hasPosition = next.latitude != null && next.longitude != null;
+        if (!hasPosition) return;
+
+        _updateMyLocationMarker(next.latitude!, next.longitude!);
+      },
+    );
 
     ref.listen<HomeEffect?>(homeEffectProvider, (previous, next) {
       if (next == null) return;
@@ -108,6 +114,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       onMapReady: (controller) async {
         _mapController = controller;
+        _renderedPhotoIds.clear();
+
+        final currentState = ref.read(homeStateProvider);
+        _renderPhotoMarkers(currentState.photos);
+
+        final latitude = currentState.userLatitude;
+        final longitude = currentState.userLongitude;
+        if (latitude != null && longitude != null) {
+          await _updateMyLocationMarker(latitude, longitude);
+        }
       },
       onCameraIdle: () {
         final camera = _mapController!.nowCameraPosition;
@@ -166,6 +182,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _renderPhotoMarkers(List<PhotoData> photos) {
+    if (_mapController == null) return;
+
     for (final photo in photos) {
       final markerId = 'photo_${photo.id}';
       if (_renderedPhotoIds.contains(markerId)) continue;
