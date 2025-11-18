@@ -6,6 +6,7 @@ import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 import 'package:picple/data/model/request/geo_photos_request.dart';
 import 'package:picple/data/model/request/upload_photo_request.dart';
+import 'package:picple/data/model/response/hot_places_response.dart';
 import 'package:picple/data/model/response/nearby_photos_response.dart';
 
 import '../dio_client.dart';
@@ -208,6 +209,25 @@ class PhotoApi {
     } catch (e, stackTrace) {
       log('[uploadFileToPreSignedUrl] Upload failed: $e\n$stackTrace');
       return false;
+    }
+  }
+
+  Future<BaseResponse<HotPlacesData>> getHotPlacesTop10() async {
+    try {
+      final response = await _dioClient.dio.get('/stat/top10');
+
+      return BaseResponse<HotPlacesData>.fromJson(
+        response.data,
+        HotPlacesData.fromJson,
+      );
+    } catch (e) {
+      return BaseResponse<HotPlacesData>(
+        isSuccess: false,
+        error: ResponseError(
+          code: "500",
+          message: 'An error occurred while fetching hot places: $e',
+        ),
+      );
     }
   }
 }

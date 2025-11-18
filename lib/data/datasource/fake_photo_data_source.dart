@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:picple/data/datasource/photo_data_source.dart';
 import 'package:picple/data/model/request/presigned_url_request.dart';
+import 'package:picple/data/model/response/hot_places_response.dart';
 import 'package:picple/data/model/response/nearby_photos_response.dart';
 import 'package:picple/data/model/response/presigned_url_response.dart';
 
@@ -117,6 +118,92 @@ class FakePhotoDataSource implements PhotoDataSource {
         "error": null
       },
       PhotoData.fromJson
+    );
+  }
+
+  @override
+  Future<BaseResponse<HotPlacesData>> getHotPlacesTop10() async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    return BaseResponse<HotPlacesData>.fromJson(
+      {
+        "isSuccess": true,
+        "data": {
+          "hotplaces": [
+            {
+              "order": 1,
+              "locationLabel": "경기도 수원시 팔달구 지동",
+              "photoCnt": 7,
+              "latitude": "37.2816337",
+              "longitude": "127.0222369"
+            },
+            {
+              "order": 2,
+              "locationLabel": "경기도 수원시 팔달구 행궁동",
+              "photoCnt": 7,
+              "latitude": "37.2841940",
+              "longitude": "127.0191077"
+            },
+            {
+              "order": 3,
+              "locationLabel": "서울특별시 강남구 역삼1동",
+              "photoCnt": 5,
+              "latitude": "37.5050333",
+              "longitude": "127.0412409"
+            },
+            {
+              "order": 4,
+              "locationLabel": "경기도 용인시 처인구 포곡읍",
+              "photoCnt": 4,
+              "latitude": "37.2933272",
+              "longitude": "127.2013221"
+            },
+            {
+              "order": 5,
+              "locationLabel": "경기도 용인시 수지구 죽전3동",
+              "photoCnt": 3,
+              "latitude": "37.3207277",
+              "longitude": "127.1276811"
+            },
+            {
+              "order": 6,
+              "locationLabel": "경기도 용인시 기흥구 보라동",
+              "photoCnt": 3,
+              "latitude": "37.2594023",
+              "longitude": "127.1205573"
+            },
+            {
+              "order": 7,
+              "locationLabel": "경기도 수원시 장안구 정자2동",
+              "photoCnt": 3,
+              "latitude": "37.2873924",
+              "longitude": "126.9915605"
+            },
+            {
+              "order": 8,
+              "locationLabel": "서울특별시 용산구 서빙고동",
+              "photoCnt": 3,
+              "latitude": "37.5240867",
+              "longitude": "126.9803880"
+            },
+            {
+              "order": 9,
+              "locationLabel": "서울특별시 송파구 잠실3동",
+              "photoCnt": 3,
+              "latitude": "37.5110880",
+              "longitude": "127.0982822"
+            },
+            {
+              "order": 10,
+              "locationLabel": "서울특별시 종로구 가회동",
+              "photoCnt": 2,
+              "latitude": "37.5811911",
+              "longitude": "126.9846929"
+            }
+          ]
+        },
+        "error": null
+      },
+      HotPlacesData.fromJson,
     );
   }
 
