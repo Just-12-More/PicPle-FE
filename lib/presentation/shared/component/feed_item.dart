@@ -60,8 +60,8 @@ class FeedItem extends StatelessWidget {
           aspectRatio: 1,
           child: GestureDetector(
             onDoubleTap: onToggleLike,
-            child: Image.network(
-              imageUrl,
+            child: CachedNetworkImage(
+              imageUrl: imageUrl,
               width: double.infinity,
               height: double.infinity,
               fit: BoxFit.cover,

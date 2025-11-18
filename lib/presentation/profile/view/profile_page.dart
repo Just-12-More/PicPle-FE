@@ -182,7 +182,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage>
               "${Routes.photoDetail.path}/${photos[index].id}",
             );
           },
-          child: Image.network(photos[index].imgUrl, fit: BoxFit.cover)
+          child: CachedNetworkImage(imageUrl: photos[index].imgUrl, fit: BoxFit.cover)
         );
       },
     );
