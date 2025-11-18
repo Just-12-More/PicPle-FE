@@ -3,20 +3,20 @@ import 'dart:io';
 import '../../../data/model/response/nearby_photos_response.dart';
 
 class UploadState {
-  final bool isLoading;
+  final bool isUploading;
   final File? photo;
 
   UploadState({
-    this.isLoading = false,
+    this.isUploading = false,
     this.photo,
   });
 
   UploadState copyWith({
-    bool? isLoading,
+    bool? isUploading,
     File? photo,
   }) {
     return UploadState(
-      isLoading: isLoading ?? this.isLoading,
+      isUploading: isUploading ?? this.isUploading,
       photo: photo ?? this.photo,
     );
   }

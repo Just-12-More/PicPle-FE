@@ -36,15 +36,6 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
 
-  bool get _isFormValid {
-    final state = ref.watch(uploadStateProvider);
-
-    return state.photo != null &&
-        state.photo!.existsSync() &&
-        _titleController.text.trim().isNotEmpty &&
-        _descriptionController.text.trim().isNotEmpty;
-  }
-
   Future<void> _takePhoto() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.camera);
 
@@ -67,7 +58,6 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
       await Future.delayed(const Duration(milliseconds: 300)); // 안전한 딜레이
       if (!mounted) return;
       ref.read(uploadStateProvider.notifier).setPhoto(File(pickedFile.path));
-      setState(() {});
     }
   }
 
@@ -97,7 +87,14 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(uploadStateProvider);
+    final photoFile = ref.watch(
+      uploadStateProvider.select((state) => state.photo),
+    );
+    final isUploading = ref.watch(
+      uploadStateProvider.select((state) => state.isUploading),
+    );
+    final hasPhoto = photoFile != null && photoFile.existsSync();
+    final isFormValid = _isFormValid(hasPhoto, isUploading);
     ref.listen<UploadEffect?>(uploadEffectProvider, (previous, next) {
       if (next == null) return;
 
@@ -146,9 +143,9 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
                   // 사진 미리보기
                   AspectRatio(
                     aspectRatio: 1.0,
-                    child: state.photo != null && state.photo!.existsSync()
+                    child: hasPhoto
                         ? Image.file(
-                          state.photo!,
+                          photoFile,
                           width: double.infinity,
                           height: double.infinity,
                           fit: BoxFit.cover,
@@ -203,7 +200,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
               ),
             ),
 
-            if (state.isLoading)
+            if (isUploading)
               const Positioned.fill(
                 child: ColoredBox(
                   color: Colors.black45,
@@ -218,8 +215,8 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-          child: ElevatedButton(
-            onPressed: _isFormValid && !state.isLoading ? () async {
+            child: ElevatedButton(
+            onPressed: isFormValid ? () async {
               final title = _titleController.text.trim();
               final description = _descriptionController.text.trim();
 
@@ -232,9 +229,9 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
-            ),
-            child: Text(
-              '등록하기',
+              ),
+              child: Text(
+                '등록하기',
               style: PicpleTypography.body1SemiBold.copyWith(
                 color: PicpleColors.white,
               )
@@ -243,6 +240,14 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
         ),
       ),
     );
+  }
+
+  bool _isFormValid(bool hasPhoto, bool isUploading) {
+    if (isUploading) return false;
+
+    return hasPhoto &&
+        _titleController.text.trim().isNotEmpty &&
+        _descriptionController.text.trim().isNotEmpty;
   }
 
   Future<void> _handleUpload(BuildContext context, WidgetRef ref, String title, String description) async {

@@ -37,7 +37,7 @@ class UploadNotifier extends AutoDisposeNotifier<UploadState> {
       return;
     }
 
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isUploading: true);
 
     try {
       final compressedFile = await resizeAndCompressImageFile(file: originalFile);
@@ -79,7 +79,7 @@ class UploadNotifier extends AutoDisposeNotifier<UploadState> {
     } catch (e) {
       _showToast("오류 발생: $e");
     } finally {
-      state = state.copyWith(isLoading: false);
+      state = state.copyWith(isUploading: false);
     }
   }
 
