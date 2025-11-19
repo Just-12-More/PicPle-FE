@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:gal/gal.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
@@ -37,6 +38,18 @@ class UploadScreen extends ConsumerStatefulWidget {
 class _UploadScreenState extends ConsumerState<UploadScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final Set<String> _selectedAdjectiveTags = {};
+  static const List<String> _adjectiveTags = [
+    '잔잔한',
+    '고요한',
+    '평화로운',
+  ];
+  final Set<String> _selectedNounTags = {};
+  static const List<String> _nounTags = [
+    '카페',
+    '도서관',
+    '학교'
+  ];
 
   Future<void> _checkCameraPermissionAndTakePhoto() async {
     final cameraGranted = await requestPermission(
@@ -115,70 +128,36 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
         child: Stack(
           children: [
             SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 12,
-              ),
+              padding: const EdgeInsets.symmetric(vertical: 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // 사진 미리보기
-                  AspectRatio(
-                    aspectRatio: 1.0,
-                    child: hasPhoto
-                        ? Image.file(
-                            photoFile,
-                            key: previewKey,
-                            width: double.infinity,
-                            height: double.infinity,
-                            fit: BoxFit.cover,
-                          )
-                        : GestureDetector(
-                            onTap: _checkCameraPermissionAndTakePhoto,
-                            child: Container(
-                              color: PicpleColors.gray2,
-                              child: const Center(
-                                child: Icon(
-                                  Icons.camera_alt,
-                                  size: 48,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                      ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildPhotoPreview(hasPhoto, photoFile, previewKey),
+                        const SizedBox(height: 16),
+                        _buildTitleField(),
+                        _buildDescriptionField(),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 24),
-
-                  // 제목 입력란
-                  TextField(
-                    controller: _titleController,
-                    style: PicpleTypography.head2.copyWith(
-                      color: PicpleColors.black,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: '제목을 입력하세요',
-                      border: InputBorder.none,
-                      hintStyle: PicpleTypography.head2.copyWith(
-                        color: PicpleColors.gray5,
-                      ),
-                    ),
+                  Divider(color: PicpleColors.gray3, height: 1, thickness: 1),
+                  _buildTagSelectorSection(
+                    title: '형용사 태그 선택',
+                    tags: _adjectiveTags,
+                    selectedTags: _selectedAdjectiveTags,
+                    onTagToggle: _toggleAdjectiveTag,
                   ),
-
-                  // 설명 입력란
-                  TextField(
-                    controller: _descriptionController,
-                    style: PicpleTypography.body1.copyWith(
-                      color: PicpleColors.black,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: '간단한 설명을 입력해주세요',
-                      border: InputBorder.none,
-                      hintStyle: PicpleTypography.body1.copyWith(
-                        color: PicpleColors.gray4,
-                      ),
-                    ),
-                    maxLines: 5,
-                  ),
+                  Divider(color: PicpleColors.gray3, height: 1, thickness: 1),
+                  _buildTagSelectorSection(
+                    title: '명사 태그 선택',
+                    tags: _nounTags,
+                    selectedTags: _selectedNounTags,
+                    onTagToggle: _toggleNounTag,
+                  )
                 ],
               ),
             ),
@@ -223,6 +202,162 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildTagSelectorSection({
+    required String title,
+    required List<String> tags,
+    required Set<String> selectedTags,
+    required void Function(String tag) onTagToggle,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 20),
+
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            children: [
+              SvgPicture.asset(
+                "assets/icons/ic_tag.svg",
+                width: 20,
+                height: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: PicpleTypography.title2.copyWith(
+                  color: PicpleColors.primary1
+                )
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 16),
+
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: tags.map((tag) {
+              final isSelected = selectedTags.contains(tag);
+
+              return GestureDetector(
+                onTap: () => onTagToggle(tag),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: isSelected ? PicpleColors.primary1 : PicpleColors.white,
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(
+                      color: isSelected ? Colors.transparent : PicpleColors.gray3,
+                      width: 1,
+                    ),
+                    boxShadow: isSelected
+                        ? [
+                      BoxShadow(
+                        color: Colors.blue.withOpacity(0.2),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      )
+                    ]
+                        : null,
+                  ),
+                  child: Text(
+                    tag,
+                    style: PicpleTypography.body2SemiBold.copyWith(
+                      color: isSelected ? PicpleColors.white : PicpleColors.gray5,
+                    )
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+
+  Widget _buildPhotoPreview(bool hasPhoto, File? photoFile, Key? previewKey) {
+    return AspectRatio(
+      aspectRatio: 1,
+      child: hasPhoto
+          ? Image.file(
+              photoFile!,
+              key: previewKey,
+              width: double.infinity,
+              height: double.infinity,
+              fit: BoxFit.cover,
+            )
+          : GestureDetector(
+              onTap: _checkCameraPermissionAndTakePhoto,
+              child: Container(
+                color: PicpleColors.gray2,
+                child: const Center(
+                  child: Icon(
+                    Icons.camera_alt,
+                    size: 48,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+            ),
+    );
+  }
+
+  Widget _buildTitleField() {
+    return TextField(
+      controller: _titleController,
+      style: PicpleTypography.head2.copyWith(color: PicpleColors.black),
+      decoration: InputDecoration(
+        hintText: '제목을 입력하세요',
+        border: InputBorder.none,
+        hintStyle: PicpleTypography.head2.copyWith(
+          color: PicpleColors.gray5,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDescriptionField() {
+    return TextField(
+      controller: _descriptionController,
+      style: PicpleTypography.body1.copyWith(color: PicpleColors.black),
+      decoration: InputDecoration(
+        hintText: '간단한 설명을 입력해주세요',
+        border: InputBorder.none,
+        hintStyle: PicpleTypography.body1.copyWith(
+          color: PicpleColors.gray4,
+        ),
+      ),
+      maxLines: 5,
+    );
+  }
+
+  void _toggleAdjectiveTag(String tag) {
+    setState(() {
+      if (_selectedAdjectiveTags.contains(tag)) {
+        _selectedAdjectiveTags.remove(tag);
+      } else {
+        _selectedAdjectiveTags.add(tag);
+      }
+    });
+  }
+
+  void _toggleNounTag(String tag) {
+    setState(() {
+      if (_selectedNounTags.contains(tag)) {
+        _selectedNounTags.remove(tag);
+      } else {
+        _selectedNounTags.add(tag);
+      }
+    });
   }
 
   bool _isFormValid(bool hasPhoto, bool isUploading) {
