@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:picple/core/util/image_utils.dart';
 
+final Map<String, NOverlayImage> _markerIconCache = {};
+
 Future<NOverlayImage> createOverlayImageFromUrl(String imageUrl) async {
   try {
     final bytes = await loadAndResizeImageFromUrl(imageUrl: imageUrl);
@@ -24,13 +26,14 @@ Future<void> addMarkerWithPlaceholderImage({
   void Function()? onTap,
 }) async {
   try {
-    const placeholder = NOverlayImage.fromAssetImage(
-        'assets/images/img_placeholder.png');
+    final cachedIcon = _markerIconCache[id];
+    final icon = cachedIcon ?? await createOverlayImageFromUrl(imageUrl);
+    _markerIconCache[id] = icon;
 
     final marker = NClusterableMarker(
       id: id,
       position: position,
-      icon: placeholder,
+      icon: icon,
       size: const Size(48, 48),
     );
 
@@ -44,9 +47,6 @@ Future<void> addMarkerWithPlaceholderImage({
     });
 
     controller.addOverlay(marker);
-
-    final realImage = await createOverlayImageFromUrl(imageUrl);
-    marker.setIcon(realImage);
   } catch (e) {
     log('Error adding marker: $e');
   }
