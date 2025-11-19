@@ -27,7 +27,7 @@ Future<void> addMarkerWithPlaceholderImage({
     const placeholder = NOverlayImage.fromAssetImage(
         'assets/images/img_placeholder.png');
 
-    final marker = NMarker(
+    final marker = NClusterableMarker(
       id: id,
       position: position,
       icon: placeholder,
