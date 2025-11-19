@@ -14,6 +14,7 @@ import 'package:picple/presentation/shared/photo_detail/view/photo_detail_page.d
 import 'package:picple/presentation/shared/photo_list/view/photo_list_page.dart';
 import 'package:picple/presentation/splash/view/splash_page.dart';
 import 'package:picple/presentation/theme/picple_colors.dart';
+import 'package:picple/presentation/upload/view/in_app_camera_page.dart';
 import 'package:picple/presentation/upload/view/upload_page.dart';
 
 enum Routes {
@@ -22,6 +23,7 @@ enum Routes {
   home(name: 'Home', path: '/home'),
   map(name: 'Map', path: '/map'),
   upload(name: 'Upload', path: '/upload'),
+  camera(name: 'Camera', path: '/camera'),
 
   photoDetail(name: 'PhotoDetail', path: '/photo_detail'),
   photoList(name: 'PhotoList', path: '/photo_list'),
@@ -74,6 +76,11 @@ final router = GoRouter(
     GoRoute(
       path: Routes.upload.path,
       builder: (context, state) => const UploadPage(),
+    ),
+
+    GoRoute(
+      path: Routes.camera.path,
+      builder: (context, state) => const InAppCameraPage(),
     ),
 
     StatefulShellRoute.indexedStack(
