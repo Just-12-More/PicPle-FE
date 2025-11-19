@@ -2,11 +2,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:picple/data/api/auth_api.dart';
 import 'package:picple/data/api/profile_api.dart';
 import 'package:picple/data/api/storage_api.dart';
+import 'package:picple/data/api/tag_api.dart';
 import 'package:picple/data/datasource/profile_data_source.dart';
 import 'package:picple/data/dio_client.dart';
 import 'package:picple/data/repository/auth_repository.dart';
 import 'package:picple/data/repository/photo_repository.dart';
 import 'package:picple/data/repository/profile_repository.dart';
+import 'package:picple/data/repository/tag_repository.dart';
 
 import 'api/photo_api.dart';
 import 'datasource/auth_data_source.dart';
@@ -59,3 +61,11 @@ final photoRepositoryProvider = Provider<PhotoRepository>((ref) {
         ref.watch(photoDataSourceProvider)
     );
 });
+
+final tagApiProvider = Provider<TagApi>((ref) =>
+    TagApi(ref.watch(dioClientProvider))
+);
+
+final tagRepositoryProvider = Provider<TagRepository>((ref) =>
+    TagRepositoryImpl(ref.watch(tagApiProvider))
+);

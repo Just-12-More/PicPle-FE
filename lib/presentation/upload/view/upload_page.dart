@@ -13,6 +13,7 @@ import 'package:pro_image_editor/pro_image_editor.dart';
 
 import '../../../core/service/flutter_image_picker.dart';
 import '../../../core/util/permission_utils.dart';
+import '../../../data/model/response/tag_response.dart';
 import '../../../routes.dart';
 import '../../theme/picple_colors.dart';
 import '../../theme/picple_typography.dart';
@@ -38,18 +39,6 @@ class UploadScreen extends ConsumerStatefulWidget {
 class _UploadScreenState extends ConsumerState<UploadScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final Set<String> _selectedAdjectiveTags = {};
-  static const List<String> _adjectiveTags = [
-    '잔잔한',
-    '고요한',
-    '평화로운',
-  ];
-  final Set<String> _selectedNounTags = {};
-  static const List<String> _nounTags = [
-    '카페',
-    '도서관',
-    '학교'
-  ];
 
   Future<void> _checkCameraPermissionAndTakePhoto() async {
     final cameraGranted = await requestPermission(
@@ -77,12 +66,9 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final photoFile = ref.watch(
-      uploadStateProvider.select((state) => state.photo),
-    );
-    final isUploading = ref.watch(
-      uploadStateProvider.select((state) => state.isUploading),
-    );
+    final uploadState = ref.watch(uploadStateProvider);
+    final photoFile = uploadState.photo;
+    final isUploading = uploadState.isUploading;
     final hasPhoto = photoFile != null && photoFile.existsSync();
     final isFormValid = _isFormValid(hasPhoto, isUploading);
     final previewKey = hasPhoto
@@ -144,20 +130,32 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
                       ],
                     ),
                   ),
-                  Divider(color: PicpleColors.gray3, height: 1, thickness: 1),
-                  _buildTagSelectorSection(
-                    title: '형용사 태그 선택',
-                    tags: _adjectiveTags,
-                    selectedTags: _selectedAdjectiveTags,
-                    onTagToggle: _toggleAdjectiveTag,
-                  ),
-                  Divider(color: PicpleColors.gray3, height: 1, thickness: 1),
-                  _buildTagSelectorSection(
-                    title: '명사 태그 선택',
-                    tags: _nounTags,
-                    selectedTags: _selectedNounTags,
-                    onTagToggle: _toggleNounTag,
-                  )
+                  if (uploadState.nounTags.isNotEmpty)
+                    Column(
+                      children: [
+                        Divider(color: PicpleColors.gray3, height: 1, thickness: 1),
+                        _buildTagSelectorSection(
+                          title: '어디에서?',
+                          tags: uploadState.nounTags,
+                          selectedTagIds: uploadState.selectedTagIds,
+                          onTagToggle: (id) =>
+                              ref.read(uploadStateProvider.notifier).toggleTag(id),
+                        ),
+                      ],
+                    ),
+                  if (uploadState.adjectiveTags.isNotEmpty)
+                    Column(
+                      children: [
+                        Divider(color: PicpleColors.gray3, height: 1, thickness: 1),
+                        _buildTagSelectorSection(
+                          title: '어떤 느낌?',
+                          tags: uploadState.adjectiveTags,
+                          selectedTagIds: uploadState.selectedTagIds,
+                          onTagToggle: (id) =>
+                              ref.read(uploadStateProvider.notifier).toggleTag(id),
+                        ),
+                      ],
+                    ),
                 ],
               ),
             ),
@@ -206,15 +204,14 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
 
   Widget _buildTagSelectorSection({
     required String title,
-    required List<String> tags,
-    required Set<String> selectedTags,
-    required void Function(String tag) onTagToggle,
+    required List<TagItem> tags,
+    required Set<int> selectedTagIds,
+    required void Function(int tagId) onTagToggle,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 20),
-
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
@@ -228,25 +225,23 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
               Text(
                 title,
                 style: PicpleTypography.title2.copyWith(
-                  color: PicpleColors.primary1
-                )
+                  color: PicpleColors.primary1,
+                ),
               ),
             ],
           ),
         ),
-
         const SizedBox(height: 16),
-
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Wrap(
             spacing: 6,
             runSpacing: 6,
             children: tags.map((tag) {
-              final isSelected = selectedTags.contains(tag);
+              final isSelected = selectedTagIds.contains(tag.id);
 
               return GestureDetector(
-                onTap: () => onTagToggle(tag),
+                onTap: () => onTagToggle(tag.id),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -259,26 +254,25 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
                     ),
                     boxShadow: isSelected
                         ? [
-                      BoxShadow(
-                        color: Colors.blue.withOpacity(0.2),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      )
-                    ]
+                            BoxShadow(
+                              color: Colors.blue.withOpacity(0.2),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            )
+                          ]
                         : null,
                   ),
                   child: Text(
-                    tag,
+                    tag.name,
                     style: PicpleTypography.body2SemiBold.copyWith(
                       color: isSelected ? PicpleColors.white : PicpleColors.gray5,
-                    )
+                    ),
                   ),
                 ),
               );
             }).toList(),
           ),
         ),
-
         const SizedBox(height: 20),
       ],
     );
@@ -338,26 +332,6 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
       ),
       maxLines: 5,
     );
-  }
-
-  void _toggleAdjectiveTag(String tag) {
-    setState(() {
-      if (_selectedAdjectiveTags.contains(tag)) {
-        _selectedAdjectiveTags.remove(tag);
-      } else {
-        _selectedAdjectiveTags.add(tag);
-      }
-    });
-  }
-
-  void _toggleNounTag(String tag) {
-    setState(() {
-      if (_selectedNounTags.contains(tag)) {
-        _selectedNounTags.remove(tag);
-      } else {
-        _selectedNounTags.add(tag);
-      }
-    });
   }
 
   bool _isFormValid(bool hasPhoto, bool isUploading) {
