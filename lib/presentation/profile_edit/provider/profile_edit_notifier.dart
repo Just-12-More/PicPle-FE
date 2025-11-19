@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:picple/core/service/native_media_picker.dart';
 import 'package:picple/data/repository/profile_repository.dart';
 import 'package:picple/data/service_providers.dart';
 import 'package:picple/presentation/profile/provider/profile_notifier.dart';
@@ -52,12 +52,10 @@ class ProfileEditNotifier extends AutoDisposeNotifier<ProfileEditState> {
   }
 
   void changeProfileImage() async {
-    ImagePicker imagePicker = ImagePicker();
-    final pickedFile = await imagePicker.pickImage(source: ImageSource.gallery);
+    final file = await NativeMediaPicker.pickFromGallery();
 
-    if (pickedFile != null) {
-      final filePath = pickedFile.path;
-      setImagePath(filePath);
+    if (file != null) {
+      setImagePath(file.path);
     } else {
       _showToast("이미지를 선택하지 않았습니다.");
     }

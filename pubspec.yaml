@@ -40,7 +40,6 @@ dependencies:
   json_serializable: ^6.9.0
   flutter_secure_storage: ^9.2.4
   permission_handler: ^12.0.1
-  image_picker: ^1.2.1
   path_provider: ^2.1.4
   flutter_naver_map: 1.4.1+1
   http: ^1.6.0

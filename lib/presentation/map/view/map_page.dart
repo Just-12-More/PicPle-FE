@@ -7,8 +7,10 @@ import 'package:picple/presentation/theme/picple_colors.dart';
 import 'package:picple/presentation/theme/picple_typography.dart';
 
 import '../../../core/util/naver_map_utils.dart';
+import '../../../data/model/response/hot_places_response.dart';
 import '../../../data/model/response/nearby_photos_response.dart';
 import '../../../routes.dart';
+import '../../hot_place/provider/hot_place_provider.dart';
 import '../provider/map_contract.dart';
 import '../provider/map_provider.dart';
 
@@ -32,6 +34,15 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   NaverMapController? _mapController;
   NMarker? _myLocationMarker;
   final List<String> _renderedPhotoIds = [];
+  final Map<String, NMarker> _hotPlaceMarkers = {};
+
+  static const int _photoMarkerZIndex = 0;
+  static const int _hotPlaceMarkerZIndex = 10;
+  static const int _myLocationMarkerZIndex = 20;
+
+  static const int _photoMarkerGlobalZIndex = 200000;
+  static const int _hotPlaceMarkerGlobalZIndex = 200010;
+  static const int _myLocationMarkerGlobalZIndex = 200020;
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +50,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       mapStateProvider.select((state) => state.photos),
       (previous, next) {
         _renderPhotoMarkers(next);
+      },
+    );
+
+    ref.listen<List<HotPlace>>(
+      hotPlaceProvider,
+      (previous, next) {
+        _renderHotPlaceMarkers(next);
       },
     );
 
@@ -118,6 +136,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
         final currentState = ref.read(mapStateProvider);
         _renderPhotoMarkers(currentState.photos);
+        _renderHotPlaceMarkers(ref.read(hotPlaceProvider));
 
         final latitude = currentState.userLatitude;
         final longitude = currentState.userLongitude;
@@ -178,6 +197,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       icon: markerIcon,
     );
 
+    _myLocationMarker!
+      ..setZIndex(_myLocationMarkerZIndex)
+      ..setGlobalZIndex(_myLocationMarkerGlobalZIndex);
+
     _mapController!.addOverlay(_myLocationMarker!);
   }
 
@@ -193,6 +216,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         id: markerId,
         position: NLatLng(photo.latitude, photo.longitude),
         imageUrl: photo.imgUrl,
+        zIndex: _photoMarkerZIndex,
+        globalZIndex: _photoMarkerGlobalZIndex,
         onTap: () {
           context.push(
             "${Routes.photoList.path}/${photo.id}",
@@ -202,6 +227,38 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
       _renderedPhotoIds.add(markerId);
     }
+  }
+
+  void _renderHotPlaceMarkers(List<HotPlace> places) {
+    final controller = _mapController;
+    if (controller == null) return;
+
+    for (final marker in _hotPlaceMarkers.values) {
+      controller.deleteOverlay(marker.info);
+    }
+    _hotPlaceMarkers.clear();
+
+    for (final place in places) {
+      final markerId = _hotPlaceMarkerId(place);
+      final marker = NMarker(
+        id: markerId,
+        position: NLatLng(place.latitude, place.longitude),
+        icon: const NOverlayImage.fromAssetImage('assets/images/img_hotplace.png'),
+        size: const Size(48, 48),
+      );
+
+      marker
+        ..setZIndex(_hotPlaceMarkerZIndex)
+        ..setGlobalZIndex(_hotPlaceMarkerGlobalZIndex);
+
+      controller.addOverlay(marker);
+      _hotPlaceMarkers[markerId] = marker;
+    }
+  }
+
+  String _hotPlaceMarkerId(HotPlace place) {
+    final labelHash = place.locationLabel.hashCode;
+    return 'hot_place_${place.order}_$labelHash';
   }
 }
 

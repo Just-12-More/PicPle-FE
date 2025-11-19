@@ -1,13 +1,11 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gal/gal.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../../core/service/native_media_picker.dart';
 import '../../../core/util/permission_utils.dart';
 import '../../theme/picple_colors.dart';
 import '../../theme/picple_typography.dart';
@@ -31,34 +29,41 @@ class UploadScreen extends ConsumerStatefulWidget {
 }
 
 class _UploadScreenState extends ConsumerState<UploadScreen> {
-  final ImagePicker _picker = ImagePicker();
-
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
 
   Future<void> _takePhoto() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.camera);
+    final file = await NativeMediaPicker.takePicture();
 
-    if (pickedFile != null) {
-      try {
-        await Gal.putImage(pickedFile.path);
-      } catch (error, stackTrace) {
-        debugPrint('Failed to save photo to gallery: $error');
-        debugPrint('$stackTrace');
-        if (mounted) {
-          ScaffoldMessenger.of(context)
-            ..removeCurrentSnackBar()
-            ..showSnackBar(
-              const SnackBar(
-                content: Text('갤러리에 사진을 저장하지 못했습니다.'),
-              ),
-            );
-        }
-      }
-      await Future.delayed(const Duration(milliseconds: 300)); // 안전한 딜레이
+    if (file == null) {
       if (!mounted) return;
-      ref.read(uploadStateProvider.notifier).setPhoto(File(pickedFile.path));
+      ScaffoldMessenger.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(content: Text('카메라를 사용할 수 없습니다.')),
+        );
+      return;
     }
+
+    try {
+      await Gal.putImage(file.path);
+    } catch (error, stackTrace) {
+      debugPrint('Failed to save photo to gallery: $error');
+      debugPrint('$stackTrace');
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+          ..removeCurrentSnackBar()
+          ..showSnackBar(
+            const SnackBar(
+              content: Text('갤러리에 사진을 저장하지 못했습니다.'),
+            ),
+          );
+      }
+    }
+
+    if (!mounted) return;
+    ref.read(uploadStateProvider.notifier).setPhoto(file);
+    setState(() {});
   }
 
   Future<void> _checkCameraPermissionAndTakePhoto() async {

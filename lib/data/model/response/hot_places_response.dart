@@ -32,8 +32,14 @@ class HotPlace {
       order: json['order'] ?? 0,
       locationLabel: json['locationLabel'] ?? '',
       photoCnt: json['photoCnt'] ?? 0,
-      latitude: json['latitude']?.toDouble() ?? 0.0,
-      longitude: json['longitude']?.toDouble() ?? 0.0,
+      latitude: _toDouble(json['latitude']),
+      longitude: _toDouble(json['longitude']),
     );
+  }
+
+  static double _toDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is num) return value.toDouble();
+    return double.tryParse(value.toString()) ?? 0.0;
   }
 }

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:picple/data/model/request/geo_photos_request.dart';
 import 'package:picple/data/model/request/presigned_url_request.dart';
 import 'package:picple/data/model/request/upload_photo_request.dart';
+import 'package:picple/data/model/response/hot_places_response.dart';
 import 'package:picple/data/model/response/nearby_photos_response.dart';
 import 'package:picple/data/model/response/presigned_url_response.dart';
 
@@ -16,6 +17,8 @@ abstract class PhotoDataSource {
   Future<BaseResponse<NearbyPhotosData>> getNearbyPhotos(int centerPhotoId);
 
   Future<BaseResponse<PhotoData>> getPhotoDetail(int photoId);
+
+  Future<BaseResponse<HotPlacesData>> getHotPlacesTop10();
 
   Future<BaseResponse<void>> likePhoto(int photoId);
 
@@ -46,6 +49,11 @@ class PhotoDataSourceImpl implements PhotoDataSource {
   @override
   Future<BaseResponse<PhotoData>> getPhotoDetail(int photoId) {
     return _photoApi.getPhotoDetail(photoId);
+  }
+
+  @override
+  Future<BaseResponse<HotPlacesData>> getHotPlacesTop10() {
+    return _photoApi.getHotPlacesTop10();
   }
 
   @override

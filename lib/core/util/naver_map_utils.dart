@@ -20,6 +20,7 @@ Future<void> addMarkerWithPlaceholderImage({
   required NLatLng position,
   required String imageUrl,
   int zIndex = 0,
+  int? globalZIndex,
   void Function()? onTap,
 }) async {
   try {
@@ -32,6 +33,11 @@ Future<void> addMarkerWithPlaceholderImage({
       icon: placeholder,
       size: const Size(48, 48),
     );
+
+    marker.setZIndex(zIndex);
+    if (globalZIndex != null) {
+      marker.setGlobalZIndex(globalZIndex);
+    }
 
     marker.setOnTapListener((NMarker marker) {
       onTap?.call();

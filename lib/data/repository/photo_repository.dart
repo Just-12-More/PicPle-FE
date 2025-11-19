@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:picple/data/datasource/photo_data_source.dart';
 import 'package:picple/data/model/response/geo_photos_response.dart';
+import 'package:picple/data/model/response/hot_places_response.dart';
 
 import '../model/request/geo_photos_request.dart';
 import '../model/request/presigned_url_request.dart';
@@ -41,6 +42,12 @@ class PhotoRepository {
 
   Future<BaseResponse<PhotoData>> getPhotoDetail(int photoId) async {
     final response = await _dataSource.getPhotoDetail(photoId);
+
+    return response;
+  }
+
+  Future<BaseResponse<HotPlacesData>> getHotPlacesTop10() async {
+    final response = await _dataSource.getHotPlacesTop10();
 
     return response;
   }
