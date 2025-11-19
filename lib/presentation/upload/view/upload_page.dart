@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gal/gal.dart';
@@ -5,8 +7,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import '../../../core/service/native_media_picker.dart';
+import '../../../core/service/flutter_image_picker.dart';
 import '../../../core/util/permission_utils.dart';
+import '../../../routes.dart';
 import '../../theme/picple_colors.dart';
 import '../../theme/picple_typography.dart';
 import '../provider/upload_contract.dart';
@@ -32,40 +35,6 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
 
-  Future<void> _takePhoto() async {
-    final file = await NativeMediaPicker.takePicture();
-
-    if (file == null) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context)
-        ..removeCurrentSnackBar()
-        ..showSnackBar(
-          const SnackBar(content: Text('카메라를 사용할 수 없습니다.')),
-        );
-      return;
-    }
-
-    try {
-      await Gal.putImage(file.path);
-    } catch (error, stackTrace) {
-      debugPrint('Failed to save photo to gallery: $error');
-      debugPrint('$stackTrace');
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-          ..removeCurrentSnackBar()
-          ..showSnackBar(
-            const SnackBar(
-              content: Text('갤러리에 사진을 저장하지 못했습니다.'),
-            ),
-          );
-      }
-    }
-
-    if (!mounted) return;
-    ref.read(uploadStateProvider.notifier).setPhoto(file);
-    setState(() {});
-  }
-
   Future<void> _checkCameraPermissionAndTakePhoto() async {
     final cameraGranted = await requestPermission(
       context: context,
@@ -75,7 +44,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
 
     if (!cameraGranted) return;
 
-    _takePhoto();
+    await _openCamera();
   }
 
   @override
@@ -86,7 +55,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
     _descriptionController.addListener(() => setState(() { }));
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkCameraPermissionAndTakePhoto();
+      _handleInitialPhotoRequest();
     });
   }
 
@@ -130,7 +99,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
       ),
       backgroundColor: PicpleColors.background,
@@ -281,5 +250,51 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
       position.latitude,
       position.longitude,
     );
+  }
+
+  Future<void> _handleInitialPhotoRequest() async {
+    final restored = await _restoreLostPhotoIfAvailable();
+    if (!restored) {
+      await _checkCameraPermissionAndTakePhoto();
+    }
+  }
+
+  Future<bool> _restoreLostPhotoIfAvailable() async {
+    final file = await FlutterImagePicker.retrieveLostImage();
+    if (file == null) {
+      return false;
+    }
+    await _onPhotoReady(file);
+    return true;
+  }
+
+  Future<void> _openCamera() async {
+    final file = await context.push<File?>(Routes.camera.path);
+    if (file == null) {
+      return;
+    }
+    await _onPhotoReady(file);
+  }
+
+  Future<void> _onPhotoReady(File file) async {
+    try {
+      await Gal.putImage(file.path);
+    } catch (error, stackTrace) {
+      debugPrint('Failed to save photo to gallery: $error');
+      debugPrint('$stackTrace');
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+          ..removeCurrentSnackBar()
+          ..showSnackBar(
+            const SnackBar(
+              content: Text('갤러리에 사진을 저장하지 못했습니다.'),
+            ),
+          );
+      }
+    }
+
+    if (!mounted) return;
+    ref.read(uploadStateProvider.notifier).setPhoto(file);
+    setState(() {});
   }
 }
