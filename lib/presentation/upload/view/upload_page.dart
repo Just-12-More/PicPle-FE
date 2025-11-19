@@ -70,7 +70,18 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
     final photoFile = uploadState.photo;
     final isUploading = uploadState.isUploading;
     final hasPhoto = photoFile != null && photoFile.existsSync();
-    final isFormValid = _isFormValid(hasPhoto, isUploading);
+    final hasSelectedAdjectiveTag = uploadState.adjectiveTags.any(
+      (tag) => uploadState.selectedTagIds.contains(tag.id),
+    );
+    final hasSelectedNounTag = uploadState.nounTags.any(
+      (tag) => uploadState.selectedTagIds.contains(tag.id),
+    );
+    final isFormValid = _isFormValid(
+      hasPhoto,
+      isUploading,
+      hasSelectedAdjectiveTag,
+      hasSelectedNounTag,
+    );
     final previewKey = hasPhoto
         ? ValueKey(
             '${photoFile.path}_${photoFile.lastModifiedSync().millisecondsSinceEpoch}',
@@ -242,8 +253,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
 
               return GestureDetector(
                 onTap: () => onTagToggle(tag.id),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
+                child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     color: isSelected ? PicpleColors.primary1 : PicpleColors.white,
@@ -254,12 +264,12 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
                     ),
                     boxShadow: isSelected
                         ? [
-                            BoxShadow(
-                              color: Colors.blue.withOpacity(0.2),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            )
-                          ]
+                      BoxShadow(
+                        color: Colors.blue.withOpacity(0.2),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      )
+                    ]
                         : null,
                   ),
                   child: Text(
@@ -334,12 +344,19 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
     );
   }
 
-  bool _isFormValid(bool hasPhoto, bool isUploading) {
+  bool _isFormValid(
+    bool hasPhoto,
+    bool isUploading,
+    bool hasSelectedAdjectiveTag,
+    bool hasSelectedNounTag,
+  ) {
     if (isUploading) return false;
 
     return hasPhoto &&
         _titleController.text.trim().isNotEmpty &&
-        _descriptionController.text.trim().isNotEmpty;
+        _descriptionController.text.trim().isNotEmpty &&
+        hasSelectedAdjectiveTag &&
+        hasSelectedNounTag;
   }
 
   Future<void> _handleUpload(BuildContext context, WidgetRef ref, String title, String description) async {
