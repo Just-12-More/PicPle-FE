@@ -7,9 +7,9 @@ import 'package:path/path.dart' as path;
 
 Future<Uint8List> loadAndResizeImageFromUrl({
   required String imageUrl,
-  int targetWidth = 48,
-  int targetHeight = 48,
-  int quality = 75,
+  int targetWidth = 60,
+  int targetHeight = 60,
+  int quality = 80,
 }) async {
   final response = await http.get(Uri.parse(imageUrl));
   if (response.statusCode != 200) {

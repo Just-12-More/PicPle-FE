@@ -34,7 +34,7 @@ Future<void> addMarkerWithPlaceholderImage({
       id: id,
       position: position,
       icon: icon,
-      size: const Size(48, 48),
+      size: const Size(60, 60),
     );
 
     marker.setZIndex(zIndex);

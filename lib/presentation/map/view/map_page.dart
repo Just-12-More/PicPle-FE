@@ -257,7 +257,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         id: markerId,
         position: NLatLng(place.latitude, place.longitude),
         icon: const NOverlayImage.fromAssetImage('assets/images/img_hotplace.png'),
-        size: const Size(48, 48),
+        size: const Size(60, 60),
       );
 
       marker
