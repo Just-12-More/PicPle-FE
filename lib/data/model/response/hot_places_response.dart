@@ -18,6 +18,7 @@ class HotPlace {
   final int photoCnt;
   final double latitude;
   final double longitude;
+  final String imgUrl;
 
   HotPlace({
     required this.order,
@@ -25,6 +26,7 @@ class HotPlace {
     required this.photoCnt,
     required this.latitude,
     required this.longitude,
+    required this.imgUrl,
   });
 
   factory HotPlace.fromJson(Map<String, dynamic> json) {
@@ -34,6 +36,7 @@ class HotPlace {
       photoCnt: json['photoCnt'] ?? 0,
       latitude: _toDouble(json['latitude']),
       longitude: _toDouble(json['longitude']),
+      imgUrl: json['imgUrl'] ?? '',
     );
   }
 

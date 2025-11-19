@@ -166,7 +166,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: CachedNetworkImage(
-              imageUrl: "https://picsum.photos/${300 + place.order}",
+              imageUrl: place.imgUrl,
+              placeholder: (context, url) =>
+                  Image.asset('assets/images/img_placeholder.png'),
+              errorWidget: (context, url, error) =>
+                  Image.asset('assets/images/img_placeholder.png'),
               width: 80,
               height: 80,
               fit: BoxFit.cover,
