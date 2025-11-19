@@ -212,6 +212,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   borderRadius: BorderRadius.circular(8),
                   child: CachedNetworkImage(
                     imageUrl: imageUrls[index],
+                    placeholder: (context, url) =>
+                        Image.asset('assets/images/img_placeholder.png'),
+                    errorWidget: (context, url, error) =>
+                        Image.asset('assets/images/img_placeholder.png'),
                     width: 96,
                     height: 96,
                     fit: BoxFit.cover,

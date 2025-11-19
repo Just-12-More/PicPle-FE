@@ -62,6 +62,10 @@ class FeedItem extends StatelessWidget {
             onDoubleTap: onToggleLike,
             child: CachedNetworkImage(
               imageUrl: imageUrl,
+              placeholder: (context, url) =>
+                  Image.asset('assets/images/img_placeholder.png', fit: BoxFit.cover),
+              errorWidget: (context, url, error) =>
+                  Image.asset('assets/images/img_placeholder.png', fit: BoxFit.cover),
               width: double.infinity,
               height: double.infinity,
               fit: BoxFit.cover,
