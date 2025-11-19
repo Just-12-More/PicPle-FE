@@ -13,7 +13,7 @@ class NearbyPhotosData {
 
   factory NearbyPhotosData.fromJson(Map<String, dynamic> json) {
     return NearbyPhotosData(
-      address: json['address'],
+      address: json['address'] ?? '',
       centerPhoto: PhotoData.fromJson(json['centerPhoto']),
       nearbyPhotos: List<PhotoData>.from(
         json['nearbyPhotos'].map((x) => PhotoData.fromJson(x)),
@@ -93,7 +93,7 @@ class PhotoData {
       profileImgUrl: json['profileImgUrl'] ?? '',
       likeCount: json['likeCount'],
       isLiked: json['isLiked'],
-      address: json['address'],
+      address: json['address'] ?? '',
       latitude: json['latitude']?.toDouble() ?? 0.0,
       longitude: json['longitude']?.toDouble() ?? 0.0,
       createdAt: json['createdAt'],
