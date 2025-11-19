@@ -4,6 +4,7 @@ class UploadPhotoRequest {
   final double latitude;
   final double longitude;
   final String photoUrl;
+  final List<int> tagIds;
 
   UploadPhotoRequest({
     required this.title,
@@ -11,6 +12,7 @@ class UploadPhotoRequest {
     required this.latitude,
     required this.longitude,
     required this.photoUrl,
+    this.tagIds = const [],
   });
 
   Map<String, dynamic> toJson() {
@@ -20,6 +22,7 @@ class UploadPhotoRequest {
       'latitude': latitude,
       'longitude': longitude,
       'photoUrl': photoUrl,
+      'tagIds': tagIds,
     };
   }
 }

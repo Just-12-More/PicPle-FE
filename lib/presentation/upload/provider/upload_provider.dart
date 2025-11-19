@@ -74,6 +74,7 @@ class UploadNotifier extends AutoDisposeNotifier<UploadState> {
         description,
         latitude,
         longitude,
+        state.selectedTagIds.toList(),
       );
 
       if (uploadResult.isSuccess) {

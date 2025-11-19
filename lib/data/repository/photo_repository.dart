@@ -70,6 +70,7 @@ class PhotoRepository {
     String description,
     double latitude,
     double longitude,
+    List<int> tagIds,
   ) async {
     final response = await _dataSource.uploadPhoto(
       UploadPhotoRequest(
@@ -78,6 +79,7 @@ class PhotoRepository {
         latitude: latitude,
         longitude: longitude,
         photoUrl: imageUrl,
+        tagIds: tagIds,
       ),
     );
 
