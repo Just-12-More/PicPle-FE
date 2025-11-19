@@ -131,6 +131,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         minZoom: 10,
       ),
       clusterOptions: NaverMapClusteringOptions(
+          mergeStrategy: const NClusterMergeStrategy(
+            maxMergeableScreenDistance: 50,
+          ),
           clusterMarkerBuilder: (info, clusterMarker) {
             clusterMarker.setIcon(NOverlayImage.fromAssetImage("assets/images/img_cluster_marker.png"));
             clusterMarker.setSize(const Size(50, 50));
