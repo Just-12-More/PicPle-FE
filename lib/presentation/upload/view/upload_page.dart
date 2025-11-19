@@ -74,7 +74,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
     final isFormValid = _isFormValid(hasPhoto, isUploading);
     final previewKey = hasPhoto
         ? ValueKey(
-            '${photoFile!.path}_${photoFile.lastModifiedSync().millisecondsSinceEpoch}',
+            '${photoFile.path}_${photoFile.lastModifiedSync().millisecondsSinceEpoch}',
           )
         : null;
     ref.listen<UploadEffect?>(uploadEffectProvider, (previous, next) {
@@ -127,7 +127,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
                     aspectRatio: 1.0,
                     child: hasPhoto
                         ? Image.file(
-                            photoFile!,
+                            photoFile,
                             key: previewKey,
                             width: double.infinity,
                             height: double.infinity,
