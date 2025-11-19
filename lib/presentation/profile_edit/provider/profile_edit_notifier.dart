@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:picple/core/service/native_media_picker.dart';
+import 'package:picple/core/service/flutter_image_picker.dart';
 import 'package:picple/data/repository/profile_repository.dart';
 import 'package:picple/data/service_providers.dart';
 import 'package:picple/presentation/profile/provider/profile_notifier.dart';
@@ -52,7 +52,7 @@ class ProfileEditNotifier extends AutoDisposeNotifier<ProfileEditState> {
   }
 
   void changeProfileImage() async {
-    final file = await NativeMediaPicker.pickFromGallery();
+    final file = await FlutterImagePicker.pickFromGallery();
 
     if (file != null) {
       setImagePath(file.path);
