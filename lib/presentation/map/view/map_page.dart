@@ -130,6 +130,16 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         zoomGesturesEnable: true,
         minZoom: 10,
       ),
+      clusterOptions: NaverMapClusteringOptions(
+          clusterMarkerBuilder: (info, clusterMarker) {
+            clusterMarker.setIcon(NOverlayImage.fromAssetImage("assets/images/img_cluster_marker.png"));
+            clusterMarker.setSize(const Size(50, 50));
+            clusterMarker.setIsFlat(true);
+            clusterMarker.setCaption(NOverlayCaption(
+                text: info.size.toString(),
+                textSize: 24.0,
+                color: PicpleColors.black));
+          }),
       onMapReady: (controller) async {
         _mapController = controller;
         _renderedPhotoIds.clear();
