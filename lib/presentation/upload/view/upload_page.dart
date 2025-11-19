@@ -1,4 +1,6 @@
+import 'dart:developer';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +8,7 @@ import 'package:gal/gal.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:pro_image_editor/pro_image_editor.dart';
 
 import '../../../core/service/flutter_image_picker.dart';
 import '../../../core/util/permission_utils.dart';
@@ -69,6 +72,11 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
     );
     final hasPhoto = photoFile != null && photoFile.existsSync();
     final isFormValid = _isFormValid(hasPhoto, isUploading);
+    final previewKey = hasPhoto
+        ? ValueKey(
+            '${photoFile!.path}_${photoFile.lastModifiedSync().millisecondsSinceEpoch}',
+          )
+        : null;
     ref.listen<UploadEffect?>(uploadEffectProvider, (previous, next) {
       if (next == null) return;
 
@@ -119,11 +127,12 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
                     aspectRatio: 1.0,
                     child: hasPhoto
                         ? Image.file(
-                          photoFile,
-                          width: double.infinity,
-                          height: double.infinity,
-                          fit: BoxFit.cover,
-                        )
+                            photoFile!,
+                            key: previewKey,
+                            width: double.infinity,
+                            height: double.infinity,
+                            fit: BoxFit.cover,
+                          )
                         : GestureDetector(
                             onTap: _checkCameraPermissionAndTakePhoto,
                             child: Container(
@@ -273,15 +282,51 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
     if (file == null) {
       return;
     }
-    await _onPhotoReady(file);
+    final editedFile = await _editPhotoWithProImageEditor(file);
+    if (editedFile == null) {
+      return;
+    }
+    await _onPhotoReady(editedFile);
+  }
+
+  Future<File?> _editPhotoWithProImageEditor(File file) async {
+    if (!mounted) return null;
+
+    Uint8List? editedBytes;
+
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (editorContext) {
+          return ProImageEditor.file(
+            file,
+            callbacks: ProImageEditorCallbacks(
+              onImageEditingComplete: (bytes) async {
+                editedBytes = bytes;
+              },
+              onCloseEditor: (_) {
+                Navigator.of(editorContext).maybePop(editedBytes);
+              },
+            ),
+          );
+        },
+      ),
+    );
+
+    if (editedBytes == null) {
+      return null;
+    }
+
+    await file.writeAsBytes(editedBytes!, flush: true);
+    PaintingBinding.instance.imageCache.evict(FileImage(file));
+    return file;
   }
 
   Future<void> _onPhotoReady(File file) async {
     try {
       await Gal.putImage(file.path);
     } catch (error, stackTrace) {
-      debugPrint('Failed to save photo to gallery: $error');
-      debugPrint('$stackTrace');
+      log('Failed to save photo to gallery: $error');
+      log('$stackTrace');
       if (mounted) {
         ScaffoldMessenger.of(context)
           ..removeCurrentSnackBar()
@@ -295,6 +340,5 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
 
     if (!mounted) return;
     ref.read(uploadStateProvider.notifier).setPhoto(file);
-    setState(() {});
   }
 }
