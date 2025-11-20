@@ -1,6 +1,7 @@
 import 'package:picple/data/dio_client.dart';
 import 'package:picple/data/model/response/base_response.dart';
 import 'package:picple/data/model/response/tag_response.dart';
+import 'package:picple/data/model/response/tagged_photos_response.dart';
 
 class TagApi {
   final DioClient _dioClient;
@@ -20,6 +21,37 @@ class TagApi {
         error: ResponseError(
           code: '500',
           message: 'Failed to fetch tags: $e',
+        ),
+      );
+    }
+  }
+
+  Future<BaseResponse<TaggedPhotosResponse>> getPhotosByTagId(int tagId) async {
+    try {
+      final response = await _dioClient.dio.get('/photos/$tagId');
+      final responseData =
+          Map<String, dynamic>.from(response.data as Map<dynamic, dynamic>);
+      final photosJson = responseData['data'] as List<dynamic>?;
+
+      return BaseResponse<TaggedPhotosResponse>(
+        isSuccess: responseData['isSuccess'] as bool? ?? false,
+        data: photosJson != null
+            ? TaggedPhotosResponse.fromList(photosJson)
+            : null,
+        error: responseData['error'] != null
+            ? ResponseError.fromJson(
+                Map<String, dynamic>.from(
+                  responseData['error'] as Map<dynamic, dynamic>,
+                ),
+              )
+            : null,
+      );
+    } catch (e) {
+      return BaseResponse<TaggedPhotosResponse>(
+        isSuccess: false,
+        error: ResponseError(
+          code: '500',
+          message: 'Failed to fetch photos by tag: $e',
         ),
       );
     }

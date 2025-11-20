@@ -1,27 +1,26 @@
 import 'package:picple/data/api/tag_api.dart';
-import 'package:picple/data/datasource/tag_data_source.dart';
 import 'package:picple/data/model/response/base_response.dart';
 import 'package:picple/data/model/response/tag_response.dart';
 import 'package:picple/data/model/response/tagged_photos_response.dart';
 
-abstract class TagRepository {
+abstract class TagDataSource {
   Future<BaseResponse<TagResponse>> getTags();
 
   Future<BaseResponse<TaggedPhotosResponse>> getPhotosByTagId(int tagId);
 }
 
-class TagRepositoryImpl implements TagRepository {
-  final TagDataSource _tagDataSource;
+class TagDataSourceImpl implements TagDataSource {
+  final TagApi _tagApi;
 
-  TagRepositoryImpl(TagApi tagApi) : _tagDataSource = TagDataSourceImpl(tagApi);
+  TagDataSourceImpl(this._tagApi);
 
   @override
   Future<BaseResponse<TagResponse>> getTags() {
-    return _tagDataSource.getTags();
+    return _tagApi.getTags();
   }
 
   @override
   Future<BaseResponse<TaggedPhotosResponse>> getPhotosByTagId(int tagId) {
-    return _tagDataSource.getPhotosByTagId(tagId);
+    return _tagApi.getPhotosByTagId(tagId);
   }
 }
