@@ -1,8 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../data/model/response/hot_places_response.dart';
+import '../../../routes.dart';
 import '../../hot_place/provider/hot_place_provider.dart';
 import '../../theme/picple_colors.dart';
 import '../../theme/picple_typography.dart';
@@ -47,7 +49,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       },
     );
 
-    final hotPlaces = ref.watch(hotPlaceProvider);
+    final hotPlaceState = ref.watch(hotPlaceProvider);
     final hashtagState = ref.watch(homeHashtagStateProvider);
 
     return Scaffold(
@@ -60,7 +62,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               SliverToBoxAdapter(child: _buildHeader()),
-              SliverToBoxAdapter(child: _buildHotPlaceSection(hotPlaces)),
+              SliverToBoxAdapter(child: _buildHotPlaceSection(hotPlaceState)),
               SliverToBoxAdapter(child: _buildHashtagSections(hashtagState)),
             ]
           ),
@@ -122,7 +124,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildHotPlaceSection(List<HotPlace> hotPlaces) {
+  Widget _buildHotPlaceSection(HotPlaceState hotPlaceState) {
+    final hotPlaces = hotPlaceState.hotPlaces;
+
     return Padding(
       padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
       child: Column(
@@ -130,11 +134,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         children: [
           _buildSectionTitle("오늘의 인기 장소"),
           const SizedBox(height: 10),
-          if (hotPlaces.isEmpty)
+          if (hotPlaceState.isLoading)
             const SizedBox(
               height: 120,
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (hotPlaces.isEmpty)
+            SizedBox(
+              height: 80,
               child: Center(
-                child: CircularProgressIndicator(),
+                child: Text(
+                  '아직 인기 장소 정보가 없습니다.',
+                  style: PicpleTypography.body2.copyWith(
+                    color: PicpleColors.gray5,
+                  ),
+                ),
               ),
             )
           else
@@ -274,17 +288,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final photo = section.photos[index];
-          return ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: CachedNetworkImage(
-              imageUrl: photo.imgUrl,
-              placeholder: (context, url) =>
-                  Image.asset('assets/images/img_placeholder.png'),
-              errorWidget: (context, url, error) =>
-                  Image.asset('assets/images/img_placeholder.png'),
-              width: 96,
-              height: 96,
-              fit: BoxFit.cover,
+          return GestureDetector(
+            onTap: () {
+              context.push("${Routes.photoDetail.path}/${photo.id}");
+            },
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: CachedNetworkImage(
+                imageUrl: photo.imgUrl,
+                placeholder: (context, url) =>
+                    Image.asset('assets/images/img_placeholder.png'),
+                errorWidget: (context, url, error) =>
+                    Image.asset('assets/images/img_placeholder.png'),
+                width: 96,
+                height: 96,
+                fit: BoxFit.cover,
+              ),
             ),
           );
         },
