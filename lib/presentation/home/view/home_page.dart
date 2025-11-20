@@ -26,6 +26,13 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  Future<void> _onRefresh() async {
+    await Future.wait([
+      ref.read(hotPlaceProvider.notifier).refresh(),
+      ref.read(homeHashtagStateProvider.notifier).refreshHashtags(),
+    ]);
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen<HomeHashtagEffect?>(
@@ -47,12 +54,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       backgroundColor: PicpleColors.white,
       body: SafeArea(
         top: false,
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(child: _buildHeader()),
-            SliverToBoxAdapter(child: _buildHotPlaceSection(hotPlaces)),
-            SliverToBoxAdapter(child: _buildHashtagSections(hashtagState)),
-          ]
+        child: RefreshIndicator(
+          onRefresh: _onRefresh,
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(child: _buildHeader()),
+              SliverToBoxAdapter(child: _buildHotPlaceSection(hotPlaces)),
+              SliverToBoxAdapter(child: _buildHashtagSections(hashtagState)),
+            ]
+          ),
         ),
       ),
     );

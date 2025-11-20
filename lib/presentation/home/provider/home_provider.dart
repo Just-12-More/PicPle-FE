@@ -23,6 +23,10 @@ class HomeHashtagNotifier extends AutoDisposeNotifier<HomeHashtagState> {
     return const HomeHashtagState(isLoading: true);
   }
 
+  Future<void> refreshHashtags() async {
+    await _loadHotTags();
+  }
+
   Future<void> _loadHotTags() async {
     state = state.copyWith(isLoading: true);
     try {
