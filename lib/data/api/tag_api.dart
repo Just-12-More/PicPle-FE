@@ -29,7 +29,10 @@ class TagApi {
 
   Future<BaseResponse<TaggedPhotosResponse>> getPhotosByTagId(int tagId) async {
     try {
-      final response = await _dioClient.dio.get('/photos/$tagId');
+      final response = await _dioClient.dio.get(
+        '/photos',
+        queryParameters: {'tagId': tagId},
+      );
       final responseData =
           Map<String, dynamic>.from(response.data as Map<dynamic, dynamic>);
       final photosJson = responseData['data'] as List<dynamic>?;

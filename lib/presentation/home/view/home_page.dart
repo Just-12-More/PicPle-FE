@@ -6,6 +6,8 @@ import '../../../data/model/response/hot_places_response.dart';
 import '../../hot_place/provider/hot_place_provider.dart';
 import '../../theme/picple_colors.dart';
 import '../../theme/picple_typography.dart';
+import '../provider/home_contract.dart';
+import '../provider/home_provider.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -26,7 +28,20 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
+    ref.listen<HomeHashtagEffect?>(
+      homeHashtagEffectProvider,
+      (previous, effect) {
+        if (effect is HomeHashtagShowToast) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(effect.message)),
+          );
+          ref.read(homeHashtagEffectProvider.notifier).state = null;
+        }
+      },
+    );
+
     final hotPlaces = ref.watch(hotPlaceProvider);
+    final hashtagState = ref.watch(homeHashtagStateProvider);
 
     return Scaffold(
       backgroundColor: PicpleColors.white,
@@ -36,8 +51,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           slivers: [
             SliverToBoxAdapter(child: _buildHeader()),
             SliverToBoxAdapter(child: _buildHotPlaceSection(hotPlaces)),
-            SliverToBoxAdapter(child: _buildHashtagSection("#잔잔한")),
-            SliverToBoxAdapter(child: _buildHashtagSection("#고요한"))
+            SliverToBoxAdapter(child: _buildHashtagSections(hashtagState)),
           ]
         ),
       ),
@@ -181,9 +195,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildHashtagSection(String tag) {
-    final imageUrls = List.generate(
-        5, (i) => "https://picsum.photos/${300 + i}");
+  Widget _buildHashtagSections(HomeHashtagState state) {
+    Widget _buildContent() {
+      if (state.isLoading && state.sections.isEmpty) {
+        return const Padding(
+          padding: EdgeInsets.symmetric(vertical: 40),
+          child: Center(child: CircularProgressIndicator()),
+        );
+      }
+
+      if (state.sections.isEmpty) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+          child: Text(
+            '현재 인기 태그가 없습니다.',
+            style: PicpleTypography.body2.copyWith(color: PicpleColors.gray5),
+          ),
+        );
+      }
+
+      return Column(
+        children: state.sections
+            .map((section) => _buildHashtagSection(section))
+            .toList(),
+      );
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -191,39 +227,77 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 20.0),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Text(
-              tag,
+              '지금 인기 있는 태그',
+              style: PicpleTypography.title1,
+            ),
+            ),
+          _buildContent(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHashtagSection(HotTagSectionState section) {
+    final tagLabel = '#${section.tag.name}';
+
+    Widget _buildPhotoList() {
+      if (section.isLoading && section.photos.isEmpty) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      if (section.photos.isEmpty) {
+        return Center(
+          child: Text(
+            '사진이 아직 없습니다.',
+            style: PicpleTypography.body2.copyWith(color: PicpleColors.gray5),
+          ),
+        );
+      }
+
+      return ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        itemCount: section.photos.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final photo = section.photos[index];
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: CachedNetworkImage(
+              imageUrl: photo.imgUrl,
+              placeholder: (context, url) =>
+                  Image.asset('assets/images/img_placeholder.png'),
+              errorWidget: (context, url, error) =>
+                  Image.asset('assets/images/img_placeholder.png'),
+              width: 96,
+              height: 96,
+              fit: BoxFit.cover,
+            ),
+          );
+        },
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 20.0, bottom: 10),
+            child: Text(
+              tagLabel,
               style: PicpleTypography.body1SemiBold.copyWith(
-                color: PicpleColors.black
+                color: PicpleColors.black,
               ),
             ),
           ),
-          const SizedBox(height: 10),
           SizedBox(
             height: 96,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              itemCount: imageUrls.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
-              itemBuilder: (context, index) {
-                return ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: CachedNetworkImage(
-                    imageUrl: imageUrls[index],
-                    placeholder: (context, url) =>
-                        Image.asset('assets/images/img_placeholder.png'),
-                    errorWidget: (context, url, error) =>
-                        Image.asset('assets/images/img_placeholder.png'),
-                    width: 96,
-                    height: 96,
-                    fit: BoxFit.cover,
-                  ),
-                );
-              },
-            ),
-          )
+            child: _buildPhotoList(),
+          ),
         ],
       ),
     );
