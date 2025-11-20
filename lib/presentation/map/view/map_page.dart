@@ -54,7 +54,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     );
 
     ref.listen<List<HotPlace>>(
-      hotPlaceProvider,
+      hotPlaceProvider.select((state) => state.hotPlaces),
       (previous, next) {
         _renderHotPlaceMarkers(next);
       },
@@ -149,7 +149,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
         final currentState = ref.read(mapStateProvider);
         _renderPhotoMarkers(currentState.photos);
-        _renderHotPlaceMarkers(ref.read(hotPlaceProvider));
+        _renderHotPlaceMarkers(ref.read(hotPlaceProvider).hotPlaces);
 
         final latitude = currentState.userLatitude;
         final longitude = currentState.userLongitude;
