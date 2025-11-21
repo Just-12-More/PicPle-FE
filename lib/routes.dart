@@ -11,6 +11,7 @@ import 'package:picple/presentation/profile/view/profile_page.dart';
 import 'package:picple/presentation/profile_edit/view/profile_edit_page.dart';
 import 'package:picple/presentation/setting/view/setting_page.dart';
 import 'package:picple/presentation/shared/photo_detail/view/photo_detail_page.dart';
+import 'package:picple/presentation/shared/photo_list/view/location_photo_list_page.dart';
 import 'package:picple/presentation/shared/photo_list/view/photo_list_page.dart';
 import 'package:picple/presentation/splash/view/splash_page.dart';
 import 'package:picple/presentation/theme/picple_colors.dart';
@@ -27,6 +28,7 @@ enum Routes {
 
   photoDetail(name: 'PhotoDetail', path: '/photo_detail'),
   photoList(name: 'PhotoList', path: '/photo_list'),
+  photoListByLocation(name: 'PhotoListByLocation', path: '/photo_list_location'),
 
   profile(name: 'Profile', path: '/profile'),
   profileEdit(name: 'ProfileEdit', path: 'profile_edit'),
@@ -71,6 +73,17 @@ final router = GoRouter(
         }
         return PhotoListPage(centerPhotoId: id);
       }
+    ),
+
+    GoRoute(
+      path: Routes.photoListByLocation.path,
+      builder: (context, state) {
+        final location = state.uri.queryParameters['location'];
+        if (location == null || location.isEmpty) {
+          return const Scaffold(body: Center(child: Text('Invalid location')));
+        }
+        return LocationPhotoListPage(location: location);
+      },
     ),
 
     GoRoute(

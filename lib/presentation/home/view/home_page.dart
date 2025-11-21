@@ -62,7 +62,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               SliverToBoxAdapter(child: _buildHeader()),
-              SliverToBoxAdapter(child: _buildHotPlaceSection(hotPlaceState)),
+              SliverToBoxAdapter(child: _buildHotPlaceSection(context, hotPlaceState)),
               SliverToBoxAdapter(child: _buildHashtagSections(hashtagState)),
             ]
           ),
@@ -124,15 +124,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildHotPlaceSection(HotPlaceState hotPlaceState) {
+  Widget _buildHotPlaceSection(BuildContext context, HotPlaceState hotPlaceState) {
     final hotPlaces = hotPlaceState.hotPlaces;
 
     return Padding(
-      padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
+      padding: const EdgeInsets.only(top: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionTitle("오늘의 인기 장소"),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+                "오늘의 인기 장소",
+                style: PicpleTypography.title1
+            ),
+          ),
           const SizedBox(height: 10),
           if (hotPlaceState.isLoading)
             const SizedBox(
@@ -152,70 +158,62 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             )
           else
-            ...hotPlaces.map(_buildHotPlaceItem),
+            ...hotPlaces.map((place) => _buildHotPlaceItem(context, place)),
         ],
       ),
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-            title,
-            style: PicpleTypography.title1
+  Widget _buildHotPlaceItem(BuildContext context, HotPlace place) {
+    return InkWell(
+      onTap: () {
+        final encodedLocation = Uri.encodeComponent(place.locationLabel);
+        context.push('${Routes.photoListByLocation.path}?location=$encodedLocation');
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    place.locationLabel,
+                    style: PicpleTypography.title2,
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      const Icon(Icons.camera_alt, size: 16, color: PicpleColors.gray5),
+                      const SizedBox(width: 4),
+                      Text(
+                        "새로운 사진 ${place.photoCnt}개",
+                        style: PicpleTypography.body2SemiBold.copyWith(
+                          color: PicpleColors.gray5
+                        )
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: CachedNetworkImage(
+                imageUrl: place.imgUrl,
+                placeholder: (context, url) =>
+                    Image.asset('assets/images/img_placeholder.png'),
+                errorWidget: (context, url, error) =>
+                    Image.asset('assets/images/img_placeholder.png'),
+                width: 80,
+                height: 80,
+                fit: BoxFit.cover,
+              ),
+            )
+          ],
         ),
-        const Icon(Icons.chevron_right),
-      ],
-    );
-  }
-
-  Widget _buildHotPlaceItem(HotPlace place) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  place.locationLabel,
-                  style: PicpleTypography.title2,
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    const Icon(Icons.camera_alt, size: 16, color: PicpleColors.gray5),
-                    const SizedBox(width: 4),
-                    Text(
-                      "새로운 사진 ${place.photoCnt}개",
-                      style: PicpleTypography.body2SemiBold.copyWith(
-                        color: PicpleColors.gray5
-                      )
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: CachedNetworkImage(
-              imageUrl: place.imgUrl,
-              placeholder: (context, url) =>
-                  Image.asset('assets/images/img_placeholder.png'),
-              errorWidget: (context, url, error) =>
-                  Image.asset('assets/images/img_placeholder.png'),
-              width: 80,
-              height: 80,
-              fit: BoxFit.cover,
-            ),
-          )
-        ],
       ),
     );
   }

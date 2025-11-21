@@ -8,6 +8,7 @@ import 'package:picple/data/model/request/geo_photos_request.dart';
 import 'package:picple/data/model/request/upload_photo_request.dart';
 import 'package:picple/data/model/response/hot_places_response.dart';
 import 'package:picple/data/model/response/nearby_photos_response.dart';
+import 'package:picple/data/model/response/stat_photos_response.dart';
 
 import '../dio_client.dart';
 import '../model/request/presigned_url_request.dart';
@@ -226,6 +227,28 @@ class PhotoApi {
         error: ResponseError(
           code: "500",
           message: 'An error occurred while fetching hot places: $e',
+        ),
+      );
+    }
+  }
+
+  Future<BaseResponse<StatPhotosData>> getStatPhotos(String location) async {
+    try {
+      final response = await _dioClient.dio.get(
+        '/stat/photo',
+        queryParameters: {'location': location},
+      );
+
+      return BaseResponse<StatPhotosData>.fromJson(
+        response.data,
+        StatPhotosData.fromJson,
+      );
+    } catch (e) {
+      return BaseResponse<StatPhotosData>(
+        isSuccess: false,
+        error: ResponseError(
+          code: "500",
+          message: 'An error occurred while fetching photos by location: $e',
         ),
       );
     }
