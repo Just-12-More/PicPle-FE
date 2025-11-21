@@ -102,6 +102,8 @@ class FeedItem extends StatelessWidget {
                     ],
                   ),
 
+                  const SizedBox(width: 20),
+
                   Expanded(
                     child: Align(
                       alignment: Alignment.centerRight,
