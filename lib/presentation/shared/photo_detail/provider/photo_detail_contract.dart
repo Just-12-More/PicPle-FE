@@ -1,4 +1,5 @@
 import '../../../../data/model/response/nearby_photos_response.dart';
+import '../../../../data/model/response/tag_response.dart';
 
 class PhotoDetailState {
   final bool isInitialized;
@@ -19,6 +20,7 @@ class PhotoDetailState {
       latitude: 0.0,
       longitude: 0.0,
       createdAt: '',
+      tags: <TagItem>[],
     ),
   });
 

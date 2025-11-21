@@ -54,7 +54,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     );
 
     ref.listen<List<HotPlace>>(
-      hotPlaceProvider,
+      hotPlaceProvider.select((state) => state.hotPlaces),
       (previous, next) {
         _renderHotPlaceMarkers(next);
       },
@@ -131,6 +131,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         minZoom: 10,
       ),
       clusterOptions: NaverMapClusteringOptions(
+          mergeStrategy: const NClusterMergeStrategy(
+            maxMergeableScreenDistance: 50,
+          ),
           clusterMarkerBuilder: (info, clusterMarker) {
             clusterMarker.setIcon(NOverlayImage.fromAssetImage("assets/images/img_cluster_marker.png"));
             clusterMarker.setSize(const Size(50, 50));
@@ -146,7 +149,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
         final currentState = ref.read(mapStateProvider);
         _renderPhotoMarkers(currentState.photos);
-        _renderHotPlaceMarkers(ref.read(hotPlaceProvider));
+        _renderHotPlaceMarkers(ref.read(hotPlaceProvider).hotPlaces);
 
         final latitude = currentState.userLatitude;
         final longitude = currentState.userLongitude;
@@ -254,7 +257,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         id: markerId,
         position: NLatLng(place.latitude, place.longitude),
         icon: const NOverlayImage.fromAssetImage('assets/images/img_hotplace.png'),
-        size: const Size(48, 48),
+        size: const Size(60, 60),
       );
 
       marker

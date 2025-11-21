@@ -70,6 +70,7 @@ class PhotoListScreen extends ConsumerWidget {
                   profileImageUrl: photo.profileImgUrl,
                   imageUrl: photo.imgUrl,
                   isLiked: photo.isLiked,
+                  tags: photo.tags,
                   likeCount: photo.likeCount,
                   title: photo.title,
                   description: photo.description,
@@ -82,4 +83,3 @@ class PhotoListScreen extends ConsumerWidget {
     );
   }
 }
-

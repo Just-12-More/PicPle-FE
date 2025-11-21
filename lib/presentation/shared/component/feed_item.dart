@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import '../../../data/model/response/tag_response.dart';
 import '../../theme/picple_colors.dart';
 import '../../theme/picple_typography.dart';
 
@@ -9,6 +10,7 @@ class FeedItem extends StatelessWidget {
   final String profileImageUrl;
   final String imageUrl;
   final bool isLiked;
+  final List<TagItem> tags;
   final int likeCount;
   final String title;
   final String description;
@@ -21,6 +23,7 @@ class FeedItem extends StatelessWidget {
     required this.profileImageUrl,
     required this.imageUrl,
     required this.isLiked,
+    required this.tags,
     required this.likeCount,
     required this.title,
     required this.description,
@@ -62,6 +65,10 @@ class FeedItem extends StatelessWidget {
             onDoubleTap: onToggleLike,
             child: CachedNetworkImage(
               imageUrl: imageUrl,
+              placeholder: (context, url) =>
+                  Image.asset('assets/images/img_placeholder.png', fit: BoxFit.cover),
+              errorWidget: (context, url, error) =>
+                  Image.asset('assets/images/img_placeholder.png', fit: BoxFit.cover),
               width: double.infinity,
               height: double.infinity,
               fit: BoxFit.cover,
@@ -77,18 +84,55 @@ class FeedItem extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  GestureDetector(
-                    onTap: onToggleLike,
-                    child: Icon(
-                      isLiked ? Icons.favorite : Icons.favorite_border,
-                      color: isLiked ? PicpleColors.red : PicpleColors.gray5,
-                      size: 24,
-                    ),
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: onToggleLike,
+                        child: Icon(
+                          isLiked ? Icons.favorite : Icons.favorite_border,
+                          color: isLiked ? PicpleColors.red : PicpleColors.gray5,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '$likeCount',
+                        style: PicpleTypography.body1.copyWith(color: PicpleColors.black),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                      '$likeCount',
-                      style: PicpleTypography.body1.copyWith(color: PicpleColors.black)
+
+                  const SizedBox(width: 20),
+
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: List.generate(tags.length, (index) {
+                            final tag = tags[index];
+                            return Padding(
+                              padding: EdgeInsets.only(left: index == 0 ? 0 : 8),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: PicpleColors.primary1,
+                                  borderRadius: BorderRadius.circular(40),
+                                ),
+                                child: Text(
+                                  '#${tag.name}',
+                                  style: PicpleTypography.body2.copyWith(
+                                    color: PicpleColors.white,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),

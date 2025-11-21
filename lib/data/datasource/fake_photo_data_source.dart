@@ -133,6 +133,7 @@ class FakePhotoDataSource implements PhotoDataSource {
               "order": 1,
               "locationLabel": "경기도 수원시 팔달구 지동",
               "photoCnt": 7,
+              "imgUrl": "https://picsum.photos/id/201/300/300",
               "latitude": "37.2816337",
               "longitude": "127.0222369"
             },
@@ -140,6 +141,7 @@ class FakePhotoDataSource implements PhotoDataSource {
               "order": 2,
               "locationLabel": "경기도 수원시 팔달구 행궁동",
               "photoCnt": 7,
+              "imgUrl": "https://picsum.photos/id/202/300/300",
               "latitude": "37.2841940",
               "longitude": "127.0191077"
             },
@@ -147,6 +149,7 @@ class FakePhotoDataSource implements PhotoDataSource {
               "order": 3,
               "locationLabel": "서울특별시 강남구 역삼1동",
               "photoCnt": 5,
+              "imgUrl": "https://picsum.photos/id/203/300/300",
               "latitude": "37.5050333",
               "longitude": "127.0412409"
             },
@@ -154,6 +157,7 @@ class FakePhotoDataSource implements PhotoDataSource {
               "order": 4,
               "locationLabel": "경기도 용인시 처인구 포곡읍",
               "photoCnt": 4,
+              "imgUrl": "https://picsum.photos/id/204/300/300",
               "latitude": "37.2933272",
               "longitude": "127.2013221"
             },
@@ -161,6 +165,7 @@ class FakePhotoDataSource implements PhotoDataSource {
               "order": 5,
               "locationLabel": "경기도 용인시 수지구 죽전3동",
               "photoCnt": 3,
+              "imgUrl": "https://picsum.photos/id/205/300/300",
               "latitude": "37.3207277",
               "longitude": "127.1276811"
             },
@@ -168,6 +173,7 @@ class FakePhotoDataSource implements PhotoDataSource {
               "order": 6,
               "locationLabel": "경기도 용인시 기흥구 보라동",
               "photoCnt": 3,
+              "imgUrl": "https://picsum.photos/id/206/300/300",
               "latitude": "37.2594023",
               "longitude": "127.1205573"
             },
@@ -175,6 +181,7 @@ class FakePhotoDataSource implements PhotoDataSource {
               "order": 7,
               "locationLabel": "경기도 수원시 장안구 정자2동",
               "photoCnt": 3,
+              "imgUrl": "https://picsum.photos/id/207/300/300",
               "latitude": "37.2873924",
               "longitude": "126.9915605"
             },
@@ -182,6 +189,7 @@ class FakePhotoDataSource implements PhotoDataSource {
               "order": 8,
               "locationLabel": "서울특별시 용산구 서빙고동",
               "photoCnt": 3,
+              "imgUrl": "https://picsum.photos/id/208/300/300",
               "latitude": "37.5240867",
               "longitude": "126.9803880"
             },
@@ -189,6 +197,7 @@ class FakePhotoDataSource implements PhotoDataSource {
               "order": 9,
               "locationLabel": "서울특별시 송파구 잠실3동",
               "photoCnt": 3,
+              "imgUrl": "https://picsum.photos/id/209/300/300",
               "latitude": "37.5110880",
               "longitude": "127.0982822"
             },
@@ -196,6 +205,7 @@ class FakePhotoDataSource implements PhotoDataSource {
               "order": 10,
               "locationLabel": "서울특별시 종로구 가회동",
               "photoCnt": 2,
+              "imgUrl": "https://picsum.photos/id/210/300/300",
               "latitude": "37.5811911",
               "longitude": "126.9846929"
             }

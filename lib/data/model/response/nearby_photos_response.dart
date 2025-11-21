@@ -1,5 +1,7 @@
 import 'package:picple/core/util/date_time_utils.dart';
 
+import 'tag_response.dart';
+
 class NearbyPhotosData {
   final String address;
   final PhotoData centerPhoto;
@@ -35,6 +37,7 @@ class PhotoData {
   final double latitude;
   final double longitude;
   final String createdAt;
+  final List<TagItem> tags;
 
   String get formattedTime => formatPostedTimeFromString(createdAt);
 
@@ -51,6 +54,7 @@ class PhotoData {
     required this.latitude,
     required this.longitude,
     required this.createdAt,
+    this.tags = const <TagItem>[],
   });
 
   PhotoData copyWith({
@@ -66,6 +70,7 @@ class PhotoData {
     double? latitude,
     double? longitude,
     String? createdAt,
+    List<TagItem>? tags,
   }) {
     return PhotoData(
       id: id ?? this.id,
@@ -80,10 +85,20 @@ class PhotoData {
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       createdAt: createdAt ?? this.createdAt,
+      tags: tags ?? this.tags,
     );
   }
 
   factory PhotoData.fromJson(Map<String, dynamic> json) {
+    List<TagItem> parsedTags = const <TagItem>[];
+    final dynamic tagsJson = json['tags'];
+    if (tagsJson is List) {
+      parsedTags = tagsJson
+          .whereType<Map<String, dynamic>>()
+          .map(TagItem.fromJson)
+          .toList();
+    }
+
     return PhotoData(
       id: json['id'],
       title: json['title'],
@@ -97,6 +112,7 @@ class PhotoData {
       latitude: json['latitude']?.toDouble() ?? 0.0,
       longitude: json['longitude']?.toDouble() ?? 0.0,
       createdAt: json['createdAt'],
+      tags: parsedTags,
     );
   }
 }

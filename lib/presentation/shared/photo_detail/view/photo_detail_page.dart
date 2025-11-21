@@ -53,6 +53,7 @@ class PhotoDetailScreen extends ConsumerWidget {
               profileImageUrl: state.photo.profileImgUrl,
               imageUrl: state.photo.imgUrl,
               isLiked: state.photo.isLiked,
+              tags: state.photo.tags,
               likeCount: state.photo.likeCount,
               title: state.photo.title,
               description: state.photo.description,
