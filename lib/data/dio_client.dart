@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -39,7 +41,7 @@ class DioClient {
 
 class TokenInterceptor extends Interceptor {
   final FlutterSecureStorage storage;
-  bool _isRefreshing = false;
+  Future<bool>? _refreshFuture;
 
   TokenInterceptor({required this.storage});
 
@@ -68,41 +70,71 @@ class TokenInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-  if (err.response?.statusCode == 401 && !_isRefreshing) {
-    _isRefreshing = true;
+    if (err.response?.statusCode != 401) {
+      handler.next(err);
+      return;
+    }
+
+    final originalRequest = err.requestOptions;
+
     try {
-      final refreshToken = await storage.read(key: Constants.REFRESH_TOKEN_KEY);
-      if (refreshToken == null) {
-        // Refresh token이 없으면 로그아웃 처리
-        print('Refresh token is missing. Logging out.');
+      final refreshed = await _refreshTokenIfNeeded();
+      if (!refreshed) {
         handler.next(err);
         return;
       }
-      final options = BaseOptions(
-        contentType: Headers.jsonContentType,
-        validateStatus: (status) {
-          return true;
-        },
+
+      final newAccessToken = await storage.read(key: Constants.ACCESS_TOKEN_KEY);
+      if (newAccessToken == null) {
+        handler.next(err);
+        return;
+      }
+
+      originalRequest.headers['Authorization'] = 'Bearer $newAccessToken';
+      final dio = Dio()..httpClientAdapter = IOHttpClientAdapter();
+      final retryResponse = await dio.fetch(originalRequest);
+      handler.resolve(retryResponse);
+    } catch (e) {
+      handler.next(err);
+    }
+  }
+
+  Future<bool> _refreshTokenIfNeeded() async {
+    if (_refreshFuture != null) {
+      return _refreshFuture!;
+    }
+
+    final refreshToken = await storage.read(key: Constants.REFRESH_TOKEN_KEY);
+    if (refreshToken == null) {
+      print('Refresh token is missing. Logging out.');
+      return false;
+    }
+
+    final options = BaseOptions(
+      contentType: Headers.jsonContentType,
+      validateStatus: (_) => true,
+    );
+
+    final dio = Dio(options)
+      ..httpClientAdapter = IOHttpClientAdapter()
+      ..interceptors.add(
+        PrettyDioLogger(
+          requestHeader: true,
+          requestBody: true,
+          responseBody: true,
+          responseHeader: false,
+          error: true,
+          compact: true,
+        ),
       );
 
-      final dio = Dio(options)
-        ..httpClientAdapter = IOHttpClientAdapter()
-        ..interceptors.add(
-          PrettyDioLogger(
-            requestHeader: true,
-            requestBody: true,
-            responseBody: true,
-            responseHeader: false,
-            error: true,
-            compact: true,
-          ),
-        );
+    final completer = Completer<bool>();
+    _refreshFuture = completer.future;
 
+    try {
       final response = await dio.post(
         '${Config.baseUrl}/auth/reissue/token',
-        data: {
-          'refreshToken': refreshToken,
-        },
+        data: {'refreshToken': refreshToken},
       );
 
       final responseData = response.data;
@@ -117,21 +149,18 @@ class TokenInterceptor extends Interceptor {
       if (newAccessToken == null || newRefreshToken == null) {
         throw Exception('Refresh token response missing fields: $data');
       }
+
       await storage.write(key: Constants.ACCESS_TOKEN_KEY, value: newAccessToken);
       await storage.write(key: Constants.REFRESH_TOKEN_KEY, value: newRefreshToken);
 
-      // 원래 요청 재시도
-      final originalRequest = err.requestOptions;
-      originalRequest.headers['Authorization'] = 'Bearer $newAccessToken';
-      final retryResponse = await dio.fetch(originalRequest);
-      handler.resolve(retryResponse);
-      return;
+      completer.complete(true);
+      return true;
     } catch (e) {
+      completer.completeError(e);
       print('Failed to refresh token: $e');
+      return false;
     } finally {
-      _isRefreshing = false;
+      _refreshFuture = null;
     }
-  }
-  handler.next(err);
   }
 }
