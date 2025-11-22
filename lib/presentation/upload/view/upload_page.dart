@@ -92,7 +92,9 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
 
       switch (next) {
         case UploadSuccess():
-          context.pop(next.photo);
+          context.pop(
+            UploadCompletedResult(photo: next.photo, tagIds: next.tagIds),
+          );
           break;
         case ShowToast():
           ScaffoldMessenger.of(context).showSnackBar(

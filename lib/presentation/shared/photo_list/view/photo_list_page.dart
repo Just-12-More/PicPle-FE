@@ -42,6 +42,30 @@ class PhotoListScreen extends ConsumerWidget {
 
       ref.read(photoListEffectProvider.notifier).state = null;
     });
+    return PhotoListScaffold(
+      state: state,
+      onToggleLike: (photoId) =>
+          ref.read(photoListStateProvider.notifier).toggleLikePhoto(photoId),
+    );
+  }
+}
+
+class PhotoListScaffold extends StatelessWidget {
+  final PhotoListState state;
+  final ValueChanged<int> onToggleLike;
+  final String? initialTitle;
+
+  const PhotoListScaffold({
+    required this.state,
+    required this.onToggleLike,
+    this.initialTitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final title = state.address.isNotEmpty
+        ? state.address
+        : (initialTitle ?? '');
 
     return Scaffold(
       appBar: AppBar(
@@ -51,34 +75,34 @@ class PhotoListScreen extends ConsumerWidget {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text(state.address, style: PicpleTypography.title1),
+        title: Text(title, style: PicpleTypography.title1),
         centerTitle: true,
       ),
       backgroundColor: PicpleColors.background,
       body: SafeArea(
         child: !state.isInitialized
             ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : ListView.builder(
-              itemCount: state.photos.length,
-              itemBuilder: (context, index) {
-                final photo = state.photos[index];
+                child: CircularProgressIndicator(),
+              )
+            : ListView.builder(
+                itemCount: state.photos.length,
+                itemBuilder: (context, index) {
+                  final photo = state.photos[index];
 
-                return FeedItem(
-                  username: photo.nickname,
-                  profileImageUrl: photo.profileImgUrl,
-                  imageUrl: photo.imgUrl,
-                  isLiked: photo.isLiked,
-                  tags: photo.tags,
-                  likeCount: photo.likeCount,
-                  title: photo.title,
-                  description: photo.description,
-                  time: photo.formattedTime,
-                  onToggleLike: () => ref.read(photoListStateProvider.notifier).toggleLikePhoto(photo.id),
-                );
-              },
-            ),
+                  return FeedItem(
+                    username: photo.nickname,
+                    profileImageUrl: photo.profileImgUrl,
+                    imageUrl: photo.imgUrl,
+                    isLiked: photo.isLiked,
+                    tags: photo.tags,
+                    likeCount: photo.likeCount,
+                    title: photo.title,
+                    description: photo.description,
+                    time: photo.formattedTime,
+                    onToggleLike: () => onToggleLike(photo.id),
+                  );
+                },
+              ),
       ),
     );
   }

@@ -29,6 +29,8 @@ class HotPlace {
     required this.imgUrl,
   });
 
+  String get address => locationLabel;
+
   factory HotPlace.fromJson(Map<String, dynamic> json) {
     return HotPlace(
       order: json['order'] ?? 0,

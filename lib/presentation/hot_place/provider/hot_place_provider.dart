@@ -32,7 +32,7 @@ final hotPlaceProvider = NotifierProvider<HotPlaceNotifier, HotPlaceState>(
 class HotPlaceNotifier extends Notifier<HotPlaceState> {
   @override
   HotPlaceState build() {
-    _loadInitialHotPlaces();
+    Future.microtask(_loadInitialHotPlaces);
     return const HotPlaceState(isLoading: true);
   }
 

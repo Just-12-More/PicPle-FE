@@ -2,9 +2,12 @@ import 'dart:io';
 
 import 'package:picple/data/datasource/photo_data_source.dart';
 import 'package:picple/data/model/request/presigned_url_request.dart';
+import 'package:picple/data/model/request/recommend_photos_request.dart';
 import 'package:picple/data/model/response/hot_places_response.dart';
 import 'package:picple/data/model/response/nearby_photos_response.dart';
 import 'package:picple/data/model/response/presigned_url_response.dart';
+import 'package:picple/data/model/response/recommend_photos_response.dart';
+import 'package:picple/data/model/response/stat_photos_response.dart';
 
 import '../model/request/geo_photos_request.dart';
 import '../model/request/upload_photo_request.dart';
@@ -218,6 +221,50 @@ class FakePhotoDataSource implements PhotoDataSource {
   }
 
   @override
+  Future<BaseResponse<StatPhotosData>> getStatPhotos(String location) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    return BaseResponse<StatPhotosData>.fromJson(
+      {
+        "isSuccess": true,
+        "data": {
+          "photos": [
+            {
+              "id": 160,
+              "title": "사진1",
+              "imgUrl": "https://picple-pictures.s3.ap-northeast-2.amazonaws.com/uploaded-image/2/3df15d7d-fc87-4080-ba3f-ad1f492dbd59/코리락쿠마",
+              "description": "",
+              "nickname": "picple-user-1-fd5ec",
+              "profileImgUrl": "",
+              "likeCount": 0,
+              "isLiked": false,
+              "address": location,
+              "createdAt": "2025-11-15T13:10:47.766798",
+              "latitude": 0.0,
+              "longitude": 0.0
+            },
+            {
+              "id": 161,
+              "title": "사진2",
+              "imgUrl": "https://picple-pictures.s3.ap-northeast-2.amazonaws.com/uploaded-image/2/6bebfeab-2897-4c10-be0e-ad0f9fc893d1/초콜릿 토끼.jpeg",
+              "description": "",
+              "nickname": "picple-user-1-fd5ec",
+              "profileImgUrl": null,
+              "likeCount": 0,
+              "isLiked": false,
+              "address": location,
+              "createdAt": "2025-11-15T15:50:10.453376",
+              "latitude": 0.0,
+              "longitude": 0.0
+            }
+          ]
+        },
+        "error": null
+      },
+      StatPhotosData.fromJson,
+    );
+  }
+
+  @override
   Future<BaseResponse<void>> likePhoto(int photoId) async {
     await Future.delayed(const Duration(milliseconds: 500));
     return BaseResponse<void>.fromJson(
@@ -289,5 +336,25 @@ class FakePhotoDataSource implements PhotoDataSource {
   Future<bool> uploadFileToPreSignedUrl(File file, String preSignedUrl) async {
     await Future.delayed(const Duration(milliseconds: 500));
     return true;
+  }
+
+  @override
+  Future<BaseResponse<RecommendPhotosResponse>> getRecommendedPhotos(
+      RecommendPhotosRequest request) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    final list = List.generate(request.tagIds.length, (index) {
+      final id = _photoIdCounter++;
+      return {
+        'id': id,
+        'imgUrl': 'https://picsum.photos/id/${250 + id}/400/400',
+        'tags': ['추천${index + 1}', '태그${request.tagIds[index]}'],
+      };
+    });
+
+    return BaseResponse<RecommendPhotosResponse>(
+      isSuccess: true,
+      data: RecommendPhotosResponse.fromList(list),
+    );
   }
 }
