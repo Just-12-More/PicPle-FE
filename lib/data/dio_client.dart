@@ -5,6 +5,7 @@ import 'package:dio/io.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:picple/constants.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+import 'package:synchronized/synchronized.dart';
 
 import '../config.dart';
 
@@ -41,7 +42,8 @@ class DioClient {
 
 class TokenInterceptor extends Interceptor {
   final FlutterSecureStorage storage;
-  Future<bool>? _refreshFuture;
+  final Lock _refreshLock = Lock();
+  Completer<bool>? _refreshCompleter;
 
   TokenInterceptor({required this.storage});
 
@@ -100,16 +102,34 @@ class TokenInterceptor extends Interceptor {
   }
 
   Future<bool> _refreshTokenIfNeeded() async {
-    if (_refreshFuture != null) {
-      return _refreshFuture!;
-    }
+    Completer<bool>? completer;
 
-    final refreshToken = await storage.read(key: Constants.REFRESH_TOKEN_KEY);
-    if (refreshToken == null) {
-      print('Refresh token is missing. Logging out.');
-      return false;
-    }
+    await _refreshLock.synchronized(() async {
+      if (_refreshCompleter == null) {
+        final refreshToken = await storage.read(key: Constants.REFRESH_TOKEN_KEY);
+        if (refreshToken == null) {
+          print('Refresh token is missing. Logging out.');
+          completer = Completer<bool>()..complete(false);
+        } else {
+          completer = Completer<bool>();
+          _refreshCompleter = completer;
+          _performTokenRefresh(refreshToken).then((result) {
+            completer!.complete(result);
+          }).catchError((_) {
+            completer!.complete(false);
+          }).whenComplete(() {
+            _refreshCompleter = null;
+          });
+        }
+      }
 
+      completer ??= _refreshCompleter;
+    });
+
+    return completer!.future;
+  }
+
+  Future<bool> _performTokenRefresh(String refreshToken) async {
     final options = BaseOptions(
       contentType: Headers.jsonContentType,
       validateStatus: (_) => true,
@@ -127,9 +147,6 @@ class TokenInterceptor extends Interceptor {
           compact: true,
         ),
       );
-
-    final completer = Completer<bool>();
-    _refreshFuture = completer.future;
 
     try {
       final response = await dio.post(
@@ -153,14 +170,10 @@ class TokenInterceptor extends Interceptor {
       await storage.write(key: Constants.ACCESS_TOKEN_KEY, value: newAccessToken);
       await storage.write(key: Constants.REFRESH_TOKEN_KEY, value: newRefreshToken);
 
-      completer.complete(true);
       return true;
     } catch (e) {
-      completer.completeError(e);
       print('Failed to refresh token: $e');
       return false;
-    } finally {
-      _refreshFuture = null;
     }
   }
 }
