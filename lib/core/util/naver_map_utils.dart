@@ -24,8 +24,7 @@ Future<NOverlayImage>  createOverlayImageFromUrl(
   }
 }
 
-Future<void> addMarkerWithImage({
-  required NaverMapController controller,
+Future<NClusterableMarker> createMarkerWithImage({
   required String id,
   required NLatLng position,
   required String imageUrl,
@@ -45,19 +44,34 @@ Future<void> addMarkerWithImage({
       position: position,
       icon: icon,
       size: Size(width, height),
-    );
+    )
+      ..setZIndex(zIndex);
 
-    marker.setZIndex(zIndex);
     if (globalZIndex != null) {
       marker.setGlobalZIndex(globalZIndex);
     }
 
-    marker.setOnTapListener((NMarker marker) {
-      onTap?.call();
-    });
+    if (onTap != null) {
+      marker.setOnTapListener((_) => onTap());
+    }
 
-    controller.addOverlay(marker);
+    return marker;
   } catch (e) {
-    log('Error adding marker: $e');
+    log('Error creating marker: $e');
+    rethrow;
+  }
+}
+
+Future<void> addMarkersInBatches({
+  required NaverMapController controller,
+  required List<NMarker> markers,
+  int batchSize = 50,
+}) async {
+  if (markers.isEmpty) return;
+
+  for (var i = 0; i < markers.length; i += batchSize) {
+    final batch = markers.skip(i).take(batchSize).toSet();
+    final overlaySet = batch.map<NAddableOverlay>((marker) => marker).toSet();
+    await controller.addOverlayAll(overlaySet);
   }
 }

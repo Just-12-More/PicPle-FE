@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,7 +35,7 @@ class MapScreen extends ConsumerStatefulWidget {
 class _MapScreenState extends ConsumerState<MapScreen> {
   NaverMapController? _mapController;
   NMarker? _myLocationMarker;
-  final List<String> _renderedPhotoIds = [];
+  final Map<String, NMarker> _photoMarkers = {};
   final Map<String, NMarker> _hotPlaceMarkers = {};
 
   static const int _photoMarkerZIndex = 0;
@@ -49,7 +51,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     ref.listen<List<PhotoData>>(
       mapStateProvider.select((state) => state.photos),
       (previous, next) {
-        _renderPhotoMarkers(next);
+        unawaited(_renderPhotoMarkers(next));
       },
     );
 
@@ -145,10 +147,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           }),
       onMapReady: (controller) async {
         _mapController = controller;
-        _renderedPhotoIds.clear();
+        _photoMarkers.clear();
 
         final currentState = ref.read(mapStateProvider);
-        _renderPhotoMarkers(currentState.photos);
+        unawaited(_renderPhotoMarkers(currentState.photos));
         _renderHotPlaceMarkers(ref.read(hotPlaceProvider).hotPlaces);
 
         final latitude = currentState.userLatitude;
@@ -217,28 +219,50 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     _mapController!.addOverlay(_myLocationMarker!);
   }
 
-  void _renderPhotoMarkers(List<PhotoData> photos) {
-    if (_mapController == null) return;
+  Future<void> _renderPhotoMarkers(List<PhotoData> photos) async {
+    final controller = _mapController;
+    if (controller == null) return;
 
+    final incomingIds = photos.map((photo) => 'photo_${photo.id}').toSet();
+
+    final staleIds = _photoMarkers.keys
+        .where((id) => !incomingIds.contains(id))
+        .toList(growable: false);
+    for (final id in staleIds) {
+      final marker = _photoMarkers.remove(id);
+      if (marker != null) {
+        await controller.deleteOverlay(marker.info);
+      }
+    }
+
+    final markersToAdd = <NMarker>[];
     for (final photo in photos) {
       final markerId = 'photo_${photo.id}';
-      if (_renderedPhotoIds.contains(markerId)) continue;
+      if (_photoMarkers.containsKey(markerId)) continue;
 
-      addMarkerWithImage(
-        controller: _mapController!,
-        id: markerId,
-        position: NLatLng(photo.latitude, photo.longitude),
-        imageUrl: photo.imgUrl,
-        zIndex: _photoMarkerZIndex,
-        globalZIndex: _photoMarkerGlobalZIndex,
-        onTap: () {
-          context.push(
-            "${Routes.photoList.path}/${photo.id}",
-          );
-        }
-      );
+      try {
+        final marker = await createMarkerWithImage(
+          id: markerId,
+          position: NLatLng(photo.latitude, photo.longitude),
+          imageUrl: photo.imgUrl,
+          zIndex: _photoMarkerZIndex,
+          globalZIndex: _photoMarkerGlobalZIndex,
+          onTap: () {
+            context.push(
+              "${Routes.photoList.path}/${photo.id}",
+            );
+          },
+        );
 
-      _renderedPhotoIds.add(markerId);
+        _photoMarkers[markerId] = marker;
+        markersToAdd.add(marker);
+      } catch (e, stack) {
+        debugPrint('Failed to create marker for photo ${photo.id}: $e\n$stack');
+      }
+    }
+
+    if (markersToAdd.isNotEmpty && controller != null) {
+      await addMarkersInBatches(controller: controller, markers: markersToAdd);
     }
   }
 
