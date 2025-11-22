@@ -6,9 +6,17 @@ import 'package:picple/core/util/image_utils.dart';
 
 final Map<String, NOverlayImage> _markerIconCache = {};
 
-Future<NOverlayImage> createOverlayImageFromUrl(String imageUrl) async {
+Future<NOverlayImage>  createOverlayImageFromUrl(
+  String imageUrl,
+  double width,
+  double height,
+) async {
   try {
-    final bytes = await loadAndResizeImageFromUrl(imageUrl: imageUrl);
+    final bytes = await loadAndResizeImageFromUrl(
+      imageUrl: imageUrl,
+      targetWidth: width.toInt(),
+      targetHeight: height.toInt(),
+    );
     return await NOverlayImage.fromByteArray(bytes);
   } catch (e) {
     log('Error loading image from URL: $e');
@@ -16,25 +24,27 @@ Future<NOverlayImage> createOverlayImageFromUrl(String imageUrl) async {
   }
 }
 
-Future<void> addMarkerWithPlaceholderImage({
+Future<void> addMarkerWithImage({
   required NaverMapController controller,
   required String id,
   required NLatLng position,
   required String imageUrl,
+  double width = 60,
+  double height = 60,
   int zIndex = 0,
   int? globalZIndex,
   void Function()? onTap,
 }) async {
   try {
     final cachedIcon = _markerIconCache[id];
-    final icon = cachedIcon ?? await createOverlayImageFromUrl(imageUrl);
+    final icon = cachedIcon ?? await createOverlayImageFromUrl(imageUrl, width, height);
     _markerIconCache[id] = icon;
 
     final marker = NClusterableMarker(
       id: id,
       position: position,
       icon: icon,
-      size: const Size(60, 60),
+      size: Size(width, height),
     );
 
     marker.setZIndex(zIndex);

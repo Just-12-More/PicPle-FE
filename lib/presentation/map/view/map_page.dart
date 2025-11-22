@@ -224,7 +224,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       final markerId = 'photo_${photo.id}';
       if (_renderedPhotoIds.contains(markerId)) continue;
 
-      addMarkerWithPlaceholderImage(
+      addMarkerWithImage(
         controller: _mapController!,
         id: markerId,
         position: NLatLng(photo.latitude, photo.longitude),
