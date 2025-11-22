@@ -2,9 +2,11 @@ import 'dart:io';
 
 import 'package:picple/data/datasource/photo_data_source.dart';
 import 'package:picple/data/model/request/presigned_url_request.dart';
+import 'package:picple/data/model/request/recommend_photos_request.dart';
 import 'package:picple/data/model/response/hot_places_response.dart';
 import 'package:picple/data/model/response/nearby_photos_response.dart';
 import 'package:picple/data/model/response/presigned_url_response.dart';
+import 'package:picple/data/model/response/recommend_photos_response.dart';
 import 'package:picple/data/model/response/stat_photos_response.dart';
 
 import '../model/request/geo_photos_request.dart';
@@ -334,5 +336,25 @@ class FakePhotoDataSource implements PhotoDataSource {
   Future<bool> uploadFileToPreSignedUrl(File file, String preSignedUrl) async {
     await Future.delayed(const Duration(milliseconds: 500));
     return true;
+  }
+
+  @override
+  Future<BaseResponse<RecommendPhotosResponse>> getRecommendedPhotos(
+      RecommendPhotosRequest request) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    final list = List.generate(request.tagIds.length, (index) {
+      final id = _photoIdCounter++;
+      return {
+        'id': id,
+        'imgUrl': 'https://picsum.photos/id/${250 + id}/400/400',
+        'tags': ['추천${index + 1}', '태그${request.tagIds[index]}'],
+      };
+    });
+
+    return BaseResponse<RecommendPhotosResponse>(
+      isSuccess: true,
+      data: RecommendPhotosResponse.fromList(list),
+    );
   }
 }

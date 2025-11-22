@@ -78,7 +78,10 @@ class UploadNotifier extends AutoDisposeNotifier<UploadState> {
       );
 
       if (uploadResult.isSuccess) {
-        ref.read(uploadEffectProvider.notifier).state = UploadSuccess(uploadResult.data!);
+        ref.read(uploadEffectProvider.notifier).state = UploadSuccess(
+          uploadResult.data!,
+          state.selectedTagIds.toList(),
+        );
       } else {
         _showToast("메타데이터 저장 실패: ${uploadResult.error?.message ?? 'Unknown error'}");
       }

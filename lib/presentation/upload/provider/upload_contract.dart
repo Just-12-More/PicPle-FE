@@ -38,9 +38,17 @@ class UploadState {
 abstract class UploadEffect { }
 class UploadSuccess extends UploadEffect {
   final PhotoData photo;
-  UploadSuccess(this.photo);
+  final List<int> tagIds;
+  UploadSuccess(this.photo, this.tagIds);
 }
 class ShowToast extends UploadEffect {
   final String message;
   ShowToast(this.message);
+}
+
+class UploadCompletedResult {
+  final PhotoData photo;
+  final List<int> tagIds;
+
+  const UploadCompletedResult({required this.photo, required this.tagIds});
 }

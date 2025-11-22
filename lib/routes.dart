@@ -9,12 +9,14 @@ import 'package:picple/presentation/map/provider/map_provider.dart';
 import 'package:picple/presentation/map/view/map_page.dart';
 import 'package:picple/presentation/profile/view/profile_page.dart';
 import 'package:picple/presentation/profile_edit/view/profile_edit_page.dart';
+import 'package:picple/presentation/recommendation/view/recommendation_page.dart';
 import 'package:picple/presentation/setting/view/setting_page.dart';
 import 'package:picple/presentation/shared/photo_detail/view/photo_detail_page.dart';
 import 'package:picple/presentation/shared/photo_list/view/location_photo_list_page.dart';
 import 'package:picple/presentation/shared/photo_list/view/photo_list_page.dart';
 import 'package:picple/presentation/splash/view/splash_page.dart';
 import 'package:picple/presentation/theme/picple_colors.dart';
+import 'package:picple/presentation/upload/provider/upload_contract.dart';
 import 'package:picple/presentation/upload/view/in_app_camera_page.dart';
 import 'package:picple/presentation/upload/view/upload_page.dart';
 
@@ -25,6 +27,7 @@ enum Routes {
   map(name: 'Map', path: '/map'),
   upload(name: 'Upload', path: '/upload'),
   camera(name: 'Camera', path: '/camera'),
+  recommendation(name: 'Recommendation', path: '/recommendation'),
 
   photoDetail(name: 'PhotoDetail', path: '/photo_detail'),
   photoList(name: 'PhotoList', path: '/photo_list'),
@@ -94,6 +97,15 @@ final router = GoRouter(
     GoRoute(
       path: Routes.camera.path,
       builder: (context, state) => const InAppCameraPage(),
+    ),
+
+    GoRoute(
+      path: Routes.recommendation.path,
+      builder: (context, state) {
+        final extra = state.extra;
+        final tagIds = extra is List<int> ? extra : const <int>[];
+        return RecommendationPage(tagIds: tagIds);
+      },
     ),
 
     StatefulShellRoute.indexedStack(
@@ -176,7 +188,15 @@ class ScaffoldWithNavBar extends StatelessWidget {
               final container = ProviderScope.containerOf(context);
               final result = await context.push(Routes.upload.path);
 
-              if (result != null && result is PhotoData) {
+              if (result is UploadCompletedResult) {
+                container
+                    .read(mapStateProvider.notifier)
+                    .addPhoto(result.photo);
+                await context.push(
+                  Routes.recommendation.path,
+                  extra: result.tagIds,
+                );
+              } else if (result is PhotoData) {
                 container.read(mapStateProvider.notifier).addPhoto(result);
               }
             },

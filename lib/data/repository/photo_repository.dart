@@ -7,10 +7,12 @@ import 'package:picple/data/model/response/stat_photos_response.dart';
 
 import '../model/request/geo_photos_request.dart';
 import '../model/request/presigned_url_request.dart';
+import '../model/request/recommend_photos_request.dart';
 import '../model/request/upload_photo_request.dart';
 import '../model/response/base_response.dart';
 import '../model/response/nearby_photos_response.dart';
 import '../model/response/presigned_url_response.dart';
+import '../model/response/recommend_photos_response.dart';
 
 class PhotoRepository {
   final PhotoDataSource _dataSource;
@@ -101,6 +103,15 @@ class PhotoRepository {
 
   Future<bool> uploadFileToPreSignedUrl(File file, String preSignedUrl) async {
     final response = await _dataSource.uploadFileToPreSignedUrl(file, preSignedUrl);
+
+    return response;
+  }
+
+  Future<BaseResponse<RecommendPhotosResponse>> getRecommendedPhotos(
+      List<int> tagIds) async {
+    final response = await _dataSource.getRecommendedPhotos(
+      RecommendPhotosRequest(tagIds: tagIds),
+    );
 
     return response;
   }

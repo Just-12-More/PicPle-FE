@@ -5,9 +5,11 @@ import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 import 'package:picple/data/model/request/geo_photos_request.dart';
+import 'package:picple/data/model/request/recommend_photos_request.dart';
 import 'package:picple/data/model/request/upload_photo_request.dart';
 import 'package:picple/data/model/response/hot_places_response.dart';
 import 'package:picple/data/model/response/nearby_photos_response.dart';
+import 'package:picple/data/model/response/recommend_photos_response.dart';
 import 'package:picple/data/model/response/stat_photos_response.dart';
 
 import '../dio_client.dart';
@@ -154,6 +156,41 @@ class PhotoApi {
         error: ResponseError(
           code: "500",
           message: 'An error occurred while uploading the photo: $e',
+        ),
+      );
+    }
+  }
+
+  Future<BaseResponse<RecommendPhotosResponse>> getRecommendedPhotos(
+    RecommendPhotosRequest request,
+  ) async {
+    try {
+      final response = await _dioClient.dio.post(
+        '/photos/recommend',
+        data: request.toJson(),
+      );
+
+      final responseData =
+          Map<String, dynamic>.from(response.data as Map<dynamic, dynamic>);
+      final items = responseData['data'] as List<dynamic>?;
+
+      return BaseResponse<RecommendPhotosResponse>(
+        isSuccess: responseData['isSuccess'] as bool? ?? false,
+        data: items != null ? RecommendPhotosResponse.fromList(items) : null,
+        error: responseData['error'] != null
+            ? ResponseError.fromJson(
+                Map<String, dynamic>.from(
+                  responseData['error'] as Map<dynamic, dynamic>,
+                ),
+              )
+            : null,
+      );
+    } catch (e) {
+      return BaseResponse<RecommendPhotosResponse>(
+        isSuccess: false,
+        error: ResponseError(
+          code: '500',
+          message: 'An error occurred while fetching recommendations: $e',
         ),
       );
     }
