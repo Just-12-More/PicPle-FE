@@ -235,11 +235,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       }
     }
 
-    final markersToAdd = <NMarker>[];
-    for (final photo in photos) {
+    final newPhotos = photos.where((photo) {
       final markerId = 'photo_${photo.id}';
-      if (_photoMarkers.containsKey(markerId)) continue;
+      return !_photoMarkers.containsKey(markerId);
+    }).toList(growable: false);
 
+    final markerFutures = newPhotos.map((photo) async {
+      final markerId = 'photo_${photo.id}';
       try {
         final marker = await createMarkerWithImage(
           id: markerId,
@@ -255,11 +257,16 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         );
 
         _photoMarkers[markerId] = marker;
-        markersToAdd.add(marker);
+        return marker;
       } catch (e, stack) {
         debugPrint('Failed to create marker for photo ${photo.id}: $e\n$stack');
+        return null;
       }
-    }
+    }).toList();
+
+    final markersToAdd = (await Future.wait(markerFutures))
+        .whereType<NMarker>()
+        .toList(growable: false);
 
     if (markersToAdd.isNotEmpty && controller != null) {
       await addMarkersInBatches(controller: controller, markers: markersToAdd);

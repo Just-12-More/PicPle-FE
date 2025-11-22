@@ -5,8 +5,12 @@ import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:picple/core/util/image_utils.dart';
 
 final Map<String, NOverlayImage> _markerIconCache = {};
+final Map<String, Future<NOverlayImage>> _pendingIconLoads = {};
 
-Future<NOverlayImage>  createOverlayImageFromUrl(
+String _cacheKey(String imageUrl, double width, double height) =>
+    '$imageUrl-${width.toInt()}x${height.toInt()}';
+
+Future<NOverlayImage> _loadOverlayImageFromUrl(
   String imageUrl,
   double width,
   double height,
@@ -24,6 +28,29 @@ Future<NOverlayImage>  createOverlayImageFromUrl(
   }
 }
 
+Future<NOverlayImage> _getOrCreateOverlayImage(
+    String imageUrl, double width, double height) async {
+  final key = _cacheKey(imageUrl, width, height);
+
+  if (_markerIconCache.containsKey(key)) {
+    return _markerIconCache[key]!;
+  }
+
+  if (_pendingIconLoads.containsKey(key)) {
+    return _pendingIconLoads[key]!;
+  }
+
+  final loader = _loadOverlayImageFromUrl(imageUrl, width, height);
+  _pendingIconLoads[key] = loader;
+  try {
+    final icon = await loader;
+    _markerIconCache[key] = icon;
+    return icon;
+  } finally {
+    _pendingIconLoads.remove(key);
+  }
+}
+
 Future<NClusterableMarker> createMarkerWithImage({
   required String id,
   required NLatLng position,
@@ -35,9 +62,7 @@ Future<NClusterableMarker> createMarkerWithImage({
   void Function()? onTap,
 }) async {
   try {
-    final cachedIcon = _markerIconCache[id];
-    final icon = cachedIcon ?? await createOverlayImageFromUrl(imageUrl, width, height);
-    _markerIconCache[id] = icon;
+    final icon = await _getOrCreateOverlayImage(imageUrl, width, height);
 
     final marker = NClusterableMarker(
       id: id,
