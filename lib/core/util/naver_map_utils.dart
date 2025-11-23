@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:collection';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -5,12 +7,26 @@ import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:picple/core/util/image_utils.dart';
 
 final Map<String, NOverlayImage> _markerIconCache = {};
-final Map<String, Future<NOverlayImage>> _pendingIconLoads = {};
+final Map<String, Future<_OverlayImageResult>> _pendingIconLoads = {};
+
+const int _maxConcurrentImageLoads = 6;
+int _activeImageLoads = 0;
+final Queue<_ImageLoadRequest> _imageLoadQueue = Queue<_ImageLoadRequest>();
 
 String _cacheKey(String imageUrl, double width, double height) =>
     '$imageUrl-${width.toInt()}x${height.toInt()}';
 
-Future<NOverlayImage> _loadOverlayImageFromUrl(
+Future<_OverlayImageResult> _loadOverlayImageFromUrl(
+  String imageUrl,
+  double width,
+  double height,
+) {
+  return _enqueueImageLoad(
+    () => _performOverlayImageLoad(imageUrl, width, height),
+  );
+}
+
+Future<_OverlayImageResult> _performOverlayImageLoad(
   String imageUrl,
   double width,
   double height,
@@ -21,10 +37,14 @@ Future<NOverlayImage> _loadOverlayImageFromUrl(
       targetWidth: width.toInt(),
       targetHeight: height.toInt(),
     );
-    return await NOverlayImage.fromByteArray(bytes);
+    final icon = await NOverlayImage.fromByteArray(bytes);
+    return _OverlayImageResult(icon, cacheable: true);
   } catch (e) {
     log('Error loading image from URL: $e');
-    return const NOverlayImage.fromAssetImage('assets/images/img_placeholder.png');
+    return const _OverlayImageResult(
+      NOverlayImage.fromAssetImage('assets/images/img_placeholder.png'),
+      cacheable: false,
+    );
   }
 }
 
@@ -36,19 +56,64 @@ Future<NOverlayImage> _getOrCreateOverlayImage(
     return _markerIconCache[key]!;
   }
 
-  if (_pendingIconLoads.containsKey(key)) {
-    return _pendingIconLoads[key]!;
+  final loader = _pendingIconLoads.putIfAbsent(
+    key,
+    () => _loadOverlayImageFromUrl(imageUrl, width, height),
+  );
+  try {
+    final result = await loader;
+    if (result.cacheable) {
+      _markerIconCache[key] = result.image;
+    }
+    return result.image;
+  } finally {
+    if (_pendingIconLoads[key] == loader) {
+      _pendingIconLoads.remove(key);
+    }
+  }
+}
+
+class _OverlayImageResult {
+  final NOverlayImage image;
+  final bool cacheable;
+
+  const _OverlayImageResult(this.image, {required this.cacheable});
+}
+
+class _ImageLoadRequest {
+  final Future<_OverlayImageResult> Function() task;
+  final Completer<_OverlayImageResult> completer;
+
+  _ImageLoadRequest(this.task, this.completer);
+}
+
+Future<_OverlayImageResult> _enqueueImageLoad(
+  Future<_OverlayImageResult> Function() task,
+) {
+  final completer = Completer<_OverlayImageResult>();
+  _imageLoadQueue.add(_ImageLoadRequest(task, completer));
+  _tryStartNextImageLoad();
+  return completer.future;
+}
+
+void _tryStartNextImageLoad() {
+  if (_activeImageLoads >= _maxConcurrentImageLoads) {
+    return;
+  }
+  if (_imageLoadQueue.isEmpty) {
+    return;
   }
 
-  final loader = _loadOverlayImageFromUrl(imageUrl, width, height);
-  _pendingIconLoads[key] = loader;
-  try {
-    final icon = await loader;
-    _markerIconCache[key] = icon;
-    return icon;
-  } finally {
-    _pendingIconLoads.remove(key);
-  }
+  final request = _imageLoadQueue.removeFirst();
+  _activeImageLoads++;
+  request
+      .task()
+      .then(request.completer.complete)
+      .catchError(request.completer.completeError)
+      .whenComplete(() {
+    _activeImageLoads--;
+    _tryStartNextImageLoad();
+  });
 }
 
 Future<NClusterableMarker> createMarkerWithImage({
