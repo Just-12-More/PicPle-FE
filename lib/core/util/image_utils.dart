@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
@@ -16,20 +17,14 @@ Future<Uint8List> loadAndResizeImageFromUrl({
     throw Exception('이미지 다운로드 실패: $imageUrl');
   }
 
-  final originalImage = img.decodeImage(response.bodyBytes);
-  if (originalImage == null) {
-    throw Exception('이미지 디코딩 실패');
-  }
-
-  final resized = img.copyResize(
-    originalImage,
-    width: targetWidth,
-    height: targetHeight,
-    interpolation: img.Interpolation.linear,
+  final params = _ResizeParams(
+    bytes: Uint8List.fromList(response.bodyBytes),
+    targetWidth: targetWidth,
+    targetHeight: targetHeight,
+    quality: quality,
   );
 
-  final jpgBytes = img.encodeJpg(resized, quality: quality);
-  return Uint8List.fromList(jpgBytes);
+  return Isolate.run(() => _resizeBytes(params));
 }
 
 Future<File> resizeAndCompressImageFile({
@@ -57,4 +52,35 @@ Future<File> resizeAndCompressImageFile({
       .writeAsBytes(Uint8List.fromList(compressed));
 
   return compressedFile;
+}
+
+class _ResizeParams {
+  final Uint8List bytes;
+  final int targetWidth;
+  final int targetHeight;
+  final int quality;
+
+  const _ResizeParams({
+    required this.bytes,
+    required this.targetWidth,
+    required this.targetHeight,
+    required this.quality,
+  });
+}
+
+Uint8List _resizeBytes(_ResizeParams params) {
+  final originalImage = img.decodeImage(params.bytes);
+  if (originalImage == null) {
+    throw Exception('이미지 디코딩 실패');
+  }
+
+  final resized = img.copyResize(
+    originalImage,
+    width: params.targetWidth,
+    height: params.targetHeight,
+    interpolation: img.Interpolation.linear,
+  );
+
+  final jpgBytes = img.encodeJpg(resized, quality: params.quality);
+  return Uint8List.fromList(jpgBytes);
 }
